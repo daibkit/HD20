@@ -345,7 +345,7 @@
   ui.addEventListener('mousedown', e => { if (e.target.closest('.tb')) e.preventDefault(); }); // giữ vùng chọn khi bấm nút định dạng
 
   // Nút “Thêm hoạt động” nằm ngay trong mục “Một ngày để trở về”, chỉ hiện khi đang bật chỉnh sửa.
-  const ADD_BTNS = [{key: 'agenda', sec: 'agenda', label: '＋ Thêm hoạt động lịch trình', inner: false}, {key: 'chain', sec: 'hoat-dong', label: '＋ Thêm hoạt động', inner: true}];
+  const ADD_BTNS = [{key: 'agenda', sec: 'agenda', label: '＋ Thêm hoạt động lịch trình', inner: false}, {key: 'chain', sec: 'hoat-dong', label: '＋ Thêm hoạt động', inner: true}, {key: 'slides', sec: 'hen-uoc', label: '＋ Thêm lời hẹn ước', inner: true}];
   function syncAddBtn() {
     ADD_BTNS.forEach(d => {
       const sec = document.getElementById(d.sec), cur = document.querySelector('[data-hdx-add="' + d.key + '"]');
