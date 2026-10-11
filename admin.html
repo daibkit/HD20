@@ -1,0 +1,2029 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Quản trị — Anh em ơi! Về nhà</title>
+<link rel="icon" href="img/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap">
+<style>
+/* Layout: sticky pill-nav header (as on the event site) → navy gradient page band with breadcrumb → 1240px content column of cards/tables. */
+:root{
+  --bg:#FAFCFD; --surface:#FFFFFF; --tint:#EAF5FB; --tint-2:#F3F8FB;
+  --ink:#13204A; --ink-strong:#16285E; --body:#3C4A6E; --muted:#56617D; --faint:#8A93AC;
+  --line:#E3ECF3; --line-strong:#CBD9E6;
+  --brand:#0E4C9C; --sky:#2BBDE6; --orange:#F28A55; --gold:#F6CF5C; --green:#2AA56A; --danger:#C2412D;
+  --grad:linear-gradient(90deg,#F28A55,#F6CF5C);
+  --hero:linear-gradient(180deg,#3165AC 0%,#174D9C 55%,#1A2D62 100%);
+  --hero-ink:#FFFFFF; --hero-soft:#A9D8F2; --hero-body:#DCEBF8;
+  --pub-bg:#DDF2E5; --pub-fg:#1F7A4C; --draft-bg:#FBF0D2; --draft-fg:#875A00; --arch-bg:#E7EBF3; --arch-fg:#56617D;
+  --act-bg:#DDF2FA; --act-fg:#0B6A8E; --inact-bg:#F7E6DC; --inact-fg:#9A4A2A;
+  --danger-bg:#FBE7E3; --warn-bg:#FFF6E6; --warn-line:#F6CF5C;
+  --shadow:0 1px 2px rgba(19,32,74,.06),0 8px 24px rgba(19,32,74,.06);
+  --ring:0 0 0 3px rgba(43,189,230,.35);
+  --f-display:'Raleway',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --f-body:'Raleway',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --f-mono:ui-monospace,'SFMono-Regular',Menlo,Consolas,monospace;
+  --r-card:24px; --r-ctl:14px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0D1633; --surface:#141F44; --tint:#1A2A57; --tint-2:#17244C;
+  --ink:#E9F1FA; --ink-strong:#F2F7FD; --body:#C6D3E8; --muted:#9FAECB; --faint:#7483A6;
+  --line:#26356A; --line-strong:#33457F;
+  --brand:#7FD3F0; --sky:#55D0F2; --danger:#FF8A75;
+  --pub-bg:#123F2C; --pub-fg:#8FE0B3; --draft-bg:#43350D; --draft-fg:#F6D77E; --arch-bg:#253259; --arch-fg:#B4C0DA;
+  --act-bg:#103A4D; --act-fg:#8EDCF5; --inact-bg:#4A2A1E; --inact-fg:#F5B497;
+  --danger-bg:#4A1D17; --warn-bg:#3A2F12; --warn-line:#8F7426;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0D1633; --surface:#141F44; --tint:#1A2A57; --tint-2:#17244C;
+  --ink:#E9F1FA; --ink-strong:#F2F7FD; --body:#C6D3E8; --muted:#9FAECB; --faint:#7483A6;
+  --line:#26356A; --line-strong:#33457F;
+  --brand:#7FD3F0; --sky:#55D0F2; --danger:#FF8A75;
+  --pub-bg:#123F2C; --pub-fg:#8FE0B3; --draft-bg:#43350D; --draft-fg:#F6D77E; --arch-bg:#253259; --arch-fg:#B4C0DA;
+  --act-bg:#103A4D; --act-fg:#8EDCF5; --inact-bg:#4A2A1E; --inact-fg:#F5B497;
+  --danger-bg:#4A1D17; --warn-bg:#3A2F12; --warn-line:#8F7426;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+html,body{background:var(--bg)}
+body{margin:0;font-family:var(--f-body);color:var(--ink);font-size:15.5px;line-height:1.55;-webkit-font-smoothing:antialiased}
+a{color:var(--brand)}
+::selection{background:var(--gold);color:#13204A}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:none;box-shadow:var(--ring);border-radius:10px}
+.wrap{max-width:1240px;margin:0 auto;padding-inline:20px}
+@media (max-width:480px){.wrap{padding-inline:16px}}
+.ic{flex:0 0 auto;display:block}
+.sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.tnum{font-variant-numeric:tabular-nums}
+
+/* Header */
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:40;background:color-mix(in srgb,var(--bg) 94%,transparent);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.topbar-in{display:flex;align-items:center;gap:10px 16px;padding-block:10px;flex-wrap:nowrap}
+h1[tabindex="-1"]:focus{box-shadow:none;outline:none}
+.brand{display:flex;align-items:center;gap:10px;border:0;background:none;cursor:pointer;padding:2px;text-align:left}
+.brand img{width:42px;height:42px;object-fit:contain}
+.brand b{display:block;font-weight:800;font-size:15px;color:var(--ink-strong);line-height:1.1}
+.brand small{display:block;font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.mainnav{display:flex;gap:2px;flex:1 1 0;min-width:0;overflow-x:auto;scrollbar-width:none}
+.mainnav::-webkit-scrollbar{display:none}
+.navpill{flex:0 0 auto;border:0;cursor:pointer;font-size:14px;font-weight:600;padding:9px 12px;border-radius:999px;white-space:nowrap;color:var(--body);background:transparent}
+.navpill:hover{background:var(--tint)}
+.navpill[aria-current="page"]{background:var(--tint);color:var(--brand)}
+.top-tools{display:flex;align-items:center;gap:8px;margin-left:auto}
+.gsearch{position:relative}
+.gsearch input{width:220px;max-width:42vw;padding:9px 12px 9px 34px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface)}
+.gsearch .ic{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted)}
+.store-pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:6px 10px;border-radius:999px;white-space:nowrap;border:1px solid var(--line);background:var(--surface);color:var(--muted);cursor:pointer}
+.store-pill .dot{width:8px;height:8px;border-radius:50%;background:var(--faint)}
+.store-pill.cloud .dot{background:var(--green)}
+.store-pill.local .dot{background:var(--gold)}
+@media (max-width:1180px){.gsearch input{width:170px}.store-pill .lbl{display:none}}
+@media (max-width:900px){
+  .topbar{position:static}
+  .topbar-in{gap:8px;flex-wrap:wrap}
+  .bulk{top:0}
+  .mainnav{order:3;flex-basis:100%}
+  .gsearch input{width:160px}
+  .store-pill .lbl{display:none}
+}
+@media (max-width:520px){.top-new .lbl{display:none}.gsearch input{width:130px}.brand small{display:none}}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1.5px solid transparent;cursor:pointer;font-weight:700;font-size:14.5px;padding:10px 18px;border-radius:999px;white-space:nowrap;text-decoration:none;line-height:1.2;transition:filter .15s,background .15s,transform .15s}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-grad{background:var(--grad);color:#fff;text-shadow:0 1px 1px rgba(150,70,20,.25)}
+.btn-grad:hover:not(:disabled){filter:brightness(1.06)}
+.btn-navy{background:#16285E;color:#fff}
+.btn-navy:hover:not(:disabled){background:#0E4C9C}
+.btn-line{background:var(--surface);color:var(--ink-strong);border-color:var(--line-strong)}
+.btn-line:hover:not(:disabled){background:var(--tint)}
+.btn-ghost{background:transparent;color:var(--brand)}
+.btn-ghost:hover:not(:disabled){background:var(--tint)}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-danger:hover:not(:disabled){filter:brightness(1.08)}
+.btn-danger-line{background:var(--surface);color:var(--danger);border-color:color-mix(in srgb,var(--danger) 45%,transparent)}
+.btn-danger-line:hover:not(:disabled){background:var(--danger-bg)}
+.btn-sm{font-size:13px;padding:7px 12px}
+.btn-hero{background:transparent;color:#fff;border-color:rgba(255,255,255,.45)}
+.btn-hero:hover{background:rgba(255,255,255,.1)}
+.ibtn{width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;border:1px solid transparent;background:transparent;color:var(--muted);cursor:pointer}
+.ibtn:hover:not(:disabled){background:var(--tint);color:var(--brand)}
+.ibtn.danger:hover:not(:disabled){background:var(--danger-bg);color:var(--danger)}
+.ibtn:disabled{opacity:.3;cursor:not-allowed}
+
+/* Page band */
+.band{background:var(--hero);color:var(--hero-ink)}
+.band-in{padding-block:26px 30px;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px 24px}
+.band-l{display:flex;flex-direction:column;gap:8px;min-width:0;flex:1 1 420px}
+.crumbs{display:flex;flex-wrap:wrap;align-items:center;gap:4px;font-size:13px;color:var(--hero-soft);font-weight:600}
+.crumbs button{border:0;background:none;color:var(--hero-soft);cursor:pointer;padding:2px 4px;border-radius:6px;font-weight:600}
+.crumbs button:hover{color:#fff;text-decoration:underline}
+.crumbs .sep{opacity:.6}
+.crumbs .here{color:#fff;padding:2px 4px}
+.band h1{margin:0;font-family:var(--f-display);font-weight:700;font-size:clamp(26px,3.4vw,40px);line-height:1.12;letter-spacing:-.015em;text-wrap:balance}
+.band p{margin:0;color:var(--hero-body);max-width:680px;text-wrap:pretty}
+.band-r{display:flex;flex-wrap:wrap;gap:10px}
+.backbtn{display:inline-flex;align-items:center;gap:4px;border:1px solid rgba(255,255,255,.3);background:rgba(10,25,70,.25);color:#fff;border-radius:999px;padding:5px 12px 5px 8px;font-size:13px;font-weight:600;cursor:pointer;align-self:flex-start}
+.backbtn:hover{background:rgba(255,255,255,.12)}
+
+main.view{padding-block:24px 64px}
+.stack{display:flex;flex-direction:column;gap:20px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--shadow)}
+.card-pad{padding:clamp(16px,2.2vw,24px)}
+.card-h{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.card-h h2,.h2{margin:0;font-family:var(--f-display);font-weight:700;font-size:20px;color:var(--ink-strong);letter-spacing:-.01em}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--brand)}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:20px;align-items:start}
+
+/* Stat tiles — echo of the site's "20 năm" number cards */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:14px}
+.stat{padding:18px 20px;border-radius:22px;background:var(--surface);border:1px solid var(--line);display:flex;flex-direction:column;gap:6px;cursor:pointer;text-align:left;box-shadow:var(--shadow)}
+.stat:hover{border-color:var(--line-strong);transform:translateY(-1px)}
+.stat .n{font-family:var(--f-display);font-weight:800;font-size:clamp(34px,3.6vw,46px);line-height:1;letter-spacing:-.02em}
+.stat .l{font-weight:700;font-size:15px;color:var(--ink-strong)}
+.stat .s{font-size:13px;color:var(--muted)}
+.n-orange{color:var(--orange)} .n-sky{color:var(--sky)} .n-green{color:var(--green)} .n-gold{color:#D9A21F} .n-brand{color:var(--brand)}
+
+/* Pills */
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;white-space:nowrap;letter-spacing:.01em}
+.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.st-published{background:var(--pub-bg);color:var(--pub-fg)}
+.st-draft{background:var(--draft-bg);color:var(--draft-fg)}
+.st-draft::before{background:transparent;border:2px solid currentColor;width:8px;height:8px}
+.st-archived{background:var(--arch-bg);color:var(--arch-fg)}
+.st-archived::before{border-radius:2px}
+.st-active{background:var(--act-bg);color:var(--act-fg)}
+.st-inactive{background:var(--inact-bg);color:var(--inact-fg)}
+.st-inactive::before{background:transparent;border:2px dashed currentColor;width:8px;height:8px}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:12.5px;font-weight:600;padding:3px 10px;border-radius:999px;background:var(--tint);color:var(--brand);border:0}
+button.chip{cursor:pointer}
+button.chip:hover{filter:brightness(.97)}
+
+/* Toolbar & forms */
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;padding:14px;border-radius:20px;background:var(--tint-2);border:1px solid var(--line)}
+.fld{display:flex;flex-direction:column;gap:5px;min-width:0}
+.fld>label,.lbl-t{font-size:12.5px;font-weight:700;color:var(--muted);letter-spacing:.02em}
+.req{color:var(--danger)}
+.inp,.sel,.ta{width:100%;padding:10px 12px;border-radius:var(--r-ctl);border:1.5px solid var(--line-strong);background:var(--surface);color:var(--ink);min-height:42px}
+.sel{padding-right:30px}
+.ta{min-height:90px;resize:vertical;line-height:1.5}
+.inp:focus,.sel:focus,.ta:focus{outline:none;border-color:var(--sky);box-shadow:var(--ring)}
+.inp[aria-invalid="true"],.sel[aria-invalid="true"],.ta[aria-invalid="true"]{border-color:var(--danger)}
+.inp-lg{font-size:22px;font-weight:700;font-family:var(--f-display);padding:12px 14px}
+.err{margin:0;color:var(--danger);font-size:13px;font-weight:600}
+.hint{margin:0;color:var(--muted);font-size:12.5px}
+.f-q{flex:2 1 220px}.f-s{flex:1 1 150px}.f-d{flex:1 1 140px}
+.searchbox{position:relative}
+.searchbox .ic{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none}
+.searchbox .inp{padding-left:36px}
+.formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.formgrid .full{grid-column:1/-1}
+@media (max-width:560px){.formgrid{grid-template-columns:1fr}}
+.slugrow{display:flex;align-items:stretch;border:1.5px solid var(--line-strong);border-radius:var(--r-ctl);background:var(--surface);overflow:hidden}
+.slugrow:focus-within{border-color:var(--sky);box-shadow:var(--ring)}
+.slugrow span{padding:10px 0 10px 12px;color:var(--faint);font-family:var(--f-mono);font-size:13px;white-space:nowrap;align-self:center}
+.slugrow input{border:0;outline:none;min-width:0;flex:1;padding:10px 12px 10px 2px;font-family:var(--f-mono);font-size:13.5px;background:transparent}
+.slugrow input:focus{box-shadow:none}
+.slugrow[aria-invalid="true"]{border-color:var(--danger)}
+.switch{display:inline-flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;font-size:14px}
+.switch input{appearance:none;width:42px;height:24px;border-radius:999px;background:var(--line-strong);position:relative;cursor:pointer;margin:0;transition:background .2s;flex:0 0 auto}
+.switch input::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 2px rgba(0,0,0,.25)}
+.switch input:checked{background:var(--green)}
+.switch input:checked::after{transform:translateX(18px)}
+.radio-card{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:16px;border:1.5px solid var(--line);cursor:pointer}
+.radio-card:has(input:checked){border-color:var(--sky);background:var(--tint-2)}
+.radio-card input{margin-top:4px;accent-color:#0E4C9C}
+.radio-card b{display:block;color:var(--ink-strong)}
+.ack{display:flex;gap:10px;align-items:center;cursor:pointer;font-size:14px}
+.ack input{width:18px;height:18px;accent-color:#0E4C9C;margin:0}
+
+/* Image field */
+.imgfld{display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.imgprev{width:96px;height:72px;border-radius:14px;background:repeating-linear-gradient(135deg,var(--tint) 0 8px,var(--tint-2) 8px 16px);border:1px solid var(--line);overflow:hidden;flex:0 0 auto;display:flex;align-items:center;justify-content:center;color:var(--faint)}
+.imgprev img{width:100%;height:100%;object-fit:cover}
+.imgfld-c{flex:1 1 200px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.imgfld-row{display:flex;gap:8px;flex-wrap:wrap}
+.filebtn{position:relative;overflow:hidden}
+.filebtn input{position:absolute;inset:0;opacity:0;cursor:pointer}
+
+/* Tables */
+.tblwrap{overflow-x:auto}
+.tbl{width:100%;border-collapse:collapse;font-size:14.5px}
+.tbl th{text-align:left;font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:12px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+.tbl td{padding:12px;border-bottom:1px solid var(--line);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:0}
+.tbl tbody tr:hover{background:var(--tint-2)}
+.tbl .num{text-align:right;font-variant-numeric:tabular-nums}
+.tbl .actions{text-align:right;white-space:nowrap}
+.tbl .chk{width:36px}
+.tbl input[type=checkbox],.chkbox{width:18px;height:18px;accent-color:#0E4C9C;cursor:pointer}
+.tt{display:flex;gap:12px;align-items:center;min-width:0}
+.tt .thumb{width:56px;height:42px;border-radius:10px;object-fit:cover;flex:0 0 auto;background:var(--tint)}
+.tt .ph{width:56px;height:42px;border-radius:10px;flex:0 0 auto;background:repeating-linear-gradient(135deg,var(--tint) 0 7px,var(--tint-2) 7px 14px)}
+.tt-t{min-width:0}
+.tt-t button.link,.link{border:0;background:none;padding:0;color:var(--ink-strong);font-weight:700;cursor:pointer;text-align:left;font-size:15px;line-height:1.3}
+.tt-t button.link:hover,.link:hover{color:var(--brand);text-decoration:underline}
+.tt-t .sub{font-size:12.5px;color:var(--muted);font-family:var(--f-mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:360px}
+.tt-t .ex{font-size:13px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;max-width:420px}
+.ord{display:flex;align-items:center;gap:2px}
+.ord .v{min-width:22px;text-align:center;font-weight:700;font-variant-numeric:tabular-nums}
+.togglest{border:0;cursor:pointer;background:none;padding:0}
+@media (max-width:760px){
+  .tbl thead{display:none}
+  .tbl,.tbl tbody{display:block}
+  .tbl tr{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;padding:14px;border-bottom:1px solid var(--line)}
+  .tbl td{display:flex;align-items:center;gap:8px;padding:0;border:0;min-width:0}
+  .tbl td[data-label]::before{content:attr(data-label);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);min-width:84px}
+  .tbl td.main{grid-column:1/-1}
+  .tbl td.chk{grid-row:1}
+  .tbl td.chk+td.main{grid-column:2}
+  .tbl td.wide{grid-column:1/-1}
+  .tbl .actions{grid-column:1/-1;justify-content:flex-start;flex-wrap:wrap}
+  .tbl .num{text-align:left}
+  .tt-t .sub,.tt-t .ex{max-width:none}
+}
+
+/* Bulk bar & pager */
+.bulk{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 14px;border-radius:16px;background:#16285E;color:#fff;position:sticky;top:calc(env(safe-area-inset-top,0px) + 72px);z-index:5}
+.bulk b{margin-right:auto}
+.bulk .btn-line{background:transparent;color:#fff;border-color:rgba(255,255,255,.35)}
+.bulk .btn-line:hover{background:rgba(255,255,255,.1)}
+.pager{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-top:1px solid var(--line)}
+.pager-n{display:flex;gap:4px;flex-wrap:wrap}
+.pg{min-width:34px;height:34px;border-radius:999px;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-weight:700;font-size:13px;font-variant-numeric:tabular-nums}
+.pg[aria-current="page"]{background:#16285E;color:#fff;border-color:#16285E}
+.pg:disabled{opacity:.4;cursor:not-allowed}
+
+/* Empty & loading */
+.empty{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:44px 20px}
+.empty .art{width:72px;height:72px;border-radius:22px;background:var(--tint);display:flex;align-items:center;justify-content:center;color:var(--brand)}
+.empty h3{margin:0;font-size:18px;color:var(--ink-strong)}
+.empty p{margin:0;color:var(--muted);max-width:460px}
+.skel{border-radius:16px;background:linear-gradient(90deg,var(--tint) 0%,var(--tint-2) 50%,var(--tint) 100%);background-size:200% 100%;animation:sh 1.4s infinite linear}
+@keyframes sh{to{background-position:-200% 0}}
+.notice{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:18px;background:var(--warn-bg);border:1px solid var(--warn-line);color:var(--ink)}
+.notice.info{background:var(--tint-2);border-color:var(--line-strong)}
+.notice.danger{background:var(--danger-bg);border-color:color-mix(in srgb,var(--danger) 40%,transparent)}
+.notice .ic{margin-top:2px}
+
+/* Dashboard lists */
+.rlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.rlist li{display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.rlist li:last-child{border-bottom:0}
+.rlist .meta{font-size:12.5px;color:var(--muted)}
+.qa{display:flex;flex-wrap:wrap;gap:10px}
+.secrow{display:flex;flex-direction:column;gap:8px;padding:12px 0;border-bottom:1px solid var(--line)}
+.secrow:last-child{border-bottom:0}
+.secrow-h{display:flex;flex-wrap:wrap;align-items:center;gap:8px;justify-content:space-between}
+.counts{display:flex;flex-wrap:wrap;gap:6px}
+
+/* Detail header */
+.detail{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:start}
+.detail-img{width:180px;aspect-ratio:4/3;border-radius:18px;object-fit:cover;max-width:100%}
+@media (max-width:640px){.detail{grid-template-columns:1fr}.detail-img{width:100%}}
+.kv{display:grid;grid-template-columns:max-content 1fr;gap:6px 16px;font-size:14px;margin:0}
+.kv dt{color:var(--muted);font-weight:600}
+.kv dd{margin:0;min-width:0;overflow-wrap:anywhere}
+
+/* Editor */
+.edit-grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:20px;align-items:start}
+@media (max-width:980px){.edit-grid{grid-template-columns:1fr}}
+.edit-main{display:flex;flex-direction:column;gap:16px}
+.edit-side{display:flex;flex-direction:column;gap:16px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 76px)}
+@media (max-width:980px){.edit-side{position:static}}
+.side-h{margin:0 0 10px;font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.side-actions{display:flex;flex-direction:column;gap:8px}
+.side-actions .row{display:flex;gap:8px;flex-wrap:wrap}
+.side-actions .row .btn{flex:1 1 auto}
+.rte{border:1.5px solid var(--line-strong);border-radius:18px;background:var(--surface);overflow:hidden}
+.rte:focus-within{border-color:var(--sky);box-shadow:var(--ring)}
+.rte[aria-invalid="true"]{border-color:var(--danger)}
+.rte-tb{display:flex;flex-wrap:wrap;gap:2px;padding:6px;border-bottom:1px solid var(--line);background:var(--tint-2);position:sticky;top:0}
+.rte-tb .sepv{width:1px;background:var(--line-strong);margin:4px 4px}
+.tb{min-width:34px;height:34px;padding:0 8px;border-radius:10px;border:0;background:transparent;cursor:pointer;font-weight:700;color:var(--body);display:inline-flex;align-items:center;justify-content:center;font-size:13.5px}
+.tb:hover{background:var(--tint)}
+.tb[aria-pressed="true"]{background:#16285E;color:#fff}
+.rte-pop{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;padding:10px;border-bottom:1px solid var(--line);background:var(--surface)}
+.rte-body{min-height:340px;padding:18px 20px;outline:none}
+.rte-body:empty::before{content:attr(data-placeholder);color:var(--faint)}
+.rte-foot{display:flex;justify-content:space-between;gap:8px;padding:8px 14px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted)}
+.tags{display:flex;flex-wrap:wrap;gap:6px;padding:6px;border:1.5px solid var(--line-strong);border-radius:var(--r-ctl);background:var(--surface);min-height:44px;align-items:center}
+.tags:focus-within{border-color:var(--sky);box-shadow:var(--ring)}
+.tags input{border:0;outline:none;flex:1 1 100px;min-width:80px;padding:4px 6px;background:transparent}
+.tags input:focus{box-shadow:none}
+.tag{display:inline-flex;align-items:center;gap:4px;padding:3px 4px 3px 10px;border-radius:999px;background:var(--tint);color:var(--brand);font-size:13px;font-weight:600}
+.tag button{width:20px;height:20px;border-radius:50%;border:0;background:transparent;color:inherit;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+.tag button:hover{background:rgba(14,76,156,.12)}
+.mbar{display:none}
+@media (max-width:980px){
+  .mbar{display:flex;gap:8px;position:sticky;bottom:0;z-index:20;padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px));margin-top:16px;border-radius:18px;background:color-mix(in srgb,var(--bg) 94%,transparent);backdrop-filter:blur(10px);border-top:1px solid var(--line)}
+  .mbar .btn{flex:1 1 0;padding-inline:10px}
+}
+.metaline{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted);margin-bottom:12px}
+.metaline b{color:var(--ink)}
+
+/* Reading view (public style) */
+.prose{color:var(--body);font-size:16.5px;line-height:1.7;overflow-wrap:anywhere}
+.prose>*:first-child{margin-top:0}
+.prose h2{font-family:var(--f-display);color:var(--ink-strong);font-size:24px;line-height:1.25;margin:1.4em 0 .5em;letter-spacing:-.01em}
+.prose h3{font-family:var(--f-display);color:var(--ink-strong);font-size:19px;margin:1.3em 0 .4em}
+.prose p{margin:0 0 1em}
+.prose ul,.prose ol{margin:0 0 1em;padding-left:1.4em}
+.prose li{margin:.2em 0}
+.prose blockquote{margin:1.2em 0;padding:14px 18px;border-radius:18px;background:linear-gradient(140deg,var(--warn-bg),var(--tint-2));color:var(--ink);font-style:italic}
+.prose img{max-width:100%;height:auto;border-radius:18px;display:block;margin:1em 0}
+.prose a{color:var(--brand);text-decoration:underline;text-underline-offset:2px}
+.read{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+.read-cover{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:28px;max-width:100%}
+.read-lede{font-size:19px;line-height:1.55;color:var(--ink-strong);font-weight:500;margin:0;text-wrap:pretty}
+.read-meta{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13.5px;color:var(--hero-body)}
+.prevbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;justify-content:space-between;padding:10px 14px;border-radius:16px;background:var(--warn-bg);border:1px solid var(--warn-line);font-size:14px}
+
+/* Public preview */
+.site-band{background:var(--hero);color:#fff}
+.site-band-in{display:flex;flex-wrap:wrap;align-items:center;gap:16px 28px;padding-block:22px}
+.site-logo{width:84px;height:84px;border-radius:22px;object-fit:cover}
+.site-pills{display:flex;flex-wrap:wrap;gap:6px}
+.site-pill{border:1.5px solid rgba(255,255,255,.35);background:transparent;color:#fff;border-radius:999px;padding:8px 14px;font-weight:600;font-size:14px;cursor:pointer}
+.site-pill[aria-current="page"]{background:#fff;color:#16285E;border-color:#fff}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr));gap:18px}
+.acard{display:flex;flex-direction:column;gap:10px;padding:0 0 18px;border-radius:24px;background:var(--surface);border:1px solid var(--line);overflow:hidden;cursor:pointer;text-align:left;box-shadow:var(--shadow);transition:transform .2s}
+.acard:hover{transform:translateY(-2px)}
+.acard img,.acard .ph{width:100%;aspect-ratio:16/10;object-fit:cover;background:repeating-linear-gradient(135deg,#1C3270 0 14px,#1A2D66 14px 28px)}
+.acard .in{padding:0 18px;display:flex;flex-direction:column;gap:6px}
+.acard h3{margin:0;font-family:var(--f-display);font-size:18px;line-height:1.3;color:var(--ink-strong)}
+.acard p{margin:0;font-size:14px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.seccard{display:grid;grid-template-columns:120px minmax(0,1fr);gap:18px;align-items:center;padding:16px;border-radius:24px;background:linear-gradient(140deg,#FFF6EA 0%,#FDEBD3 60%,#E4F3FB 100%);border:1px solid #F6E0C4;cursor:pointer;text-align:left;color:#13204A}
+.seccard:nth-child(3n+2){background:linear-gradient(140deg,#EFF9F2 0%,#DDF1E4 60%,#E8F5FA 100%);border-color:#CBE8D5}
+.seccard:nth-child(3n+3){background:linear-gradient(140deg,#EAF5FB 0%,#DCEBF8 60%,#F3F8FB 100%);border-color:#CFE3F2}
+.seccard img,.seccard .ph{width:120px;height:96px;border-radius:16px;object-fit:cover;background:#DCEBF8}
+.seccard h3{margin:0 0 4px;font-size:20px;color:#16285E}
+.seccard p{margin:0;font-size:14px;color:#3C4A6E}
+@media (max-width:480px){.seccard{grid-template-columns:1fr}.seccard img,.seccard .ph{width:100%;height:auto;aspect-ratio:16/9}}
+
+/* Modal */
+.mback{position:fixed;inset:0;z-index:100;background:rgba(13,22,51,.55);display:flex;align-items:flex-start;justify-content:center;padding:max(24px,env(safe-area-inset-top,0px)) 16px 24px;overflow-y:auto}
+.modal{width:100%;max-width:620px;background:var(--surface);border-radius:26px;box-shadow:0 30px 80px rgba(0,0,0,.35);border:1px solid var(--line);margin:auto 0}
+.modal.lg{max-width:900px}
+.modal-h{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:20px 22px 0}
+.modal-h h2{margin:0;font-family:var(--f-display);font-size:21px;color:var(--ink-strong);line-height:1.25}
+.modal-b{padding:16px 22px;display:flex;flex-direction:column;gap:14px}
+.modal-f{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:10px;padding:14px 22px 20px;border-top:1px solid var(--line)}
+@media (max-width:480px){.modal-f .btn{flex:1 1 auto}}
+
+/* Toasts */
+.toasts{position:fixed;z-index:200;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:8px;width:min(440px,calc(100% - 32px));pointer-events:none}
+.toast{pointer-events:auto;display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:16px;background:#16285E;color:#fff;box-shadow:0 10px 30px rgba(0,0,0,.25);font-weight:600;font-size:14.5px;animation:tin .2s ease-out}
+.toast.ok .ic{color:#8FE0B3}.toast.err{background:#7A2416}.toast.err .ic{color:#FFB4A6}.toast.warn{background:#5A4510}
+.toast .x{margin-left:auto;border:0;background:none;color:#fff;opacity:.7;cursor:pointer;padding:0 2px}
+@keyframes tin{from{transform:translateY(8px);opacity:0}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+.foot{border-top:1px solid var(--line);padding-block:18px;font-size:12.5px;color:var(--muted);display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between}
+.codebox{width:100%;min-height:160px;font-family:var(--f-mono);font-size:12px}
+[hidden]{display:none!important}
+img{max-width:100%}
+.who{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted);white-space:nowrap}
+.who b{color:var(--ink);font-weight:700;max-width:180px;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:1180px){.who .em{display:none}}
+.auth-wrap{min-height:calc(100vh - 140px);display:flex;align-items:center;justify-content:center;padding-block:40px}
+.auth{width:100%;max-width:420px;display:flex;flex-direction:column;gap:16px}
+.auth .card{padding:28px}
+.auth h1{margin:0;font-size:26px;color:var(--ink-strong)}
+</style>
+<script src="config.js"></script>
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <div class="wrap topbar-in">
+      <button class="brand" data-act="go" data-r="dashboard" aria-label="Về trang tổng quan">
+        <img src="img/logo.png" alt="" width="42" height="42">
+        <span><b>Anh em ơi! Về nhà</b><small>Quản trị nội dung</small></span>
+      </button>
+      <nav class="mainnav" id="mainnav" aria-label="Điều hướng chính"></nav>
+      <div class="top-tools">
+        <form class="gsearch" id="gsearch" role="search">
+          <svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+          <label for="g-q" class="sr">Tìm kiếm toàn bộ nội dung</label>
+          <input id="g-q" type="search" placeholder="Tìm nội dung…" autocomplete="off">
+        </form>
+        <button class="store-pill" id="storepill" data-act="go" data-r="backup" title="Nơi lưu dữ liệu"><span class="dot"></span><span class="lbl">Đang kết nối…</span></button>
+        <span class="who" id="who" hidden><span class="em">Đăng nhập: <b id="who-email"></b></span><button class="btn btn-line btn-sm" data-act="logout">Đăng xuất</button></span>
+        <a class="btn btn-ghost btn-sm" href="/" target="_blank" rel="noopener" title="Mở website trong thẻ mới">Website ↗</a>
+        <button class="btn btn-grad btn-sm top-new" id="topnew" data-act="new-article" hidden><span aria-hidden="true">＋</span><span class="lbl">Bài viết mới</span></button>
+      </div>
+    </div>
+  </header>
+  <div id="view-root"></div>
+  <div class="wrap"><footer class="foot"><span>Đội SVTN Đồng hương Hải Dương - NEU · 29.10.2006 – 29.10.2026</span><span id="foot-store"></span></footer></div>
+</div>
+<div class="toasts" id="toasts" role="status" aria-live="polite"></div>
+<div id="modal-root"></div>
+
+<script>
+"use strict";
+/* =========================================================================
+   Utilities
+   ========================================================================= */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const clone = o => JSON.parse(JSON.stringify(o));
+const nowISO = () => new Date().toISOString();
+const uid = p => p + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const collator = new Intl.Collator('vi', {sensitivity: 'base', numeric: true});
+const cmp = (a, b) => collator.compare(String(a ?? ''), String(b ?? ''));
+function slugify(s) {
+  return String(s || '').toLowerCase().replace(/đ/g, 'd').normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').replace(/-{2,}/g, '-').slice(0, 90).replace(/-+$/,'');
+}
+const fold = s => String(s || '').toLowerCase().replace(/đ/g, 'd').normalize('NFD').replace(/[̀-ͯ]/g, '');
+const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+function fmtDate(iso, withTime = true) {
+  if (!iso) return '—';
+  const d = new Date(iso); if (isNaN(d)) return '—';
+  const p = n => String(n).padStart(2, '0');
+  return `${p(d.getDate())}/${p(d.getMonth() + 1)}/${d.getFullYear()}` + (withTime ? ` ${p(d.getHours())}:${p(d.getMinutes())}` : '');
+}
+function relTime(iso) {
+  if (!iso) return '';
+  const s = (Date.now() - new Date(iso).getTime()) / 1000;
+  if (s < 60) return 'vừa xong';
+  if (s < 3600) return Math.floor(s / 60) + ' phút trước';
+  if (s < 86400) return Math.floor(s / 3600) + ' giờ trước';
+  if (s < 86400 * 7) return Math.floor(s / 86400) + ' ngày trước';
+  return fmtDate(iso, false);
+}
+function toLocalInput(iso) { if (!iso) return ''; const d = new Date(iso); if (isNaN(d)) return ''; const p = n => String(n).padStart(2, '0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`; }
+function fromLocalInput(v) { if (!v) return null; const d = new Date(v); return isNaN(d) ? null : d.toISOString(); }
+function textOf(html) { const d = document.createElement('div'); d.innerHTML = sanitizeHtml(html || ''); return (d.textContent || '').replace(/\s+/g, ' ').trim(); }
+function safeImg(src) {
+  src = String(src || '').trim();
+  if (!src) return '';
+  if (/^https?:\/\//i.test(src)) return src;
+  if (/^data:image\/(png|jpe?g|webp|gif);base64,/i.test(src)) return src;
+  if (/^(?!\/\/)[\w\-./]+\.(png|jpe?g|webp|gif|svg)$/i.test(src)) return src; // files published with the app
+  return '';
+}
+function lsGet(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } }
+function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+function ssGet(k, d) { try { const v = sessionStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } }
+function ssSet(k, v) { try { sessionStorage.setItem(k, JSON.stringify(v)); } catch {} }
+const sizeKB = o => Math.round(new Blob([JSON.stringify(o)]).size / 1024);
+
+const ICONS = {
+  plus:'<path d="M12 5v14M5 12h14"/>', edit:'<path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/>',
+  trash:'<path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13M10 11v6M14 11v6"/>',
+  eye:'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+  copy:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/>',
+  up:'<path d="M6 15l6-6 6 6"/>', down:'<path d="M6 9l6 6 6-6"/>', back:'<path d="M15 6l-6 6 6 6"/>', chev:'<path d="M9 6l6 6-6 6"/>',
+  x:'<path d="M6 6l12 12M18 6L6 18"/>', check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>', info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/>',
+  warn:'<path d="M12 3l10 18H2L12 3z"/><path d="M12 10v5M12 18v.5"/>',
+  send:'<path d="M5 12l14-7-5 15-3-6-6-2z"/>', unpub:'<path d="M3 3l18 18"/><path d="M10.6 6.1A10 10 0 0 1 12 6c6.5 0 10 6 10 6a17 17 0 0 1-3 3.6M6.6 6.6C3.7 8.4 2 12 2 12s3.5 6 10 6c1.7 0 3.2-.4 4.5-1"/>',
+  archive:'<rect x="3" y="4" width="18" height="5" rx="1"/><path d="M5 9v10h14V9M10 13h4"/>',
+  folder:'<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/>',
+  layers:'<path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/>', doc:'<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 12h6M9 16h6"/>',
+  image:'<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/>',
+  link:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
+  unlink:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7M4 4l16 16"/>',
+  ul:'<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/>',
+  ol:'<path d="M10 6h10M10 12h10M10 18h10M4 5l1.5-1v5M3.5 14.5a1.5 1.5 0 1 1 2.5 1L3.5 19H6"/>',
+  quote:'<path d="M7 7h4v4c0 3-2 5-4 6M15 7h4v4c0 3-2 5-4 6"/>', undo:'<path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/>',
+  redo:'<path d="M15 14l5-5-5-5"/><path d="M20 9H9a5 5 0 0 0 0 10h3"/>', clear:'<path d="M6 4h12M12 4l-4 16M4 20h8M15 14l6 6M21 14l-6 6"/>',
+  download:'<path d="M12 4v11M7 10l5 5 5-5M4 20h16"/>', upload:'<path d="M12 20V9M7 14l5-5 5 5M4 4h16"/>',
+  cloud:'<path d="M7 18a5 5 0 1 1 1-9.9A6 6 0 0 1 19.5 10 4 4 0 0 1 18 18H7z"/>', home:'<path d="M3 11l9-7 9 7v9H3z"/><path d="M9 20v-6h6v6"/>',
+  globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18"/>', search:'<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>',
+  refresh:'<path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/>'
+};
+const icon = (n, s = 18, w = 2) => `<svg class="ic" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n] || ''}</svg>`;
+
+
+/* =========================================================================
+   Supabase client (REST + Auth + Storage via fetch; no external library)
+   ========================================================================= */
+const CFG = window.HDX_CONFIG || {};
+const SB = {
+  url: String(CFG.supabaseUrl || '').trim().replace(/\/+$/, ''), key: String(CFG.supabaseAnonKey || '').trim(),
+  session: null, SK: 'hdx-admin-session', refreshing: null,
+  enabled() { return !!(this.url && this.key); },
+  load() { this.session = lsGet(this.SK, null); },
+  save(s) { this.session = s; if (s) lsSet(this.SK, s); else { try { localStorage.removeItem(this.SK); } catch {} } },
+  norm(d) { return {access_token: d.access_token, refresh_token: d.refresh_token, expires_at: Number(d.expires_at) || Math.floor(Date.now() / 1000) + (Number(d.expires_in) || 3600), email: (d.user && d.user.email) || (this.session && this.session.email) || ''}; },
+  async req(path, {method = 'GET', body, headers = {}, auth = true} = {}) {
+    if (auth) await this.ensureFresh();
+    const h = {apikey: this.key, Authorization: 'Bearer ' + (auth && this.session ? this.session.access_token : this.key), ...headers};
+    let b = body;
+    if (body !== undefined && !(body instanceof Blob)) { h['Content-Type'] = 'application/json'; b = JSON.stringify(body); }
+    let res;
+    try { res = await fetch(this.url + path, {method, headers: h, body: b}); }
+    catch { throw {code: 'network', message: 'Không kết nối được máy chủ dữ liệu. Kiểm tra mạng rồi thử lại.'}; }
+    const text = await res.text(); let data = null;
+    try { data = text ? JSON.parse(text) : null; } catch { data = text; }
+    if (!res.ok) {
+      const code = (data && (data.code || data.error_code || data.error)) || String(res.status);
+      const message = (data && (data.message || data.msg || data.error_description)) || ('HTTP ' + res.status);
+      if (auth && (res.status === 401 || code === 'PGRST301')) { this.save(null); throw {code: 'session_expired', message: 'Phiên đăng nhập đã hết hạn. Hãy đăng nhập lại.'}; }
+      throw {status: res.status, code: String(code), message};
+    }
+    return data;
+  },
+  async ensureFresh() {
+    const s = this.session; if (!s) return;
+    if (s.expires_at && Date.now() / 1000 < s.expires_at - 90) return;
+    if (!this.refreshing) this.refreshing = this.refresh().finally(() => { this.refreshing = null; });
+    return this.refreshing;
+  },
+  async refresh() {
+    const s = this.session; if (!s || !s.refresh_token) return;
+    try { const d = await this.req('/auth/v1/token?grant_type=refresh_token', {method: 'POST', body: {refresh_token: s.refresh_token}, auth: false}); this.save(this.norm(d)); }
+    catch { this.save(null); throw {code: 'session_expired', message: 'Phiên đăng nhập đã hết hạn. Hãy đăng nhập lại.'}; }
+  },
+  async signIn(email, password) { const d = await this.req('/auth/v1/token?grant_type=password', {method: 'POST', body: {email, password}, auth: false}); this.save(this.norm(d)); },
+  async signOut() { try { await this.req('/auth/v1/logout', {method: 'POST'}); } catch {} this.save(null); },
+  async recover(email) { await this.req('/auth/v1/recover?redirect_to=' + encodeURIComponent(location.origin + location.pathname), {method: 'POST', body: {email}, auth: false}); },
+  async setPassword(password) { await this.req('/auth/v1/user', {method: 'PUT', body: {password}}); },
+  rpc(fn, args) { return this.req('/rest/v1/rpc/' + fn, {method: 'POST', body: args || {}}); },
+  select(table) { return this.req('/rest/v1/' + table + '?select=*'); },
+  async upload(blob, ext) {
+    const path = `uploads/${new Date().toISOString().slice(0, 7)}/${uid('img')}.${ext}`;
+    await this.req('/storage/v1/object/media/' + path, {method: 'POST', body: blob, headers: {'Content-Type': blob.type, 'x-upsert': 'false', 'cache-control': '31536000'}});
+    return this.url + '/storage/v1/object/public/media/' + path;
+  }
+};
+const COLS = {
+  sections: {id: 'id', name: 'name', slug: 'slug', description: 'description', image: 'image', order: 'sort_order', status: 'status', createdAt: 'created_at', updatedAt: 'updated_at'},
+  categories: {id: 'id', sectionId: 'section_id', name: 'name', slug: 'slug', description: 'description', image: 'image', order: 'sort_order', status: 'status', createdAt: 'created_at', updatedAt: 'updated_at'},
+  articles: {id: 'id', title: 'title', slug: 'slug', excerpt: 'excerpt', content: 'content', cover: 'cover', sectionId: 'section_id', categoryId: 'category_id', author: 'author', tags: 'tags', status: 'status', publishedAt: 'published_at', createdAt: 'created_at', updatedAt: 'updated_at'}
+};
+const isoOrNull = v => { if (!v) return null; const d = new Date(v); return isNaN(d) ? null : d.toISOString(); };
+function toRow(kind, rec) { const r = {}; for (const [k, c] of Object.entries(COLS[kind])) if (rec[k] !== undefined) r[c] = rec[k]; return r; }
+function fromRow(kind, row) { const r = {}; for (const [k, c] of Object.entries(COLS[kind])) r[k] = row[c]; ['createdAt', 'updatedAt', 'publishedAt'].forEach(k => { if (k in r) r[k] = isoOrNull(r[k]); }); if (kind === 'articles' && !Array.isArray(r.tags)) r.tags = []; return r; }
+function sbError(e) {
+  const c = e && e.code;
+  if (c === 'session_expired') { Store.auth = 'login'; Store.authMsg = e.message; setTimeout(render, 0); return e; }
+  if (c === '42501') return {code: 'read_only', message: 'Tài khoản này không có quyền quản trị.'};
+  if (c === '23505') return {code: c, message: 'Đường dẫn (slug) bị trùng với một mục khác. Hãy đổi đường dẫn rồi lưu lại.'};
+  if (c === '23503') return {code: c, message: 'Không thể xoá vì vẫn còn nội dung trỏ tới mục này. Hãy chuyển hoặc xoá nội dung bên trong trước.'};
+  if (c === '23514') return {code: c, message: (e.message || 'Dữ liệu không hợp lệ.').replace(/^.*?: /, '')};
+  if (c === 'network') return e;
+  return {code: c || 'error', message: 'Không lưu được: ' + (e && e.message || 'lỗi không xác định') + '. Hãy thử lại.'};
+}
+async function storeImage(dataUrl) {
+  if (Store.mode !== 'supabase') return dataUrl;
+  const blob = await (await fetch(dataUrl)).blob();
+  const ext = blob.type === 'image/webp' ? 'webp' : blob.type === 'image/png' ? 'png' : 'jpg';
+  try { return await SB.upload(blob, ext); }
+  catch (e) { throw {message: 'Không tải được ảnh lên kho ảnh: ' + (e.message || e.code) + '.'}; }
+}
+
+/* HTML sanitizer for rich-text content (shared data is untrusted). */
+const ALLOWED = {P:[],H2:[],H3:[],H4:[],STRONG:[],B:[],EM:[],I:[],U:[],S:[],UL:[],OL:[],LI:[],BLOCKQUOTE:[],A:['href'],IMG:['src','alt'],BR:[],HR:[],FIGURE:[],FIGCAPTION:[],CODE:[],PRE:[]};
+function sanitizeHtml(html) {
+  const doc = new DOMParser().parseFromString('<body>' + String(html || '') + '</body>', 'text/html');
+  const walk = node => {
+    Array.from(node.childNodes).forEach(ch => {
+      if (ch.nodeType === 3) return;
+      if (ch.nodeType !== 1) { ch.remove(); return; }
+      let tag = ch.tagName;
+      if (tag === 'DIV') { // normalize divs created by contenteditable to paragraphs
+        const p = doc.createElement('p'); while (ch.firstChild) p.appendChild(ch.firstChild); ch.replaceWith(p); ch = p; tag = 'P';
+      }
+      if (tag === 'H1') { const h = doc.createElement('h2'); while (ch.firstChild) h.appendChild(ch.firstChild); ch.replaceWith(h); ch = h; tag = 'H2'; }
+      if (['SCRIPT','STYLE','IFRAME','OBJECT','EMBED','TEMPLATE','NOSCRIPT','SVG','MATH','FORM','INPUT','BUTTON','TEXTAREA','SELECT','LINK','META'].includes(tag)) { ch.remove(); return; }
+      if (!ALLOWED[tag]) { walk(ch); ch.replaceWith(...Array.from(ch.childNodes)); return; }
+      Array.from(ch.attributes).forEach(a => { if (!ALLOWED[tag].includes(a.name)) ch.removeAttribute(a.name); });
+      if (tag === 'A') {
+        const h = (ch.getAttribute('href') || '').trim();
+        if (!/^(https?:|mailto:|tel:|#|\/)/i.test(h)) ch.removeAttribute('href');
+        else { ch.setAttribute('target', '_blank'); ch.setAttribute('rel', 'noopener noreferrer'); }
+      }
+      if (tag === 'IMG') { const s = safeImg(ch.getAttribute('src')); if (!s) { ch.remove(); return; } ch.setAttribute('src', s); }
+      walk(ch);
+    });
+  };
+  walk(doc.body);
+  const BLOCK = /^(P|H2|H3|H4|UL|OL|BLOCKQUOTE|FIGURE|HR|PRE|IMG)$/;
+  $$('p', doc.body).forEach(pp => { if (Array.from(pp.children).some(c => /^(UL|OL|BLOCKQUOTE|H2|H3|H4|P|FIGURE|PRE)$/.test(c.tagName))) pp.replaceWith(...Array.from(pp.childNodes)); });
+  $$('p', doc.body).forEach(pp => { if (!pp.textContent.trim() && !pp.querySelector('img')) pp.remove(); });
+  let run = null;
+  Array.from(doc.body.childNodes).forEach(n => {
+    const inline = n.nodeType === 3 ? n.textContent.trim() !== '' || run : (n.nodeType === 1 && !BLOCK.test(n.tagName));
+    if (inline) { if (!run) { run = doc.createElement('p'); n.before(run); } run.appendChild(n); }
+    else { if (n.nodeType === 3) n.remove(); run = null; }
+  });
+  return doc.body.innerHTML.replace(/(<p>(<br>|\s|&nbsp;)*<\/p>\s*)+$/,'').trim();
+}
+
+/* Downscale an uploaded image to a compact data URI. */
+function fileToImage(file, maxDim = 1200, quality = .8) {
+  return new Promise((resolve, reject) => {
+    if (!file || !/^image\//.test(file.type)) return reject(new Error('Tệp được chọn không phải là ảnh.'));
+    const url = URL.createObjectURL(file); const img = new Image();
+    img.onload = () => {
+      const k = Math.min(1, maxDim / Math.max(img.width, img.height));
+      const c = document.createElement('canvas'); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+      const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); g.drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      let out = c.toDataURL('image/webp', quality);
+      if (!out.startsWith('data:image/webp')) out = c.toDataURL('image/jpeg', quality);
+      resolve(out);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Không đọc được ảnh này.')); };
+    img.src = url;
+  });
+}
+
+/* =========================================================================
+   Toasts, modal, confirm
+   ========================================================================= */
+function toast(msg, type = 'ok', ms = 3600) {
+  const t = document.createElement('div'); t.className = 'toast ' + type;
+  t.innerHTML = icon(type === 'ok' ? 'check' : type === 'err' ? 'warn' : 'info', 18, 2.4) + `<span>${esc(msg)}</span><button class="x" aria-label="Đóng thông báo">${icon('x',16)}</button>`;
+  $('#toasts').appendChild(t);
+  const kill = () => t.remove(); t.querySelector('.x').onclick = kill; setTimeout(kill, type === 'err' ? 7000 : ms);
+}
+const Modal = {
+  stack: [],
+  open({title, body, foot = '', size = '', onSubmit = null, onClose = null, onMount = null, labelId}) {
+    const id = 'm' + Math.random().toString(36).slice(2, 7);
+    const back = document.createElement('div'); back.className = 'mback';
+    back.innerHTML = `<form class="modal ${size}" role="dialog" aria-modal="true" aria-labelledby="${id}-t" novalidate>
+      <div class="modal-h"><h2 id="${id}-t">${title}</h2><button type="button" class="ibtn" data-mclose aria-label="Đóng">${icon('x')}</button></div>
+      <div class="modal-b">${body}</div>${foot ? `<div class="modal-f">${foot}</div>` : ''}</form>`;
+    const entry = {back, onClose, prev: document.activeElement};
+    const form = back.querySelector('form');
+    form.addEventListener('submit', async e => { e.preventDefault(); if (onSubmit) { const btn = form.querySelector('[type=submit]'); if (btn) btn.disabled = true; try { await onSubmit(form, entry); } finally { if (btn && btn.isConnected) btn.disabled = false; } } });
+    back.addEventListener('click', e => { if (e.target.closest('[data-mclose]')) { e.preventDefault(); Modal.close(entry, false); } });
+    back.addEventListener('mousedown', e => { if (e.target === back) entry.downOnBack = true; });
+    back.addEventListener('mouseup', e => { if (e.target === back && entry.downOnBack) Modal.close(entry, false); entry.downOnBack = false; });
+    $('#modal-root').appendChild(back); this.stack.push(entry);
+    document.body.style.overflow = 'hidden';
+    if (onMount) onMount(form, entry);
+    const f = form.querySelector('[autofocus]') || form.querySelector('.modal-b input:not([type=hidden]),.modal-b select,.modal-b textarea,.modal-b button') || form.querySelector('[type=submit]');
+    if (f) setTimeout(() => f.focus(), 20);
+    return entry;
+  },
+  close(entry, result) {
+    entry = entry || this.stack[this.stack.length - 1]; if (!entry) return;
+    entry.back.remove(); this.stack = this.stack.filter(x => x !== entry);
+    if (!this.stack.length) document.body.style.overflow = '';
+    if (entry.onClose) entry.onClose(result);
+    if (entry.prev && entry.prev.isConnected) entry.prev.focus({preventScroll: true});
+  },
+  top() { return this.stack[this.stack.length - 1]; }
+};
+document.addEventListener('keydown', e => {
+  const m = Modal.top(); if (!m) return;
+  if (e.key === 'Escape') { e.preventDefault(); Modal.close(m, false); }
+  if (e.key === 'Tab') {
+    const f = $$('button,input,select,textarea,a[href],[tabindex]:not([tabindex="-1"]),[contenteditable="true"]', m.back).filter(x => !x.disabled && x.offsetParent !== null);
+    if (!f.length) return; const first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  }
+});
+function confirmDialog({title, message, confirmLabel = 'Xác nhận', cancelLabel = 'Huỷ', danger = false, typeToConfirm = ''}) {
+  return new Promise(resolve => {
+    let done = false;
+    const body = `<div class="${danger ? 'notice danger' : 'notice info'}">${icon(danger ? 'warn' : 'info')}<div>${message}</div></div>` +
+      (typeToConfirm ? `<div class="fld"><label for="cf-type">Gõ <b>${esc(typeToConfirm)}</b> để xác nhận</label><input id="cf-type" class="inp" autocomplete="off" autofocus></div>` : '');
+    const foot = `<button type="button" class="btn btn-line" data-mclose>${esc(cancelLabel)}</button><button type="submit" class="btn ${danger ? 'btn-danger' : 'btn-navy'}" ${typeToConfirm ? 'disabled' : ''} ${typeToConfirm ? '' : 'autofocus'}>${esc(confirmLabel)}</button>`;
+    Modal.open({title: esc(title), body, foot,
+      onMount: f => { if (typeToConfirm) { const i = $('#cf-type', f), b = f.querySelector('[type=submit]'); i.addEventListener('input', () => b.disabled = i.value.trim() !== typeToConfirm); } },
+      onSubmit: (f, entry) => { done = true; Modal.close(entry, true); resolve(true); },
+      onClose: () => { if (!done) resolve(false); }});
+  });
+}
+
+/* =========================================================================
+   Storage layer — one interface, two adapters (cloud db / this browser)
+   ========================================================================= */
+const KINDS = ['sections', 'categories', 'articles'];
+const LS_DATA = 'hdx-cms:data:v1';
+const MAX_DOC_KB = 240;
+const Store = {
+  mode: 'loading', ready: false, failed: null, db: null, canWrite: true,
+  data: {sections: [], categories: [], articles: []},
+  subs: new Set(), chains: new Map(), localFirstRun: false,
+  on(fn) { this.subs.add(fn); }, emit() { this.subs.forEach(f => { try { f(); } catch (e) { console.error(e); } }); },
+  auth: null, authMsg: '', authNeed: null, isAdmin: false,
+  async init() {
+    if (SB.enabled()) return this.initSupabase();
+    let db = null;
+    try { if (window.claude && typeof window.claude.use === 'function') db = await window.claude.use('db'); } catch { db = null; }
+    if (db) { this.db = db; this.mode = 'cloud'; this.initCloud(); this.checkWrite(); }
+    else this.initLocal();
+  },
+  async initSupabase() {
+    this.mode = 'supabase'; SB.load();
+    const h = new URLSearchParams(location.hash.replace(/^#/, ''));
+    if (h.get('access_token')) {
+      SB.save(SB.norm({access_token: h.get('access_token'), refresh_token: h.get('refresh_token'), expires_in: h.get('expires_in'), expires_at: h.get('expires_at')}));
+      if (['recovery', 'invite', 'signup', 'magiclink'].includes(h.get('type'))) this.authNeed = 'setpw';
+      try { history.replaceState(null, '', location.pathname); } catch {}
+    } else if (h.get('error_description')) {
+      this.authMsg = 'Liên kết không hợp lệ hoặc đã hết hạn. Hãy yêu cầu gửi lại.';
+      try { history.replaceState(null, '', location.pathname); } catch {}
+    }
+    if (!SB.session) { this.auth = 'login'; this.emit(); return; }
+    await this.afterLogin();
+  },
+  async afterLogin() {
+    this.auth = 'checking'; this.emit();
+    try { this.isAdmin = (await SB.rpc('is_admin')) === true; }
+    catch (e) { if (e.code === 'session_expired') { this.auth = 'login'; this.authMsg = e.message; } else { this.auth = 'error'; this.authMsg = 'Không kiểm tra được quyền (' + (e.message || e.code) + '). Kiểm tra cấu hình Supabase hoặc đã chạy schema.sql chưa.'; } this.emit(); return; }
+    if (!this.isAdmin) { this.auth = 'denied'; this.emit(); return; }
+    if (this.authNeed === 'setpw') { this.auth = 'setpw'; this.emit(); return; }
+    this.canWrite = true;
+    try { await this.reload(); } catch (e) { this.auth = 'error'; this.authMsg = 'Không tải được dữ liệu (' + (e.message || e.code) + ').'; this.emit(); return; }
+    this.auth = null; this.ready = true; this.failed = null; this.emit();
+  },
+  async reload() {
+    const [a, b, c] = await Promise.all(KINDS.map(k => SB.select(k)));
+    this.data = {sections: a.map(r => fromRow('sections', r)), categories: b.map(r => fromRow('categories', r)), articles: c.map(r => fromRow('articles', r))};
+  },
+  async checkWrite() {
+    try { const u = await window.claude.use('user'); const c = u ? await u.can('data.write') : null; if (c === false) { this.canWrite = false; this.emit(); } } catch {}
+  },
+  initCloud() {
+    const got = {};
+    const timer = setTimeout(() => { if (!this.ready) { this.failed = 'Không kết nối được cơ sở dữ liệu. Hãy tải lại trang.'; this.emit(); } }, 20000);
+    KINDS.forEach(k => {
+      this.db.collection(k).onSnapshot(snap => {
+        this.data[k] = snap.docs.filter(d => d.exists).map(d => ({...clone(d.data()), id: d.id}));
+        got[k] = true;
+        if (!this.ready && KINDS.every(x => got[x])) { this.ready = true; clearTimeout(timer); }
+        if (this.ready) this.emit();
+      }, err => {
+        if (err && err.code === 'revoked') this.failed = 'Quyền truy cập dữ liệu đã thay đổi. Hãy tải lại trang.';
+        else this.failed = 'Mất kết nối tới cơ sở dữ liệu (' + (err && err.code || 'lỗi') + '). Hãy tải lại trang.';
+        this.emit();
+      });
+    });
+  },
+  initLocal() {
+    let ok = true;
+    try { localStorage.setItem('hdx-cms:probe', '1'); localStorage.removeItem('hdx-cms:probe'); } catch { ok = false; }
+    this.mode = ok ? 'local' : 'memory';
+    const raw = ok ? lsGet(LS_DATA, null) : null;
+    if (raw && typeof raw === 'object') KINDS.forEach(k => this.data[k] = Array.isArray(raw[k]) ? raw[k] : []);
+    else this.localFirstRun = true;
+    this.ready = true;
+    if (ok) window.addEventListener('storage', e => { if (e.key === LS_DATA) { const r = lsGet(LS_DATA, null); if (r) { KINDS.forEach(k => this.data[k] = r[k] || []); this.emit(); } } });
+  },
+  saveLocal(next) {
+    if (this.mode !== 'local') return;
+    try { localStorage.setItem(LS_DATA, JSON.stringify(next)); }
+    catch { throw {code: 'quota_exceeded', message: 'Bộ nhớ trình duyệt đã đầy. Hãy xoá bớt ảnh tải lên hoặc xuất bản sao lưu rồi dọn dữ liệu.'}; }
+  },
+  async _cloud(key, fn) {
+    const run = async () => {
+      try { return await fn(); }
+      catch (e) {
+        if (e && e.code === 'unavailable') { await new Promise(r => setTimeout(r, 400 + Math.random() * 600)); return fn(); }
+        throw e;
+      }
+    };
+    const p = (this.chains.get(key) || Promise.resolve()).catch(() => {}).then(run);
+    this.chains.set(key, p); return p;
+  },
+  /* ops: [{op:'put', kind, rec} | {op:'del', kind, id}] */
+  async apply(ops, onProgress) {
+    if (!this.canWrite) throw {code: 'read_only', message: 'Bạn chỉ có quyền xem nội dung này.'};
+    for (const o of ops) if (o.op === 'put' && sizeKB(o.rec) > MAX_DOC_KB) throw {code: 'too_big', message: `Bản ghi “${o.rec.title || o.rec.name}” quá lớn (${sizeKB(o.rec)} KB, tối đa ${MAX_DOC_KB} KB). Hãy dùng liên kết ảnh thay vì tải ảnh trực tiếp, hoặc giảm số ảnh trong bài.`};
+    if (this.mode === 'supabase') {
+      if (!ops.length) return;
+      const rows = ops.map(o => o.op === 'put' ? {op: 'put', kind: o.kind, rec: toRow(o.kind, o.rec)} : {op: 'del', kind: o.kind, id: o.id});
+      for (let i = 0; i < rows.length; i += 500) {
+        try { await SB.rpc('apply_ops', {ops: rows.slice(i, i + 500)}); if (onProgress) onProgress(Math.min(i + 500, rows.length), rows.length); }
+        catch (e) { throw sbError(e); }
+      }
+      const next = clone(this.data);
+      for (const o of ops) { const arr = next[o.kind]; const id = o.op === 'put' ? o.rec.id : o.id; const i = arr.findIndex(x => x.id === id);
+        if (o.op === 'put') { if (i >= 0) arr[i] = clone(o.rec); else arr.push(clone(o.rec)); } else if (i >= 0) arr.splice(i, 1); }
+      this.data = next; this.emit();
+      this.reload().then(() => this.emit()).catch(() => {});
+      return;
+    }
+    if (this.mode === 'cloud') {
+      let i = 0, n = ops.length; const queue = ops.slice(); const errors = [];
+      const worker = async () => { while (queue.length) { const o = queue.shift();
+        try {
+          const ref = this.db.collection(o.kind).doc(o.op === 'put' ? o.rec.id : o.id);
+          await this._cloud(o.kind + '/' + ref.id, () => o.op === 'put' ? ref.set(clone(o.rec)) : ref.delete());
+        } catch (e) { errors.push(e); }
+        i++; if (onProgress) onProgress(i, n); } };
+      await Promise.all(Array.from({length: Math.min(4, ops.length)}, worker));
+      if (errors.length) {
+        const e = errors[0];
+        if (e && e.code === 'invalid_argument') { this.canWrite = false; this.emit(); throw {code: 'read_only', message: 'Thao tác bị từ chối: tài khoản của bạn chỉ có quyền xem dữ liệu này.'}; }
+        if (e && e.code === 'quota_exceeded') throw {code: e.code, message: 'Cơ sở dữ liệu đã đầy: ' + (e.message || '') + ' Hãy xoá bớt bài viết hoặc ảnh tải lên.'};
+        throw {code: e && e.code || 'error', message: 'Không lưu được (' + (e && e.code || 'lỗi') + '). ' + (errors.length < ops.length ? 'Một phần thay đổi đã được ghi. ' : '') + 'Hãy thử lại.'};
+      }
+      return;
+    }
+    const next = clone(this.data);
+    for (const o of ops) {
+      const arr = next[o.kind];
+      if (o.op === 'put') { const i = arr.findIndex(x => x.id === o.rec.id); if (i >= 0) arr[i] = clone(o.rec); else arr.push(clone(o.rec)); }
+      else { const i = arr.findIndex(x => x.id === o.id); if (i >= 0) arr.splice(i, 1); }
+    }
+    this.saveLocal(next);
+    this.data = next; this.emit();
+  }
+};
+
+/* =========================================================================
+   Domain: queries, validation, cascades
+   ========================================================================= */
+const D = {
+  sec: id => Store.data.sections.find(s => s.id === id),
+  cat: id => Store.data.categories.find(c => c.id === id),
+  art: id => Store.data.articles.find(a => a.id === id),
+  sections() { return Store.data.sections.slice().sort((a, b) => (a.order ?? 0) - (b.order ?? 0) || cmp(a.name, b.name)); },
+  catsOf(secId) { return Store.data.categories.filter(c => c.sectionId === secId).sort((a, b) => (a.order ?? 0) - (b.order ?? 0) || cmp(a.name, b.name)); },
+  allCats() { const order = new Map(this.sections().map((s, i) => [s.id, i])); return Store.data.categories.slice().sort((a, b) => (order.get(a.sectionId) ?? 999) - (order.get(b.sectionId) ?? 999) || (a.order ?? 0) - (b.order ?? 0) || cmp(a.name, b.name)); },
+  artsOfSec: id => Store.data.articles.filter(a => a.sectionId === id),
+  artsOfCat: id => Store.data.articles.filter(a => a.categoryId === id),
+  nextOrder(list) { return list.reduce((m, x) => Math.max(m, Number(x.order) || 0), 0) + 1; },
+  problems() {
+    const out = [];
+    Store.data.categories.forEach(c => { if (!D.sec(c.sectionId)) out.push({kind: 'categories', id: c.id, label: c.name, why: 'thuộc một chuyên mục không còn tồn tại'}); });
+    Store.data.articles.forEach(a => {
+      const c = D.cat(a.categoryId);
+      if (!c) out.push({kind: 'articles', id: a.id, label: a.title, why: 'thuộc một danh mục không còn tồn tại'});
+      else if (c.sectionId !== a.sectionId) out.push({kind: 'articles', id: a.id, label: a.title, why: 'chuyên mục không khớp với danh mục'});
+    });
+    return out;
+  }
+};
+const LIM = {name: 120, slug: 90, desc: 600, title: 200, excerpt: 400, author: 80, tag: 40, tags: 20};
+function vSlug(slug, taken) {
+  if (!slug) return 'Hãy nhập đường dẫn.';
+  if (!SLUG_RE.test(slug)) return 'Chỉ dùng chữ thường không dấu, số và dấu gạch ngang (ví dụ: lich-su-doi).';
+  if (slug.length > LIM.slug) return `Tối đa ${LIM.slug} ký tự.`;
+  if (taken) return 'Đường dẫn này đã được dùng. Hãy chọn đường dẫn khác.';
+  return '';
+}
+function validateSection(r) {
+  const e = {};
+  if (!r.name.trim()) e.name = 'Hãy nhập tên chuyên mục.'; else if (r.name.length > LIM.name) e.name = `Tối đa ${LIM.name} ký tự.`;
+  const s = vSlug(r.slug, Store.data.sections.some(x => x.id !== r.id && x.slug === r.slug)); if (s) e.slug = s;
+  if (r.description.length > LIM.desc) e.description = `Tối đa ${LIM.desc} ký tự.`;
+  if (!Number.isInteger(r.order) || r.order < 0 || r.order > 9999) e.order = 'Thứ tự là số nguyên từ 0 đến 9999.';
+  if (r.image && !safeImg(r.image)) e.image = 'Liên kết ảnh phải bắt đầu bằng https://';
+  return e;
+}
+function validateCategory(r) {
+  const e = {};
+  if (!r.name.trim()) e.name = 'Hãy nhập tên danh mục.'; else if (r.name.length > LIM.name) e.name = `Tối đa ${LIM.name} ký tự.`;
+  if (!r.sectionId || !D.sec(r.sectionId)) e.sectionId = 'Hãy chọn chuyên mục chứa danh mục này.';
+  const s = vSlug(r.slug, Store.data.categories.some(x => x.id !== r.id && x.sectionId === r.sectionId && x.slug === r.slug)); if (s) e.slug = s.replace('đã được dùng', 'đã được dùng trong chuyên mục này');
+  if (r.description.length > LIM.desc) e.description = `Tối đa ${LIM.desc} ký tự.`;
+  if (!Number.isInteger(r.order) || r.order < 0 || r.order > 9999) e.order = 'Thứ tự là số nguyên từ 0 đến 9999.';
+  if (r.image && !safeImg(r.image)) e.image = 'Liên kết ảnh phải bắt đầu bằng https://';
+  return e;
+}
+function validateArticle(r) {
+  const e = {};
+  if (!r.title.trim()) e.title = 'Hãy nhập tiêu đề bài viết.'; else if (r.title.length > LIM.title) e.title = `Tối đa ${LIM.title} ký tự.`;
+  const s = vSlug(r.slug, Store.data.articles.some(x => x.id !== r.id && x.slug === r.slug)); if (s) e.slug = s;
+  if (!r.sectionId || !D.sec(r.sectionId)) e.sectionId = 'Hãy chọn chuyên mục.';
+  const c = D.cat(r.categoryId);
+  if (!c) e.categoryId = 'Hãy chọn danh mục.'; else if (c.sectionId !== r.sectionId) e.categoryId = 'Danh mục này không thuộc chuyên mục đã chọn.';
+  if (r.excerpt.length > LIM.excerpt) e.excerpt = `Mô tả ngắn tối đa ${LIM.excerpt} ký tự.`;
+  if (r.status === 'published') { const d = document.createElement('div'); d.innerHTML = r.content; if (!d.textContent.trim() && !d.querySelector('img')) e.content = 'Bài viết cần có nội dung trước khi xuất bản.'; }
+  if (r.author.length > LIM.author) e.author = `Tối đa ${LIM.author} ký tự.`;
+  if (r.tags.length > LIM.tags) e.tags = `Tối đa ${LIM.tags} thẻ.`;
+  if (r.cover && !safeImg(r.cover)) e.cover = 'Liên kết ảnh phải bắt đầu bằng https://';
+  return e;
+}
+function uniqueSlug(base, taken) { let s = base || 'bai-viet', i = 2; while (taken(s)) s = `${base}-${i++}`; return s; }
+
+const Repo = {
+  async saveSection(input) {
+    const ex = input.id ? D.sec(input.id) : null; const t = nowISO();
+    const rec = {...(ex || {}), ...input, id: ex ? ex.id : uid('sec'), createdAt: ex ? ex.createdAt : t, updatedAt: t};
+    await Store.apply([{op: 'put', kind: 'sections', rec}]); return rec;
+  },
+  async saveCategory(input) {
+    const ex = input.id ? D.cat(input.id) : null; const t = nowISO();
+    const rec = {...(ex || {}), ...input, id: ex ? ex.id : uid('cat'), createdAt: ex ? ex.createdAt : t, updatedAt: t};
+    const ops = [{op: 'put', kind: 'categories', rec}];
+    if (ex && ex.sectionId !== rec.sectionId) D.artsOfCat(ex.id).forEach(a => ops.push({op: 'put', kind: 'articles', rec: {...a, sectionId: rec.sectionId, updatedAt: t}}));
+    await Store.apply(ops); return rec;
+  },
+  async saveArticle(input) {
+    const ex = input.id ? D.art(input.id) : null; const t = nowISO();
+    const rec = {...(ex || {}), ...input, id: ex ? ex.id : (input.id || uid('art')), createdAt: ex ? ex.createdAt : t, updatedAt: t};
+    if (rec.status === 'published' && !rec.publishedAt) rec.publishedAt = t;
+    await Store.apply([{op: 'put', kind: 'articles', rec}]); return rec;
+  },
+  async deleteSection(id, plan) {
+    const cats = D.catsOf(id), ops = [], t = nowISO();
+    if (plan.mode === 'move') {
+      const target = D.sec(plan.targetId); if (!target) throw {message: 'Hãy chọn chuyên mục nhận nội dung.'};
+      let ord = D.nextOrder(D.catsOf(target.id));
+      cats.forEach(c => {
+        const taken = s => Store.data.categories.some(x => x.sectionId === target.id && x.slug === s && x.id !== c.id);
+        ops.push({op: 'put', kind: 'categories', rec: {...c, sectionId: target.id, slug: uniqueSlug(c.slug, taken), order: ord++, updatedAt: t}});
+        D.artsOfCat(c.id).forEach(a => ops.push({op: 'put', kind: 'articles', rec: {...a, sectionId: target.id, updatedAt: t}}));
+      });
+    } else {
+      cats.forEach(c => { D.artsOfCat(c.id).forEach(a => ops.push({op: 'del', kind: 'articles', id: a.id})); ops.push({op: 'del', kind: 'categories', id: c.id}); });
+    }
+    // articles must never point at a missing section; drop any stray ones without a valid category
+    D.artsOfSec(id).filter(a => !cats.some(c => c.id === a.categoryId)).forEach(a => ops.push({op: 'del', kind: 'articles', id: a.id}));
+    await Store.apply(ops);
+    await Store.apply([{op: 'del', kind: 'sections', id}]);
+  },
+  async deleteCategory(id, plan) {
+    const arts = D.artsOfCat(id), ops = [], t = nowISO();
+    if (plan.mode === 'move') {
+      const target = D.cat(plan.targetId); if (!target) throw {message: 'Hãy chọn danh mục nhận bài viết.'};
+      arts.forEach(a => ops.push({op: 'put', kind: 'articles', rec: {...a, categoryId: target.id, sectionId: target.sectionId, updatedAt: t}}));
+    } else arts.forEach(a => ops.push({op: 'del', kind: 'articles', id: a.id}));
+    await Store.apply(ops);
+    await Store.apply([{op: 'del', kind: 'categories', id}]);
+  },
+  async deleteArticles(ids) { await Store.apply(ids.map(id => ({op: 'del', kind: 'articles', id}))); },
+  async setStatus(ids, status) {
+    const t = nowISO();
+    const ops = ids.map(D.art).filter(Boolean).filter(a => a.status !== status).map(a => ({op: 'put', kind: 'articles', rec: {...a, status, publishedAt: status === 'published' ? (a.publishedAt || t) : a.publishedAt, updatedAt: t}}));
+    if (status === 'published') {
+      const bad = ops.filter(o => !textOf(o.rec.content) && !/<img/i.test(o.rec.content || ''));
+      if (bad.length) throw {message: `${bad.length} bài viết chưa có nội dung nên chưa thể xuất bản: ${bad.map(o => '“' + o.rec.title + '”').join(', ')}.`};
+      const broken = ops.filter(o => { const c = D.cat(o.rec.categoryId); return !c || c.sectionId !== o.rec.sectionId; });
+      if (broken.length) throw {message: `Hãy chọn lại danh mục cho: ${broken.map(o => '“' + o.rec.title + '”').join(', ')}.`};
+    }
+    await Store.apply(ops); return ops.length;
+  },
+  async duplicate(id) {
+    const a = D.art(id); if (!a) return null; const t = nowISO();
+    const rec = {...clone(a), id: uid('art'), title: (a.title + ' (bản sao)').slice(0, LIM.title), slug: uniqueSlug(a.slug + '-ban-sao', s => Store.data.articles.some(x => x.slug === s)), status: 'draft', publishedAt: null, createdAt: t, updatedAt: t};
+    await Store.apply([{op: 'put', kind: 'articles', rec}]); return rec;
+  },
+  async toggle(kind, id) {
+    const r = kind === 'sections' ? D.sec(id) : D.cat(id); if (!r) return;
+    const rec = {...r, status: r.status === 'active' ? 'inactive' : 'active', updatedAt: nowISO()};
+    await Store.apply([{op: 'put', kind, rec}]); return rec;
+  },
+  async move(kind, id, dir) {
+    const r = kind === 'sections' ? D.sec(id) : D.cat(id); if (!r) return;
+    const sibs = kind === 'sections' ? D.sections() : D.catsOf(r.sectionId);
+    const i = sibs.findIndex(x => x.id === id), j = i + dir; if (j < 0 || j >= sibs.length) return;
+    const list = sibs.map((x, k) => ({...x, _o: k + 1}));
+    [list[i]._o, list[j]._o] = [list[j]._o, list[i]._o];
+    const ops = list.filter(x => x.order !== x._o).map(x => { const {_o, ...rest} = x; return {op: 'put', kind, rec: {...rest, order: _o}}; });
+    await Store.apply(ops);
+  },
+  async replaceAll(data, onProgress) {
+    const ops = [];
+    KINDS.forEach(k => Store.data[k].forEach(r => { if (!data[k].some(x => x.id === r.id)) ops.push({op: 'del', kind: k, id: r.id}); }));
+    KINDS.forEach(k => data[k].forEach(rec => ops.push({op: 'put', kind: k, rec})));
+    await Store.apply(ops, onProgress);
+  }
+};
+
+/* Import / sample validation */
+function normalizeImport(obj) {
+  const errors = [];
+  if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return {errors: ['Tệp không đúng định dạng sao lưu (cần một đối tượng JSON).']};
+  const out = {};
+  for (const k of KINDS) { if (!Array.isArray(obj[k])) { errors.push(`Thiếu danh sách “${k}”.`); out[k] = []; } else out[k] = obj[k]; }
+  if (errors.length) return {errors};
+  const t = nowISO(); const ids = new Set();
+  const str = (v, n) => typeof v === 'string' ? v.slice(0, n) : '';
+  out.sections = out.sections.map((s, i) => ({id: str(s.id, 80) || uid('sec'), name: str(s.name, LIM.name), slug: str(s.slug, LIM.slug) || slugify(s.name), description: str(s.description, LIM.desc), image: safeImg(s.image), order: Number.isInteger(s.order) ? s.order : i + 1, status: s.status === 'inactive' ? 'inactive' : 'active', createdAt: str(s.createdAt, 40) || t, updatedAt: str(s.updatedAt, 40) || t}));
+  out.categories = out.categories.map((c, i) => ({id: str(c.id, 80) || uid('cat'), sectionId: str(c.sectionId, 80), name: str(c.name, LIM.name), slug: str(c.slug, LIM.slug) || slugify(c.name), description: str(c.description, LIM.desc), image: safeImg(c.image), order: Number.isInteger(c.order) ? c.order : i + 1, status: c.status === 'inactive' ? 'inactive' : 'active', createdAt: str(c.createdAt, 40) || t, updatedAt: str(c.updatedAt, 40) || t}));
+  out.articles = out.articles.map(a => ({id: str(a.id, 80) || uid('art'), title: str(a.title, LIM.title), slug: str(a.slug, LIM.slug) || slugify(a.title), excerpt: str(a.excerpt, LIM.excerpt), content: sanitizeHtml(typeof a.content === 'string' ? a.content : ''), cover: safeImg(a.cover), sectionId: str(a.sectionId, 80), categoryId: str(a.categoryId, 80), author: str(a.author, LIM.author), tags: Array.isArray(a.tags) ? a.tags.filter(x => typeof x === 'string').map(x => x.slice(0, LIM.tag)).slice(0, LIM.tags) : [], status: ['draft','published','archived'].includes(a.status) ? a.status : 'draft', publishedAt: typeof a.publishedAt === 'string' ? a.publishedAt : null, createdAt: str(a.createdAt, 40) || t, updatedAt: str(a.updatedAt, 40) || t}));
+  const secIds = new Set(out.sections.map(s => s.id)); const catMap = new Map(out.categories.map(c => [c.id, c]));
+  for (const k of KINDS) out[k].forEach(r => { if (!/^[\w.~:@+-]{1,80}$/.test(r.id)) errors.push(`Mã “${r.id}” không hợp lệ.`); if (ids.has(r.id)) errors.push(`Mã “${r.id}” bị trùng.`); ids.add(r.id); });
+  out.sections.forEach(s => { if (!s.name) errors.push(`Một chuyên mục (${s.id}) thiếu tên.`); if (!SLUG_RE.test(s.slug)) errors.push(`Chuyên mục “${s.name}” có đường dẫn không hợp lệ.`); });
+  out.categories.forEach(c => { if (!c.name) errors.push(`Một danh mục (${c.id}) thiếu tên.`); if (!secIds.has(c.sectionId)) errors.push(`Danh mục “${c.name}” trỏ tới chuyên mục không tồn tại.`); });
+  out.articles.forEach(a => { if (!a.title) errors.push(`Một bài viết (${a.id}) thiếu tiêu đề.`); const c = catMap.get(a.categoryId); if (!c) errors.push(`Bài “${a.title}” trỏ tới danh mục không tồn tại.`); else if (c.sectionId !== a.sectionId) errors.push(`Bài “${a.title}” có chuyên mục không khớp với danh mục.`); });
+  return {data: out, errors: errors.slice(0, 12), errorCount: errors.length};
+}
+async function fetchSample() {
+  const res = await fetch('sample.json', {cache: 'no-store'});
+  if (!res.ok) throw new Error('Không tải được dữ liệu mẫu.');
+  const n = normalizeImport(await res.json());
+  if (n.errors.length) throw new Error(n.errors[0]);
+  return n.data;
+}
+
+/* =========================================================================
+   App state, routing
+   ========================================================================= */
+const S = {
+  route: ssGet('hdx-cms:route', {name: 'dashboard', params: {}}),
+  history: [],
+  filters: ssGet('hdx-cms:filters', null) || {
+    sections: {q: '', status: '', sort: 'order'},
+    categories: {q: '', section: '', status: '', sort: 'order'},
+    articles: {q: '', section: '', category: '', status: '', dateField: 'updatedAt', from: '', to: '', sort: 'updatedAt-desc', page: 1, size: 10},
+    search: {q: ''}
+  },
+  selected: new Set()
+};
+const W = () => Store.canWrite;
+function saveUiState() { ssSet('hdx-cms:route', {name: S.route.name, params: S.route.params}); ssSet('hdx-cms:filters', S.filters); }
+async function go(name, params = {}, opts = {}) {
+  if (!opts.force && S.route.name === 'edit' && Editor.isDirty()) {
+    const ok = await confirmDialog({title: 'Rời trang khi chưa lưu?', message: 'Bài viết có thay đổi chưa lưu. Nếu rời đi, các thay đổi này sẽ mất.', confirmLabel: 'Rời đi, không lưu', cancelLabel: 'Ở lại chỉnh sửa', danger: true});
+    if (!ok) return false;
+  }
+  if (S.route.name === 'edit') Editor.unmount();
+  if (opts.push !== false) { S.history.push({...S.route, scroll: window.scrollY}); if (S.history.length > 60) S.history.shift(); }
+  if (name !== 'articles') S.selected.clear();
+  S.route = {name, params};
+  saveUiState(); render();
+  window.scrollTo(0, opts.scroll || 0);
+  if (!opts.keepFocus) { const h = $('#view-root h1'); if (h) { h.setAttribute('tabindex', '-1'); h.focus({preventScroll: true}); } }
+  return true;
+}
+function back() { const prev = S.history.pop(); if (prev) go(prev.name, prev.params, {push: false, scroll: prev.scroll}); else go('dashboard', {}, {push: false}); }
+
+/* =========================================================================
+   View helpers
+   ========================================================================= */
+const STATUS_A = {published: 'Đã xuất bản', draft: 'Bản nháp', archived: 'Lưu trữ'};
+const STATUS_S = {active: 'Đang hiển thị', inactive: 'Tạm ẩn'};
+const pillA = s => `<span class="pill st-${esc(s)}">${STATUS_A[s] || esc(s)}</span>`;
+const pillS = s => `<span class="pill st-${esc(s)}">${STATUS_S[s] || esc(s)}</span>`;
+function band({crumbs = [], title, sub = '', right = '', eyebrow = '', showBack = true}) {
+  const cr = crumbs.map((c, i) => i === crumbs.length - 1 ? `<span class="here" aria-current="page">${esc(c[0])}</span>` : `<button data-act="go" data-r="${esc(c[1])}" ${c[2] ? `data-p='${esc(JSON.stringify(c[2]))}'` : ''}>${esc(c[0])}</button><span class="sep" aria-hidden="true">/</span>`).join('');
+  return `<section class="band"><div class="wrap band-in"><div class="band-l">
+    ${showBack && S.history.length ? `<button class="backbtn" data-act="back">${icon('back', 16)} Quay lại</button>` : ''}
+    ${crumbs.length ? `<nav class="crumbs" aria-label="Đường dẫn trang">${cr}</nav>` : ''}
+    ${eyebrow ? `<span class="eyebrow" style="color:var(--hero-soft)">${eyebrow}</span>` : ''}
+    <h1>${title}</h1>${sub ? `<p>${sub}</p>` : ''}</div>${right ? `<div class="band-r">${right}</div>` : ''}</div></section>`;
+}
+function emptyBox({ic = 'doc', title, text = '', action = ''}) { return `<div class="empty"><div class="art">${icon(ic, 32, 1.8)}</div><h3>${title}</h3>${text ? `<p>${text}</p>` : ''}${action}</div>`; }
+const goAttr = (r, p) => `data-act="go" data-r="${r}"${p ? ` data-p='${esc(JSON.stringify(p))}'` : ''}`;
+const thumb = src => { const s = safeImg(src); return s ? `<img class="thumb" src="${esc(s)}" alt="" loading="lazy">` : `<span class="ph" aria-hidden="true"></span>`; };
+function sel(id, opts, value, extra = '') { return `<select id="${id}" class="sel" ${extra}>${opts.map(o => `<option value="${esc(o[0])}" ${String(o[0]) === String(value) ? 'selected' : ''} ${o[2] ? 'disabled' : ''}>${esc(o[1])}</option>`).join('')}</select>`; }
+const secOptions = (first = 'Tất cả chuyên mục') => [['', first], ...D.sections().map(s => [s.id, s.name + (s.status === 'inactive' ? ' (tạm ẩn)' : '')])];
+function catOptions(secId, first = 'Tất cả danh mục') {
+  const out = [['', first]];
+  if (secId) D.catsOf(secId).forEach(c => out.push([c.id, c.name + (c.status === 'inactive' ? ' (tạm ẩn)' : '')]));
+  else D.sections().forEach(s => D.catsOf(s.id).forEach(c => out.push([c.id, s.name + ' › ' + c.name])));
+  return out;
+}
+const crumbsHome = [['Tổng quan', 'dashboard']];
+
+/* =========================================================================
+   Views
+   ========================================================================= */
+const VIEWS = {};
+
+VIEWS.dashboard = () => {
+  const A = Store.data.articles, n = s => A.filter(a => a.status === s).length;
+  const empty = !Store.data.sections.length && !A.length && !Store.data.categories.length;
+  const recent = A.slice().sort((a, b) => cmp(b.updatedAt, a.updatedAt)).slice(0, 7);
+  const probs = D.problems();
+  const qa = W() ? `<button class="btn btn-grad" data-act="new-article">${icon('plus')} Bài viết mới</button>
+      <button class="btn btn-hero" data-act="new-section">${icon('plus')} Chuyên mục</button>
+      <button class="btn btn-hero" data-act="new-category">${icon('plus')} Danh mục</button>` : '';
+  let html = band({title: 'Tổng quan nội dung', eyebrow: 'Anh em ơi! Về nhà · 20 năm', sub: Store.mode === 'supabase' ? 'Quản lý chuyên mục, danh mục và bài viết. Bài đã xuất bản hiện ngay trên trang Tin tức.' : Store.mode === 'local' ? 'Chế độ thử: dữ liệu chỉ lưu trên trình duyệt này. Điền config.js để kết nối Supabase.' : 'Quản lý chuyên mục, danh mục và bài viết cho website sinh nhật 20 tuổi của Đội.', right: qa, showBack: false});
+  html += `<main class="view"><div class="wrap stack">`;
+  if (!W()) html += `<div class="notice info">${icon('info')}<div>Bạn đang ở <b>chế độ chỉ xem</b>. Tài khoản này không có quyền thay đổi nội dung.</div></div>`;
+  if (probs.length) html += `<div class="notice danger">${icon('warn')}<div><b>Có ${probs.length} bản ghi bị lỗi liên kết.</b> Hãy mở và chọn lại chuyên mục/danh mục:<ul style="margin:6px 0 0;padding-left:18px">${probs.slice(0, 6).map(p => `<li><button class="link" style="font-size:14px" data-act="${p.kind === 'articles' ? 'edit-article' : 'edit-category'}" data-id="${esc(p.id)}">${esc(p.label || p.id)}</button> — ${p.why}</li>`).join('')}</ul></div></div>`;
+  if (empty) {
+    html += `<div class="card">${emptyBox({ic: 'layers', title: 'Chưa có nội dung nào', text: 'Bắt đầu bằng cách tạo chuyên mục đầu tiên, hoặc nạp bộ dữ liệu mẫu lấy từ website 20 năm của Đội để thử ngay.', action: W() ? `<div class="qa" style="justify-content:center"><button class="btn btn-grad" data-act="load-sample">${icon('download')} Nạp dữ liệu mẫu</button><button class="btn btn-line" data-act="new-section">${icon('plus')} Tạo chuyên mục</button></div>` : ''})}</div></div></main>`;
+    return html;
+  }
+  html += `<div class="stats">
+    <button class="stat" ${goAttr('sections')}><span class="n n-orange tnum">${Store.data.sections.length}</span><span class="l">Chuyên mục</span><span class="s">${Store.data.sections.filter(s => s.status === 'active').length} đang hiển thị</span></button>
+    <button class="stat" ${goAttr('categories')}><span class="n n-sky tnum">${Store.data.categories.length}</span><span class="l">Danh mục</span><span class="s">${Store.data.categories.filter(s => s.status === 'active').length} đang hiển thị</span></button>
+    <button class="stat" data-act="filter-articles" data-status=""><span class="n n-brand tnum">${A.length}</span><span class="l">Bài viết</span><span class="s">${n('archived')} đang lưu trữ</span></button>
+    <button class="stat" data-act="filter-articles" data-status="published"><span class="n n-green tnum">${n('published')}</span><span class="l">Đã xuất bản</span><span class="s">Hiển thị trên trang</span></button>
+    <button class="stat" data-act="filter-articles" data-status="draft"><span class="n n-gold tnum">${n('draft')}</span><span class="l">Bản nháp</span><span class="s">Chưa xuất bản</span></button>
+  </div>`;
+  html += `<div class="grid-2"><section class="card card-pad"><div class="card-h"><h2>Cập nhật gần đây</h2><button class="btn btn-ghost btn-sm" ${goAttr('articles')}>Tất cả bài viết ${icon('chev', 16)}</button></div>`;
+  html += recent.length ? `<ul class="rlist">${recent.map(a => { const s = D.sec(a.sectionId), c = D.cat(a.categoryId); return `<li><div class="tt">${thumb(a.cover)}<div class="tt-t"><button class="link" data-act="edit-article" data-id="${esc(a.id)}">${esc(a.title)}</button><div class="meta">${esc(s ? s.name : '—')} › ${esc(c ? c.name : '—')} · ${relTime(a.updatedAt)}</div></div></div><span style="margin-left:auto">${pillA(a.status)}</span></li>`; }).join('')}</ul>`
+    : emptyBox({title: 'Chưa có bài viết', text: 'Bài viết bạn tạo hoặc sửa sẽ hiện ở đây.', action: W() ? `<button class="btn btn-grad" data-act="new-article">${icon('plus')} Viết bài đầu tiên</button>` : ''});
+  html += `</section><section class="card card-pad"><div class="card-h"><h2>Theo chuyên mục</h2><button class="btn btn-ghost btn-sm" ${goAttr('sections')}>Quản lý ${icon('chev', 16)}</button></div>`;
+  html += D.sections().map(s => { const arts = D.artsOfSec(s.id), cnt = st => arts.filter(a => a.status === st).length; return `<div class="secrow"><div class="secrow-h"><button class="link" ${goAttr('section', {id: s.id})}>${esc(s.name)}</button>${pillS(s.status)}</div><div class="counts"><span class="chip">${D.catsOf(s.id).length} danh mục</span><span class="pill st-published">${cnt('published')} xuất bản</span><span class="pill st-draft">${cnt('draft')} nháp</span>${cnt('archived') ? `<span class="pill st-archived">${cnt('archived')} lưu trữ</span>` : ''}</div></div>`; }).join('') || emptyBox({title: 'Chưa có chuyên mục'});
+  html += `</section></div></div></main>`;
+  return html;
+};
+
+/* ---- Sections ---- */
+function sectionRows(list, {showOrder}) {
+  return list.map((s, i) => {
+    const nc = D.catsOf(s.id).length, na = D.artsOfSec(s.id).length;
+    return `<tr>
+      ${showOrder ? `<td data-label="Thứ tự"><div class="ord">${W() ? `<button class="ibtn" data-act="move" data-kind="sections" data-id="${esc(s.id)}" data-dir="-1" ${i === 0 ? 'disabled' : ''} aria-label="Đưa “${esc(s.name)}” lên trên">${icon('up', 16)}</button>` : ''}<span class="v">${esc(s.order)}</span>${W() ? `<button class="ibtn" data-act="move" data-kind="sections" data-id="${esc(s.id)}" data-dir="1" ${i === list.length - 1 ? 'disabled' : ''} aria-label="Đưa “${esc(s.name)}” xuống dưới">${icon('down', 16)}</button>` : ''}</div></td>` : `<td data-label="Thứ tự" class="num">${esc(s.order)}</td>`}
+      <td class="main"><div class="tt">${thumb(s.image)}<div class="tt-t"><button class="link" ${goAttr('section', {id: s.id})}>${esc(s.name)}</button><div class="sub">/${esc(s.slug)}</div></div></div></td>
+      <td class="num" data-label="Danh mục"><button class="chip" data-act="filter-cats" data-sec="${esc(s.id)}">${nc}</button></td>
+      <td class="num" data-label="Bài viết"><button class="chip" data-act="filter-articles" data-sec="${esc(s.id)}">${na}</button></td>
+      <td data-label="Trạng thái">${W() ? `<button class="togglest" data-act="toggle" data-kind="sections" data-id="${esc(s.id)}" title="Bấm để ${s.status === 'active' ? 'tạm ẩn' : 'hiển thị'}" aria-label="${STATUS_S[s.status]} — bấm để ${s.status === 'active' ? 'tạm ẩn' : 'hiển thị'}">${pillS(s.status)}</button>` : pillS(s.status)}</td>
+      <td data-label="Cập nhật" class="small muted">${fmtDate(s.updatedAt)}</td>
+      <td class="actions"><button class="ibtn" ${goAttr('section', {id: s.id})} aria-label="Xem chi tiết “${esc(s.name)}”" title="Chi tiết">${icon('eye')}</button>${W() ? `<button class="ibtn" data-act="edit-section" data-id="${esc(s.id)}" aria-label="Sửa “${esc(s.name)}”" title="Sửa">${icon('edit')}</button><button class="ibtn danger" data-act="delete-section" data-id="${esc(s.id)}" aria-label="Xoá “${esc(s.name)}”" title="Xoá">${icon('trash')}</button>` : ''}</td></tr>`;
+  }).join('');
+}
+VIEWS.sections = () => {
+  const f = S.filters.sections; const q = fold(f.q.trim());
+  let list = D.sections().filter(s => (!f.status || s.status === f.status) && (!q || fold(s.name + ' ' + s.slug + ' ' + s.description).includes(q)));
+  const sorters = {order: null, name: (a, b) => cmp(a.name, b.name), 'updatedAt-desc': (a, b) => cmp(b.updatedAt, a.updatedAt), 'createdAt-desc': (a, b) => cmp(b.createdAt, a.createdAt)};
+  if (sorters[f.sort]) list.sort(sorters[f.sort]);
+  const showOrder = f.sort === 'order' && !q && !f.status;
+  const filtered = q || f.status || f.sort !== 'order';
+  let html = band({crumbs: [...crumbsHome, ['Chuyên mục']], title: 'Chuyên mục', sub: 'Các khu vực lớn của website. Mỗi chuyên mục chứa nhiều danh mục.', right: W() ? `<button class="btn btn-grad" data-act="new-section">${icon('plus')} Thêm chuyên mục</button>` : ''});
+  html += `<main class="view"><div class="wrap stack">
+    <div class="toolbar" role="search">
+      <div class="fld f-q"><label for="fs-q">Tìm kiếm</label><div class="searchbox">${icon('search', 16)}<input id="fs-q" class="inp" type="search" data-f="sections.q" value="${esc(f.q)}" placeholder="Tên, đường dẫn, mô tả…"></div></div>
+      <div class="fld f-s"><label for="fs-st">Trạng thái</label>${sel('fs-st', [['', 'Tất cả'], ['active', 'Đang hiển thị'], ['inactive', 'Tạm ẩn']], f.status, 'data-f="sections.status"')}</div>
+      <div class="fld f-s"><label for="fs-sort">Sắp xếp</label>${sel('fs-sort', [['order', 'Thứ tự hiển thị'], ['name', 'Tên A–Z'], ['updatedAt-desc', 'Mới cập nhật'], ['createdAt-desc', 'Mới tạo']], f.sort, 'data-f="sections.sort"')}</div>
+      ${filtered ? `<button class="btn btn-ghost btn-sm" data-act="reset-filters" data-view="sections">${icon('refresh', 16)} Đặt lại</button>` : ''}
+    </div>`;
+  if (!Store.data.sections.length) html += `<div class="card">${emptyBox({ic: 'layers', title: 'Chưa có chuyên mục nào', text: 'Chuyên mục là khu vực lớn của website, ví dụ “Giới thiệu Đội” hay “Lịch trình & Hoạt động”.', action: W() ? `<button class="btn btn-grad" data-act="new-section">${icon('plus')} Tạo chuyên mục đầu tiên</button>` : ''})}</div>`;
+  else if (!list.length) html += `<div class="card">${emptyBox({ic: 'search', title: 'Không có chuyên mục phù hợp', text: 'Thử từ khoá khác hoặc đặt lại bộ lọc.', action: `<button class="btn btn-line" data-act="reset-filters" data-view="sections">Đặt lại bộ lọc</button>`})}</div>`;
+  else html += `<div class="card"><div class="tblwrap"><table class="tbl"><caption class="sr">Danh sách chuyên mục</caption><thead><tr><th>Thứ tự</th><th>Chuyên mục</th><th class="num">Danh mục</th><th class="num">Bài viết</th><th>Trạng thái</th><th>Cập nhật</th><th class="actions"><span class="sr">Thao tác</span></th></tr></thead><tbody>${sectionRows(list, {showOrder})}</tbody></table></div>
+    ${!showOrder && W() ? `<p class="hint" style="padding:0 14px 12px">Muốn đổi thứ tự? Chọn “Thứ tự hiển thị” và bỏ bộ lọc để dùng nút mũi tên.</p>` : ''}</div>`;
+  return html + `</div></main>`;
+};
+
+VIEWS.section = ({id}) => {
+  const s = D.sec(id);
+  if (!s) return notFound('Chuyên mục này không còn tồn tại.', 'sections');
+  const cats = D.catsOf(s.id), arts = D.artsOfSec(s.id).sort((a, b) => cmp(b.updatedAt, a.updatedAt));
+  const right = W() ? `<button class="btn btn-grad" data-act="new-article" data-sec="${esc(s.id)}">${icon('plus')} Bài viết</button><button class="btn btn-hero" data-act="edit-section" data-id="${esc(s.id)}">${icon('edit')} Sửa</button>` : '';
+  let html = band({crumbs: [...crumbsHome, ['Chuyên mục', 'sections'], [s.name]], title: esc(s.name), sub: esc(s.description || ''), right});
+  html += `<main class="view"><div class="wrap stack"><section class="card card-pad"><div class="detail"><dl class="kv">
+    <dt>Trạng thái</dt><dd>${pillS(s.status)}</dd><dt>Đường dẫn</dt><dd class="tnum" style="font-family:var(--f-mono);font-size:13px">/${esc(s.slug)}</dd>
+    <dt>Thứ tự</dt><dd class="tnum">${esc(s.order)}</dd><dt>Tạo lúc</dt><dd class="tnum">${fmtDate(s.createdAt)}</dd><dt>Cập nhật</dt><dd class="tnum">${fmtDate(s.updatedAt)}</dd>
+    <dt>Nội dung</dt><dd>${cats.length} danh mục · ${arts.length} bài viết</dd></dl>
+    ${safeImg(s.image) ? `<img class="detail-img" src="${esc(safeImg(s.image))}" alt="Ảnh chuyên mục ${esc(s.name)}">` : ''}</div>
+    ${W() ? `<div class="qa" style="margin-top:16px"><button class="btn btn-line btn-sm" data-act="toggle" data-kind="sections" data-id="${esc(s.id)}">${s.status === 'active' ? 'Tạm ẩn chuyên mục' : 'Hiển thị chuyên mục'}</button><button class="btn btn-danger-line btn-sm" data-act="delete-section" data-id="${esc(s.id)}">${icon('trash', 16)} Xoá chuyên mục</button></div>` : ''}</section>`;
+  html += `<section class="card"><div class="card-h card-pad" style="margin:0;padding-bottom:0"><h2>Danh mục trong chuyên mục</h2>${W() ? `<button class="btn btn-line btn-sm" data-act="new-category" data-sec="${esc(s.id)}">${icon('plus', 16)} Thêm danh mục</button>` : ''}</div>`;
+  html += cats.length ? `<div class="tblwrap"><table class="tbl"><thead><tr><th>Thứ tự</th><th>Danh mục</th><th class="num">Bài viết</th><th>Trạng thái</th><th class="actions"><span class="sr">Thao tác</span></th></tr></thead><tbody>${categoryRows(cats, {showOrder: true, showSection: false})}</tbody></table></div>`
+    : emptyBox({ic: 'folder', title: 'Chưa có danh mục', text: 'Bài viết cần thuộc một danh mục. Hãy tạo danh mục đầu tiên cho chuyên mục này.', action: W() ? `<button class="btn btn-grad" data-act="new-category" data-sec="${esc(s.id)}">${icon('plus')} Tạo danh mục</button>` : ''});
+  html += `</section><section class="card"><div class="card-h card-pad" style="margin:0;padding-bottom:0"><h2>Bài viết mới cập nhật</h2>${arts.length ? `<button class="btn btn-ghost btn-sm" data-act="filter-articles" data-sec="${esc(s.id)}">Xem tất cả ${arts.length} bài ${icon('chev', 16)}</button>` : ''}</div>`;
+  html += arts.length ? `<div class="tblwrap"><table class="tbl"><thead><tr><th>Bài viết</th><th>Danh mục</th><th>Trạng thái</th><th>Cập nhật</th><th class="actions"><span class="sr">Thao tác</span></th></tr></thead><tbody>${articleRows(arts.slice(0, 8), {compact: true})}</tbody></table></div>` : emptyBox({title: 'Chưa có bài viết trong chuyên mục'});
+  return html + `</section></div></main>`;
+};
+
+/* ---- Categories ---- */
+function categoryRows(list, {showOrder, showSection = true}) {
+  return list.map(c => {
+    const s = D.sec(c.sectionId), sibs = D.catsOf(c.sectionId), i = sibs.findIndex(x => x.id === c.id), na = D.artsOfCat(c.id).length;
+    return `<tr>
+      ${showOrder ? `<td data-label="Thứ tự"><div class="ord">${W() ? `<button class="ibtn" data-act="move" data-kind="categories" data-id="${esc(c.id)}" data-dir="-1" ${i <= 0 ? 'disabled' : ''} aria-label="Đưa “${esc(c.name)}” lên trên">${icon('up', 16)}</button>` : ''}<span class="v">${esc(c.order)}</span>${W() ? `<button class="ibtn" data-act="move" data-kind="categories" data-id="${esc(c.id)}" data-dir="1" ${i >= sibs.length - 1 ? 'disabled' : ''} aria-label="Đưa “${esc(c.name)}” xuống dưới">${icon('down', 16)}</button>` : ''}</div></td>` : `<td data-label="Thứ tự" class="num">${esc(c.order)}</td>`}
+      <td class="main"><div class="tt">${thumb(c.image)}<div class="tt-t"><button class="link" ${goAttr('category', {id: c.id})}>${esc(c.name)}</button><div class="sub">/${esc(s ? s.slug : '?')}/${esc(c.slug)}</div></div></div></td>
+      ${showSection ? `<td data-label="Chuyên mục">${s ? `<button class="link" style="font-weight:600;font-size:14px" ${goAttr('section', {id: s.id})}>${esc(s.name)}</button>` : '<span class="pill st-inactive">Thiếu chuyên mục</span>'}</td>` : ''}
+      <td class="num" data-label="Bài viết"><button class="chip" data-act="filter-articles" data-cat="${esc(c.id)}">${na}</button></td>
+      <td data-label="Trạng thái">${W() ? `<button class="togglest" data-act="toggle" data-kind="categories" data-id="${esc(c.id)}" title="Bấm để ${c.status === 'active' ? 'tạm ẩn' : 'hiển thị'}" aria-label="${STATUS_S[c.status]} — bấm để ${c.status === 'active' ? 'tạm ẩn' : 'hiển thị'}">${pillS(c.status)}</button>` : pillS(c.status)}</td>
+      ${showSection ? `<td data-label="Cập nhật" class="small muted">${fmtDate(c.updatedAt)}</td>` : ''}
+      <td class="actions"><button class="ibtn" ${goAttr('category', {id: c.id})} aria-label="Xem bài viết trong “${esc(c.name)}”" title="Chi tiết">${icon('eye')}</button>${W() ? `<button class="ibtn" data-act="edit-category" data-id="${esc(c.id)}" aria-label="Sửa “${esc(c.name)}”" title="Sửa">${icon('edit')}</button><button class="ibtn danger" data-act="delete-category" data-id="${esc(c.id)}" aria-label="Xoá “${esc(c.name)}”" title="Xoá">${icon('trash')}</button>` : ''}</td></tr>`;
+  }).join('');
+}
+VIEWS.categories = () => {
+  const f = S.filters.categories; const q = fold(f.q.trim());
+  if (f.section && !D.sec(f.section)) f.section = '';
+  let list = D.allCats().filter(c => (!f.section || c.sectionId === f.section) && (!f.status || c.status === f.status) && (!q || fold(c.name + ' ' + c.slug + ' ' + c.description).includes(q)));
+  const sorters = {order: null, name: (a, b) => cmp(a.name, b.name), 'updatedAt-desc': (a, b) => cmp(b.updatedAt, a.updatedAt), articles: (a, b) => D.artsOfCat(b.id).length - D.artsOfCat(a.id).length};
+  if (sorters[f.sort]) list.sort(sorters[f.sort]);
+  const showOrder = f.sort === 'order' && !q && !f.status;
+  const filtered = q || f.status || f.section || f.sort !== 'order';
+  let html = band({crumbs: [...crumbsHome, ['Danh mục']], title: 'Danh mục', sub: 'Nhóm bài viết trong từng chuyên mục. Mỗi danh mục thuộc đúng một chuyên mục.', right: W() ? `<button class="btn btn-grad" data-act="new-category" ${f.section ? `data-sec="${esc(f.section)}"` : ''}>${icon('plus')} Thêm danh mục</button>` : ''});
+  html += `<main class="view"><div class="wrap stack"><div class="toolbar" role="search">
+    <div class="fld f-q"><label for="fc-q">Tìm kiếm</label><div class="searchbox">${icon('search', 16)}<input id="fc-q" class="inp" type="search" data-f="categories.q" value="${esc(f.q)}" placeholder="Tên, đường dẫn, mô tả…"></div></div>
+    <div class="fld f-s"><label for="fc-sec">Chuyên mục</label>${sel('fc-sec', secOptions(), f.section, 'data-f="categories.section"')}</div>
+    <div class="fld f-s"><label for="fc-st">Trạng thái</label>${sel('fc-st', [['', 'Tất cả'], ['active', 'Đang hiển thị'], ['inactive', 'Tạm ẩn']], f.status, 'data-f="categories.status"')}</div>
+    <div class="fld f-s"><label for="fc-sort">Sắp xếp</label>${sel('fc-sort', [['order', 'Thứ tự hiển thị'], ['name', 'Tên A–Z'], ['articles', 'Nhiều bài nhất'], ['updatedAt-desc', 'Mới cập nhật']], f.sort, 'data-f="categories.sort"')}</div>
+    ${filtered ? `<button class="btn btn-ghost btn-sm" data-act="reset-filters" data-view="categories">${icon('refresh', 16)} Đặt lại</button>` : ''}</div>`;
+  if (!Store.data.sections.length) html += `<div class="card">${emptyBox({ic: 'layers', title: 'Cần tạo chuyên mục trước', text: 'Mỗi danh mục phải thuộc một chuyên mục. Hãy tạo chuyên mục đầu tiên.', action: W() ? `<button class="btn btn-grad" data-act="new-section">${icon('plus')} Tạo chuyên mục</button>` : ''})}</div>`;
+  else if (!Store.data.categories.length) html += `<div class="card">${emptyBox({ic: 'folder', title: 'Chưa có danh mục nào', text: 'Danh mục giúp nhóm bài viết, ví dụ “Lịch sử hình thành” trong chuyên mục “Giới thiệu Đội”.', action: W() ? `<button class="btn btn-grad" data-act="new-category">${icon('plus')} Tạo danh mục đầu tiên</button>` : ''})}</div>`;
+  else if (!list.length) html += `<div class="card">${emptyBox({ic: 'search', title: 'Không có danh mục phù hợp', text: 'Thử từ khoá khác hoặc đặt lại bộ lọc.', action: `<button class="btn btn-line" data-act="reset-filters" data-view="categories">Đặt lại bộ lọc</button>`})}</div>`;
+  else html += `<div class="card"><div class="tblwrap"><table class="tbl"><caption class="sr">Danh sách danh mục</caption><thead><tr><th>Thứ tự</th><th>Danh mục</th><th>Chuyên mục</th><th class="num">Bài viết</th><th>Trạng thái</th><th>Cập nhật</th><th class="actions"><span class="sr">Thao tác</span></th></tr></thead><tbody>${categoryRows(list, {showOrder})}</tbody></table></div>
+    <p class="hint" style="padding:0 14px 12px">Thứ tự được tính riêng trong từng chuyên mục.${!showOrder && W() ? ' Chọn “Thứ tự hiển thị” và bỏ tìm kiếm/lọc trạng thái để dùng nút mũi tên.' : ''}</p></div>`;
+  return html + `</div></main>`;
+};
+
+VIEWS.category = ({id}) => {
+  const c = D.cat(id);
+  if (!c) return notFound('Danh mục này không còn tồn tại.', 'categories');
+  const s = D.sec(c.sectionId), arts = D.artsOfCat(c.id).sort((a, b) => cmp(b.updatedAt, a.updatedAt));
+  const right = W() ? `<button class="btn btn-grad" data-act="new-article" data-sec="${esc(c.sectionId)}" data-cat="${esc(c.id)}">${icon('plus')} Bài viết</button><button class="btn btn-hero" data-act="edit-category" data-id="${esc(c.id)}">${icon('edit')} Sửa</button>` : '';
+  let html = band({crumbs: [...crumbsHome, ['Danh mục', 'categories'], ...(s ? [[s.name, 'section', {id: s.id}]] : []), [c.name]], title: esc(c.name), sub: esc(c.description || ''), right});
+  html += `<main class="view"><div class="wrap stack"><section class="card card-pad"><div class="detail"><dl class="kv">
+    <dt>Chuyên mục</dt><dd>${s ? `<button class="link" style="font-size:14px" ${goAttr('section', {id: s.id})}>${esc(s.name)}</button> ${s.status === 'inactive' ? pillS('inactive') : ''}` : '<span class="pill st-inactive">Thiếu chuyên mục</span>'}</dd>
+    <dt>Trạng thái</dt><dd>${pillS(c.status)}</dd><dt>Đường dẫn</dt><dd style="font-family:var(--f-mono);font-size:13px">/${esc(s ? s.slug : '?')}/${esc(c.slug)}</dd>
+    <dt>Thứ tự</dt><dd class="tnum">${esc(c.order)}</dd><dt>Tạo lúc</dt><dd class="tnum">${fmtDate(c.createdAt)}</dd><dt>Cập nhật</dt><dd class="tnum">${fmtDate(c.updatedAt)}</dd></dl>
+    ${safeImg(c.image) ? `<img class="detail-img" src="${esc(safeImg(c.image))}" alt="Ảnh danh mục ${esc(c.name)}">` : ''}</div>
+    ${W() ? `<div class="qa" style="margin-top:16px"><button class="btn btn-line btn-sm" data-act="toggle" data-kind="categories" data-id="${esc(c.id)}">${c.status === 'active' ? 'Tạm ẩn danh mục' : 'Hiển thị danh mục'}</button><button class="btn btn-danger-line btn-sm" data-act="delete-category" data-id="${esc(c.id)}">${icon('trash', 16)} Xoá danh mục</button></div>` : ''}</section>
+    <section class="card"><div class="card-h card-pad" style="margin:0;padding-bottom:0"><h2>Bài viết (${arts.length})</h2>${arts.length ? `<button class="btn btn-ghost btn-sm" data-act="filter-articles" data-cat="${esc(c.id)}">Mở trong danh sách bài viết ${icon('chev', 16)}</button>` : ''}</div>`;
+  html += arts.length ? `<div class="tblwrap"><table class="tbl"><thead><tr><th>Bài viết</th><th>Danh mục</th><th>Trạng thái</th><th>Cập nhật</th><th class="actions"><span class="sr">Thao tác</span></th></tr></thead><tbody>${articleRows(arts, {compact: true})}</tbody></table></div>`
+    : emptyBox({title: 'Danh mục chưa có bài viết', action: W() ? `<button class="btn btn-grad" data-act="new-article" data-sec="${esc(c.sectionId)}" data-cat="${esc(c.id)}">${icon('plus')} Viết bài trong danh mục này</button>` : ''});
+  return html + `</section></div></main>`;
+};
+
+/* ---- Articles ---- */
+function articleActions(a) {
+  return `<button class="ibtn" data-act="preview-article" data-id="${esc(a.id)}" aria-label="Xem trước “${esc(a.title)}”" title="Xem trước">${icon('eye')}</button>` + (W() ? `
+    <button class="ibtn" data-act="edit-article" data-id="${esc(a.id)}" aria-label="Sửa “${esc(a.title)}”" title="Sửa">${icon('edit')}</button>
+    ${a.status === 'published' ? `<button class="ibtn" data-act="set-status" data-status="draft" data-id="${esc(a.id)}" aria-label="Gỡ xuất bản “${esc(a.title)}”" title="Gỡ xuất bản">${icon('unpub')}</button>` : `<button class="ibtn" data-act="set-status" data-status="published" data-id="${esc(a.id)}" aria-label="Xuất bản “${esc(a.title)}”" title="Xuất bản">${icon('send')}</button>`}
+    <button class="ibtn" data-act="duplicate" data-id="${esc(a.id)}" aria-label="Nhân bản “${esc(a.title)}”" title="Nhân bản">${icon('copy')}</button>
+    <button class="ibtn danger" data-act="delete-article" data-id="${esc(a.id)}" aria-label="Xoá “${esc(a.title)}”" title="Xoá">${icon('trash')}</button>` : '');
+}
+function articleRows(list, {compact = false, selectable = false} = {}) {
+  return list.map(a => {
+    const s = D.sec(a.sectionId), c = D.cat(a.categoryId);
+    return `<tr>
+      ${selectable ? `<td class="chk"><input type="checkbox" data-act="sel" data-id="${esc(a.id)}" ${S.selected.has(a.id) ? 'checked' : ''} aria-label="Chọn “${esc(a.title)}”"></td>` : ''}
+      <td class="main"><div class="tt">${thumb(a.cover)}<div class="tt-t"><button class="link" data-act="${W() ? 'edit-article' : 'preview-article'}" data-id="${esc(a.id)}">${esc(a.title)}</button>${compact ? `<div class="sub">/${esc(a.slug)}</div>` : `<div class="ex">${esc(a.excerpt || textOf(a.content).slice(0, 140) || 'Chưa có nội dung')}</div>`}</div></div></td>
+      ${compact ? `<td data-label="Danh mục" class="small">${c ? esc(c.name) : '<span class="pill st-inactive">Thiếu</span>'}</td>` : `<td data-label="Phân loại" class="small"><div>${s ? `<button class="link" style="font-size:13.5px;font-weight:600" ${goAttr('section', {id: s.id})}>${esc(s.name)}</button>` : '—'}</div><div>${c ? `<button class="link" style="font-size:13px;font-weight:500;color:var(--muted)" ${goAttr('category', {id: c.id})}>› ${esc(c.name)}</button>` : '<span class="pill st-inactive">Thiếu danh mục</span>'}</div></td>`}
+      <td data-label="Trạng thái">${pillA(a.status)}</td>
+      ${compact ? '' : `<td data-label="Tác giả" class="small">${esc(a.author || '—')}</td>`}
+      <td data-label="Cập nhật" class="small muted tnum" title="Tạo: ${fmtDate(a.createdAt)}${a.publishedAt ? ' · Xuất bản: ' + fmtDate(a.publishedAt) : ''}">${fmtDate(a.updatedAt)}</td>
+      <td class="actions">${articleActions(a)}</td></tr>`;
+  }).join('');
+}
+function filteredArticles() {
+  const f = S.filters.articles; const q = fold(f.q.trim());
+  if (f.section && !D.sec(f.section)) f.section = '';
+  if (f.category && !D.cat(f.category)) f.category = '';
+  const from = f.from ? new Date(f.from + 'T00:00:00').getTime() : null, to = f.to ? new Date(f.to + 'T23:59:59.999').getTime() : null;
+  let list = Store.data.articles.filter(a => {
+    if (f.section && a.sectionId !== f.section) return false;
+    if (f.category && a.categoryId !== f.category) return false;
+    if (f.status && a.status !== f.status) return false;
+    if (from || to) { const v = a[f.dateField]; if (!v) return false; const t = new Date(v).getTime(); if (from && t < from) return false; if (to && t > to) return false; }
+    if (q) { const hay = fold([a.title, a.slug, a.excerpt, a.author, (a.tags || []).join(' '), textOf(a.content)].join(' ')); if (!q.split(/\s+/).every(w => hay.includes(w))) return false; }
+    return true;
+  });
+  const [field, dir] = f.sort.split('-'); const m = dir === 'asc' ? 1 : -1;
+  list.sort((a, b) => field === 'title' ? m * cmp(a.title, b.title) : m * cmp(a[field] || '', b[field] || ''));
+  if (q) { const score = a => fold(a.title).includes(q) ? 2 : fold(a.excerpt + ' ' + (a.tags || []).join(' ') + ' ' + textOf(a.content)).includes(q) ? 1 : 0; const sc = new Map(list.map(a => [a.id, score(a)])); list = list.map((a, i) => [a, i]).sort((x, y) => sc.get(y[0].id) - sc.get(x[0].id) || x[1] - y[1]).map(x => x[0]); }
+  return list;
+}
+VIEWS.articles = () => {
+  const f = S.filters.articles;
+  const list = filteredArticles();
+  const pages = Math.max(1, Math.ceil(list.length / f.size)); if (f.page > pages) f.page = pages; if (f.page < 1) f.page = 1;
+  const pageList = list.slice((f.page - 1) * f.size, f.page * f.size);
+  [...S.selected].forEach(id => { if (!D.art(id)) S.selected.delete(id); });
+  const filtered = f.q || f.section || f.category || f.status || f.from || f.to || f.sort !== 'updatedAt-desc';
+  const allOnPage = pageList.length && pageList.every(a => S.selected.has(a.id));
+  let html = band({crumbs: [...crumbsHome, ['Bài viết']], title: 'Bài viết', sub: 'Tìm, lọc, xuất bản và quản lý toàn bộ bài viết.', right: W() ? `<button class="btn btn-grad" data-act="new-article" ${f.section ? `data-sec="${esc(f.section)}"` : ''} ${f.category ? `data-cat="${esc(f.category)}"` : ''}>${icon('plus')} Viết bài mới</button>` : ''});
+  html += `<main class="view"><div class="wrap stack"><div class="toolbar" role="search">
+    <div class="fld f-q"><label for="fa-q">Tìm theo tiêu đề hoặc từ khoá</label><div class="searchbox">${icon('search', 16)}<input id="fa-q" class="inp" type="search" data-f="articles.q" value="${esc(f.q)}" placeholder="Tiêu đề, nội dung, thẻ, tác giả…"></div></div>
+    <div class="fld f-s"><label for="fa-sec">Chuyên mục</label>${sel('fa-sec', secOptions(), f.section, 'data-f="articles.section"')}</div>
+    <div class="fld f-s"><label for="fa-cat">Danh mục</label>${sel('fa-cat', catOptions(f.section), f.category, 'data-f="articles.category"')}</div>
+    <div class="fld f-s"><label for="fa-st">Trạng thái</label>${sel('fa-st', [['', 'Tất cả'], ['published', 'Đã xuất bản'], ['draft', 'Bản nháp'], ['archived', 'Lưu trữ']], f.status, 'data-f="articles.status"')}</div>
+    <div class="fld f-d"><label for="fa-df">Lọc theo ngày</label>${sel('fa-df', [['updatedAt', 'Ngày cập nhật'], ['createdAt', 'Ngày tạo'], ['publishedAt', 'Ngày xuất bản']], f.dateField, 'data-f="articles.dateField"')}</div>
+    <div class="fld f-d"><label for="fa-from">Từ ngày</label><input id="fa-from" class="inp" type="date" data-f="articles.from" value="${esc(f.from)}"></div>
+    <div class="fld f-d"><label for="fa-to">Đến ngày</label><input id="fa-to" class="inp" type="date" data-f="articles.to" value="${esc(f.to)}"></div>
+    <div class="fld f-s"><label for="fa-sort">Sắp xếp</label>${sel('fa-sort', [['updatedAt-desc', 'Cập nhật mới nhất'], ['updatedAt-asc', 'Cập nhật cũ nhất'], ['createdAt-desc', 'Tạo mới nhất'], ['createdAt-asc', 'Tạo cũ nhất'], ['title-asc', 'Tiêu đề A–Z'], ['title-desc', 'Tiêu đề Z–A']], f.sort, 'data-f="articles.sort"')}</div>
+    ${filtered ? `<button class="btn btn-ghost btn-sm" data-act="reset-filters" data-view="articles">${icon('refresh', 16)} Đặt lại bộ lọc</button>` : ''}</div>`;
+  if (S.selected.size && W()) html += `<div class="bulk" role="region" aria-label="Thao tác hàng loạt"><b>Đã chọn ${S.selected.size} bài</b>
+    <button class="btn btn-line btn-sm" data-act="bulk-status" data-status="published">${icon('send', 16)} Xuất bản</button>
+    <button class="btn btn-line btn-sm" data-act="bulk-status" data-status="draft">Chuyển nháp</button>
+    <button class="btn btn-line btn-sm" data-act="bulk-status" data-status="archived">${icon('archive', 16)} Lưu trữ</button>
+    <button class="btn btn-danger btn-sm" data-act="bulk-delete">${icon('trash', 16)} Xoá</button>
+    <button class="btn btn-line btn-sm" data-act="sel-clear">Bỏ chọn</button></div>`;
+  if (!Store.data.articles.length) html += `<div class="card">${emptyBox({title: 'Chưa có bài viết nào', text: Store.data.categories.length ? 'Viết bài đầu tiên và lưu nháp, xuất bản khi đã sẵn sàng.' : 'Bài viết cần thuộc một danh mục. Hãy tạo chuyên mục và danh mục trước.', action: W() ? (Store.data.categories.length ? `<button class="btn btn-grad" data-act="new-article">${icon('plus')} Viết bài đầu tiên</button>` : `<button class="btn btn-grad" data-act="${Store.data.sections.length ? 'new-category' : 'new-section'}">${icon('plus')} Tạo ${Store.data.sections.length ? 'danh mục' : 'chuyên mục'}</button>`) : ''})}</div>`;
+  else if (!list.length) html += `<div class="card">${emptyBox({ic: 'search', title: 'Không tìm thấy bài viết phù hợp', text: 'Thử bớt điều kiện lọc hoặc dùng từ khoá khác.', action: `<button class="btn btn-line" data-act="reset-filters" data-view="articles">Đặt lại bộ lọc</button>`})}</div>`;
+  else {
+    html += `<div class="card"><div class="tblwrap"><table class="tbl"><caption class="sr">Danh sách bài viết</caption><thead><tr>${W() ? `<th class="chk"><input type="checkbox" data-act="sel-page" ${allOnPage ? 'checked' : ''} aria-label="Chọn tất cả bài trên trang này"></th>` : ''}<th>Bài viết</th><th>Phân loại</th><th>Trạng thái</th><th>Tác giả</th><th>Cập nhật</th><th class="actions"><span class="sr">Thao tác</span></th></tr></thead><tbody>${articleRows(pageList, {selectable: W()})}</tbody></table></div>`;
+    const a = (f.page - 1) * f.size + 1, b = Math.min(list.length, f.page * f.size);
+    const nums = []; for (let p = 1; p <= pages; p++) if (p === 1 || p === pages || Math.abs(p - f.page) <= 1) nums.push(p); else if (nums[nums.length - 1] !== '…') nums.push('…');
+    html += `<nav class="pager" aria-label="Phân trang"><span class="small muted tnum">Hiển thị ${a}–${b} / ${list.length} bài${list.length !== Store.data.articles.length ? ` (lọc từ ${Store.data.articles.length})` : ''}</span>
+      <div class="pager-n"><button class="pg" data-act="page" data-p="${f.page - 1}" ${f.page <= 1 ? 'disabled' : ''} aria-label="Trang trước">‹</button>${nums.map(p => p === '…' ? `<span class="pg" style="border:0;display:inline-flex;align-items:center;justify-content:center">…</span>` : `<button class="pg" data-act="page" data-p="${p}" ${p === f.page ? 'aria-current="page"' : ''} aria-label="Trang ${p}">${p}</button>`).join('')}<button class="pg" data-act="page" data-p="${f.page + 1}" ${f.page >= pages ? 'disabled' : ''} aria-label="Trang sau">›</button></div>
+      <div class="fld" style="flex-direction:row;align-items:center;gap:8px"><label for="fa-size" class="small muted">Mỗi trang</label>${sel('fa-size', [[5, '5'], [10, '10'], [20, '20'], [50, '50']], f.size, 'data-f="articles.size" style="width:auto;min-height:34px;padding:4px 28px 4px 10px"')}</div></nav></div>`;
+  }
+  return html + `</div></main>`;
+};
+
+/* ---- Reading / preview ---- */
+function articleBody(a, {admin = false} = {}) {
+  const s = D.sec(a.sectionId), c = D.cat(a.categoryId), cover = safeImg(a.cover);
+  return `<article class="read">
+    ${cover ? `<img class="read-cover" src="${esc(cover)}" alt="Ảnh đại diện: ${esc(a.title)}">` : ''}
+    ${a.excerpt ? `<p class="read-lede">${esc(a.excerpt)}</p>` : ''}
+    <div class="prose">${sanitizeHtml(a.content) || '<p style="color:var(--faint)">Bài viết chưa có nội dung.</p>'}</div>
+    ${(a.tags || []).length ? `<div class="counts">${a.tags.map(t => `<span class="chip">#${esc(t)}</span>`).join('')}</div>` : ''}
+  </article>`;
+}
+function readHero(a) {
+  const s = D.sec(a.sectionId), c = D.cat(a.categoryId);
+  return `<span class="eyebrow" style="color:var(--hero-soft)">${esc(s ? s.name : '—')} · ${esc(c ? c.name : '—')}</span><h1>${esc(a.title || 'Chưa có tiêu đề')}</h1>
+    <div class="read-meta"><span>${esc(a.author || 'Chưa ghi tác giả')}</span><span>${a.status === 'published' && a.publishedAt ? 'Xuất bản ' + fmtDate(a.publishedAt) : STATUS_A[a.status]}</span></div>`;
+}
+VIEWS.article = ({id}) => {
+  const a = D.art(id); if (!a) return notFound('Bài viết này không còn tồn tại.', 'articles');
+  const right = W() ? `<button class="btn btn-grad" data-act="edit-article" data-id="${esc(a.id)}">${icon('edit')} Sửa bài</button>${a.status !== 'published' ? `<button class="btn btn-hero" data-act="set-status" data-status="published" data-id="${esc(a.id)}">${icon('send')} Xuất bản</button>` : `<button class="btn btn-hero" data-act="set-status" data-status="draft" data-id="${esc(a.id)}">Gỡ xuất bản</button>`}` : '';
+  const s = D.sec(a.sectionId);
+  let html = `<section class="band"><div class="wrap band-in"><div class="band-l">${S.history.length ? `<button class="backbtn" data-act="back">${icon('back', 16)} Quay lại</button>` : ''}
+    <nav class="crumbs" aria-label="Đường dẫn trang"><button data-act="go" data-r="dashboard">Tổng quan</button><span class="sep">/</span><button data-act="go" data-r="articles">Bài viết</button><span class="sep">/</span><span class="here">Xem trước</span></nav>${readHero(a)}</div><div class="band-r">${right}</div></div></section>`;
+  html += `<main class="view"><div class="wrap stack"><div class="prevbar"><span>${pillA(a.status)} <b>Bản xem trước</b> — bài viết hiển thị như trên trang công khai.${a.status !== 'published' ? ' Người xem chưa thấy bài này.' : ''}</span></div>${articleBody(a)}</div></main>`;
+  return html;
+};
+function previewModal(a) {
+  Modal.open({title: 'Xem trước bài viết', size: 'lg', body: `<div class="prevbar">${pillA(a.status)}<span>Đây là cách bài viết hiển thị với người xem. ${a.status !== 'published' ? 'Bài chưa được xuất bản.' : ''}</span></div>
+    <div class="band" style="border-radius:22px"><div class="band-in" style="padding:22px">${'<div class="band-l">' + readHero(a) + '</div>'}</div></div>${articleBody(a)}`,
+    foot: `<button type="button" class="btn btn-line" data-mclose>Đóng xem trước</button>`});
+}
+
+/* ---- Public site preview ---- */
+VIEWS.site = ({sec, cat, art} = {}) => {
+  const secs = D.sections().filter(s => s.status === 'active');
+  const visibleCats = id => D.catsOf(id).filter(c => c.status === 'active');
+  const pubOf = filter => Store.data.articles.filter(a => a.status === 'published' && filter(a) && (() => { const c = D.cat(a.categoryId), s = D.sec(a.sectionId); return c && s && c.status === 'active' && s.status === 'active' && c.sectionId === s.id; })()).sort((a, b) => cmp(b.publishedAt, a.publishedAt));
+  const cardOf = a => { const c = D.cat(a.categoryId), img = safeImg(a.cover); return `<button class="acard" ${goAttr('site', {sec: a.sectionId, art: a.id})}>${img ? `<img src="${esc(img)}" alt="" loading="lazy">` : '<span class="ph" style="display:block;aspect-ratio:16/10"></span>'}<div class="in"><span class="eyebrow">${esc(c ? c.name : '')}</span><h3>${esc(a.title)}</h3><p>${esc(a.excerpt || textOf(a.content).slice(0, 160))}</p><span class="small muted">${fmtDate(a.publishedAt, false)}</span></div></button>`; };
+  let html = `<div class="wrap" style="padding-top:14px"><div class="prevbar"><span>${icon('globe', 16)} <b>Xem trang công khai</b> — chỉ hiện bài đã xuất bản trong chuyên mục và danh mục đang hiển thị.</span><button class="btn btn-line btn-sm" ${goAttr('dashboard')}>Thoát xem trang</button></div></div>`;
+  html += `<section class="site-band" style="margin-top:14px"><div class="wrap site-band-in"><button class="brand" ${goAttr('site', {})} style="color:#fff"><img class="site-logo" src="img/anh-em-oi.webp" alt="Anh em ơi! Về nhà — 20 năm"></button><div style="display:flex;flex-direction:column;gap:10px;min-width:0;flex:1 1 320px"><h1 style="margin:0;font-size:clamp(24px,3vw,36px);line-height:1.1"><span style="background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent">20 năm</span> chung một mái nhà</h1>
+    <nav class="site-pills" aria-label="Chuyên mục">${secs.map(s => `<button class="site-pill" ${goAttr('site', {sec: s.id})} ${sec === s.id ? 'aria-current="page"' : ''}>${esc(s.name)}</button>`).join('')}</nav></div></div></section><main class="view"><div class="wrap stack">`;
+  if (art) {
+    const a = D.art(art); const ok = a && pubOf(x => x.id === a.id).length;
+    if (!ok) return html + emptyBox({title: 'Bài viết không hiển thị trên trang', text: 'Bài này chưa xuất bản, hoặc chuyên mục/danh mục của bài đang tạm ẩn.', action: `<button class="btn btn-line" data-act="back">Quay lại</button>`}) + '</div></main>';
+    return html + `<div class="band" style="border-radius:28px"><div class="band-in" style="padding:26px"><div class="band-l"><button class="backbtn" data-act="back">${icon('back', 16)} Quay lại</button>${readHero(a)}</div></div></div>${articleBody(a)}</div></main>`;
+  }
+  if (sec) {
+    const s = D.sec(sec);
+    if (!s || s.status !== 'active') return html + emptyBox({title: 'Chuyên mục đang tạm ẩn', action: `<button class="btn btn-line" ${goAttr('site', {})}>Về trang chủ</button>`}) + '</div></main>';
+    const cats = visibleCats(s.id); const cur = cat && cats.some(c => c.id === cat) ? cat : '';
+    const arts = pubOf(a => a.sectionId === s.id && (!cur || a.categoryId === cur));
+    html += `<div class="stack" style="gap:12px"><span class="eyebrow">Chuyên mục</span><h2 class="h2" style="font-size:clamp(26px,3vw,36px)">${esc(s.name)}</h2>${s.description ? `<p class="muted" style="margin:0;max-width:680px">${esc(s.description)}</p>` : ''}
+      <div class="counts"><button class="site-pill" style="color:var(--ink);border-color:var(--line-strong)${!cur ? ';background:#16285E;color:#fff;border-color:#16285E' : ''}" ${goAttr('site', {sec: s.id})}>Tất cả</button>${cats.map(c => `<button class="site-pill" style="color:var(--ink);border-color:var(--line-strong)${cur === c.id ? ';background:#16285E;color:#fff;border-color:#16285E' : ''}" ${goAttr('site', {sec: s.id, cat: c.id})}>${esc(c.name)}</button>`).join('')}</div></div>`;
+    html += arts.length ? `<div class="cards">${arts.map(cardOf).join('')}</div>` : emptyBox({title: 'Chưa có bài viết đã xuất bản', text: 'Bài viết sẽ xuất hiện ở đây sau khi được xuất bản.'});
+    return html + '</div></main>';
+  }
+  html += secs.length ? `<div class="stack" style="gap:14px"><span class="eyebrow">Khám phá</span>${secs.map(s => { const img = safeImg(s.image); return `<button class="seccard" ${goAttr('site', {sec: s.id})}>${img ? `<img src="${esc(img)}" alt="">` : '<span class="ph"></span>'}<div><h3>${esc(s.name)}</h3><p>${esc(s.description || '')}</p><p style="margin-top:6px;font-weight:700;color:#0E4C9C">${pubOf(a => a.sectionId === s.id).length} bài viết →</p></div></button>`; }).join('')}</div>` : emptyBox({title: 'Chưa có chuyên mục đang hiển thị'});
+  const latest = pubOf(() => true).slice(0, 6);
+  if (latest.length) html += `<h2 class="h2" style="margin-top:12px">Bài mới</h2><div class="cards">${latest.map(cardOf).join('')}</div>`;
+  return html + '</div></main>';
+};
+
+/* ---- Global search ---- */
+VIEWS.search = () => {
+  const q0 = S.filters.search.q.trim(), q = fold(q0);
+  const has = (s) => q && fold(s).includes(q);
+  const secs = q ? D.sections().filter(s => has(s.name + ' ' + s.slug + ' ' + s.description)) : [];
+  const cats = q ? D.allCats().filter(c => has(c.name + ' ' + c.slug + ' ' + c.description)) : [];
+  const arts = q ? Store.data.articles.filter(a => q.split(/\s+/).every(w => fold([a.title, a.slug, a.excerpt, a.author, (a.tags || []).join(' '), textOf(a.content)].join(' ')).includes(w))).sort((a, b) => cmp(b.updatedAt, a.updatedAt)) : [];
+  let html = band({crumbs: [...crumbsHome, ['Tìm kiếm']], title: q0 ? `Kết quả cho “${esc(q0)}”` : 'Tìm kiếm', sub: q0 ? `${secs.length} chuyên mục · ${cats.length} danh mục · ${arts.length} bài viết` : 'Nhập từ khoá ở ô tìm kiếm phía trên.'});
+  html += `<main class="view"><div class="wrap stack"><div class="toolbar"><div class="fld f-q"><label for="sr-q">Từ khoá</label><div class="searchbox">${icon('search', 16)}<input id="sr-q" class="inp" type="search" data-f="search.q" value="${esc(q0)}" placeholder="Tìm chuyên mục, danh mục, bài viết…"></div></div></div>`;
+  if (!q0) return html + `<div class="card">${emptyBox({ic: 'search', title: 'Tìm trong toàn bộ nội dung', text: 'Tìm theo tên chuyên mục, danh mục, tiêu đề, nội dung, thẻ hoặc tác giả. Không cần gõ dấu.'})}</div></div></main>`;
+  if (!secs.length && !cats.length && !arts.length) return html + `<div class="card">${emptyBox({ic: 'search', title: 'Không có kết quả', text: 'Thử từ khoá ngắn hơn hoặc từ khác.'})}</div></div></main>`;
+  if (secs.length) html += `<section class="card"><div class="card-pad" style="padding-bottom:0"><h2 class="h2">Chuyên mục (${secs.length})</h2></div><div class="tblwrap"><table class="tbl"><tbody>${sectionRows(secs, {showOrder: false})}</tbody></table></div></section>`;
+  if (cats.length) html += `<section class="card"><div class="card-pad" style="padding-bottom:0"><h2 class="h2">Danh mục (${cats.length})</h2></div><div class="tblwrap"><table class="tbl"><tbody>${categoryRows(cats, {showOrder: false})}</tbody></table></div></section>`;
+  if (arts.length) html += `<section class="card"><div class="card-pad" style="padding-bottom:0"><h2 class="h2">Bài viết (${arts.length})</h2></div><div class="tblwrap"><table class="tbl"><tbody>${articleRows(arts.slice(0, 50))}</tbody></table></div></section>`;
+  return html + `</div></main>`;
+};
+
+/* ---- Backup & storage ---- */
+VIEWS.backup = () => {
+  const cloud = Store.mode === 'cloud', counts = `${Store.data.sections.length} chuyên mục, ${Store.data.categories.length} danh mục, ${Store.data.articles.length} bài viết`;
+  const isEmpty = !Store.data.sections.length && !Store.data.categories.length && !Store.data.articles.length;
+  let html = band({crumbs: [...crumbsHome, ['Lưu trữ & sao lưu']], title: 'Lưu trữ & sao lưu', sub: 'Nơi dữ liệu được lưu, sao lưu ra tệp JSON và khôi phục.'});
+  html += `<main class="view"><div class="wrap stack"><section class="card card-pad"><div class="card-h"><h2>Dữ liệu đang được lưu ở đâu?</h2><span class="store-pill ${cloud || Store.mode === 'supabase' ? 'cloud' : 'local'}" style="cursor:default"><span class="dot"></span>${Store.mode === 'supabase' ? 'Supabase' : cloud ? 'Cơ sở dữ liệu dùng chung' : Store.mode === 'local' ? 'Trình duyệt này' : 'Chỉ trong phiên này'}</span></div>
+    ${Store.mode === 'supabase' ? `<p style="margin:0 0 8px">Nội dung được lưu trong <b>cơ sở dữ liệu Supabase</b>. Website đọc trực tiếp từ đây: bài vừa xuất bản hiện ngay trên trang Tin tức, không cần tải tệp lên GitHub. Chỉ tài khoản admin mới thêm, sửa, xoá được; khách chỉ đọc được nội dung đã xuất bản.</p><p class="hint">Ảnh tải lên được lưu trong kho ảnh “media” của Supabase.</p>`
+      : cloud ? `<p style="margin:0 0 8px">Nội dung được lưu trong <b>cơ sở dữ liệu của artifact này</b> trên Claude. Mọi người được chia sẻ quyền chỉnh sửa đều thấy cùng một dữ liệu, cập nhật trực tiếp, và dữ liệu còn nguyên khi tải lại trang.</p><p class="hint">Người xem cần đăng nhập. Người chỉ có quyền xem sẽ thấy giao diện chỉ đọc.${W() ? '' : ' <b>Tài khoản của bạn hiện chỉ có quyền xem.</b>'}</p>`
+      : Store.mode === 'local' ? `<div class="notice">${icon('warn')}<div><b>Dữ liệu chỉ nằm trong trình duyệt này.</b> Đây không phải cơ sở dữ liệu đám mây: người khác không thấy, thiết bị khác không thấy, và dữ liệu sẽ mất nếu xoá dữ liệu trang web. Hãy mở trang khi đã đăng nhập Claude để dùng cơ sở dữ liệu dùng chung, và xuất bản sao lưu thường xuyên.</div></div>`
+      : `<div class="notice danger">${icon('warn')}<div><b>Trình duyệt đang chặn bộ nhớ.</b> Thay đổi chỉ tồn tại tới khi đóng trang. Hãy xuất bản sao lưu trước khi rời đi.</div></div>`}
+    <p class="small muted" style="margin:10px 0 0">Hiện có: ${counts}.</p></section>`;
+  const sc = siteContent();
+  if (Store.mode !== 'supabase') html += `<section class="card card-pad"><div class="card-h"><h2>Xuất nội dung cho website</h2><span class="chip">${sc.articles.length} bài sẽ lên trang</span></div>
+    <p style="margin:0 0 12px" class="muted">Tạo tệp <b>content.json</b> cho website công khai (GitHub Pages). Tệp chỉ gồm bài <b>đã xuất bản</b> thuộc chuyên mục và danh mục <b>đang hiển thị</b>; bản nháp và nội dung tạm ẩn không bị lộ ra ngoài.</p>
+    <ol class="small" style="margin:0 0 14px;padding-left:18px;color:var(--body)"><li>Bấm “Tải content.json”.</li><li>Mở repo website trên GitHub → <b>Add file › Upload files</b>, kéo tệp vào, bấm <b>Commit changes</b>.</li><li>Khoảng 1 phút sau, website tự cập nhật.</li></ol>
+    <div class="qa"><button class="btn btn-grad" data-act="export-site">${icon('download')} Tải content.json</button><button class="btn btn-line" data-act="export-site-show">Hiện để sao chép</button></div><div id="export-site-box"></div></section>`;
+  if (Store.mode === 'supabase') html += `<div class="notice info">${icon('globe')}<div>Website đang đọc trực tiếp từ Supabase (${sc.articles.length} bài đang hiển thị trên trang Tin tức). Không cần xuất <b>content.json</b> nữa.</div></div>`;
+  html += `<div class="grid-2"><section class="card card-pad"><div class="card-h"><h2>Xuất bản sao lưu</h2></div><p style="margin:0 0 14px" class="muted">Tải toàn bộ chuyên mục, danh mục và bài viết về một tệp JSON. Ảnh tải lên trực tiếp cũng nằm trong tệp.</p>
+      <div class="qa"><button class="btn btn-navy" data-act="export">${icon('download')} Tải tệp JSON</button><button class="btn btn-line" data-act="export-show">Hiện để sao chép</button></div><div id="export-box"></div></section>
+    <section class="card card-pad"><div class="card-h"><h2>Nhập từ bản sao lưu</h2></div>${W() ? `<p style="margin:0 0 14px" class="muted">Chọn tệp JSON đã xuất trước đây. Hệ thống kiểm tra dữ liệu và liên kết trước, rồi hỏi xác nhận trước khi <b>thay thế toàn bộ</b> dữ liệu hiện có.</p>
+      <div class="qa"><span class="btn btn-line filebtn">${icon('upload')} Chọn tệp JSON<input type="file" id="imp-file" accept="application/json,.json" aria-label="Chọn tệp sao lưu JSON"></span><button class="btn btn-ghost" data-act="import-paste">Dán nội dung JSON</button></div>` : '<p class="muted">Cần quyền chỉnh sửa để nhập dữ liệu.</p>'}</section></div>`;
+  html += `<section class="card card-pad"><div class="card-h"><h2>Dữ liệu mẫu</h2></div><p style="margin:0 0 14px" class="muted">Bộ mẫu gồm 3 chuyên mục, 6 danh mục và 11 bài viết lấy từ nội dung website 20 năm của Đội.</p>
+    ${W() ? (isEmpty ? `<button class="btn btn-grad" data-act="load-sample">${icon('download')} Nạp dữ liệu mẫu</button>` : `<div class="notice" style="margin-bottom:12px">${icon('warn')}<div>Đang có nội dung thật (${counts}). Khôi phục dữ liệu mẫu sẽ <b>xoá toàn bộ</b> nội dung này. Hãy tải bản sao lưu trước.</div></div><button class="btn btn-danger-line" data-act="reset-sample">${icon('refresh')} Khôi phục dữ liệu mẫu…</button>`) : '<p class="muted">Cần quyền chỉnh sửa.</p>'}</section>`;
+  return html + `</div></main>`;
+};
+
+function notFound(msg = 'Không tìm thấy trang.', backTo = 'dashboard') {
+  return band({crumbs: [...crumbsHome, ['Không tìm thấy']], title: 'Không tìm thấy'}) + `<main class="view"><div class="wrap"><div class="card">${emptyBox({ic: 'warn', title: msg, text: 'Có thể nội dung đã bị xoá hoặc đổi chỗ.', action: `<button class="btn btn-line" ${goAttr(backTo)}>Về danh sách</button>`})}</div></div></main>`;
+}
+function loadingView() {
+  if (Store.failed) return band({title: 'Không tải được dữ liệu', showBack: false}) + `<main class="view"><div class="wrap"><div class="notice danger">${icon('warn')}<div>${esc(Store.failed)}</div></div></div></main>`;
+  return `<section class="band"><div class="wrap band-in"><div class="band-l"><div class="skel" style="height:14px;width:160px;opacity:.4"></div><div class="skel" style="height:38px;width:min(420px,80%);opacity:.4"></div></div></div></section>
+    <main class="view" aria-busy="true"><div class="wrap stack"><p class="muted" style="margin:0">Đang tải nội dung…</p><div class="stats">${'<div class="skel" style="height:116px"></div>'.repeat(5)}</div><div class="skel" style="height:280px"></div></div></main>`;
+}
+
+/* =========================================================================
+   Section / category forms
+   ========================================================================= */
+function imgField(prefix, value, label = 'Ảnh hoặc biểu tượng') {
+  const v = safeImg(value), isData = v.startsWith('data:');
+  return `<div class="fld full"><span class="lbl-t" id="${prefix}-lbl">${label} <span class="muted" style="font-weight:500">(không bắt buộc)</span></span><div class="imgfld">
+    <div class="imgprev" id="${prefix}-prev">${v ? `<img src="${esc(v)}" alt="Ảnh đang chọn">` : icon('image', 22)}</div>
+    <div class="imgfld-c"><input type="hidden" id="${prefix}" value="${esc(v)}">
+      <label class="sr" for="${prefix}-url">Liên kết ảnh</label><input id="${prefix}-url" class="inp" type="url" inputmode="url" placeholder="https://… hoặc tải ảnh lên" value="${isData ? '' : esc(v)}" data-imgurl="${prefix}" aria-describedby="${prefix}-note">
+      <div class="imgfld-row"><span class="btn btn-line btn-sm filebtn">${icon('upload', 16)} Tải ảnh lên<input type="file" accept="image/*" data-imgfile="${prefix}" aria-label="Tải ảnh lên cho ${esc(label.toLowerCase())}"></span><button type="button" class="btn btn-ghost btn-sm" data-act="img-clear" data-t="${prefix}" ${v ? '' : 'hidden'}>Bỏ ảnh</button></div>
+      <p class="hint" id="${prefix}-note">${isData ? 'Đang dùng ảnh tải lên (' + Math.round(v.length * .75 / 1024) + ' KB).' : 'Ảnh tải lên được thu nhỏ tự động.'}</p><p class="err" id="${prefix}-err" hidden></p></div></div></div>`;
+}
+function setImg(prefix, src, note) {
+  const h = document.getElementById(prefix); if (!h) return; h.value = src;
+  const p = document.getElementById(prefix + '-prev'); p.innerHTML = src ? `<img src="${esc(src)}" alt="Ảnh đang chọn">` : icon('image', 22);
+  const n = document.getElementById(prefix + '-note'); if (n && note) n.textContent = note;
+  const c = document.querySelector(`[data-act="img-clear"][data-t="${prefix}"]`); if (c) c.hidden = !src;
+  h.dispatchEvent(new Event('input', {bubbles: true}));
+}
+function showErrors(root, errs, map) {
+  $$('.err', root).forEach(e => { if (e.id && e.id !== 'ed-global-err') { e.hidden = true; e.textContent = ''; } });
+  $$('[aria-invalid]', root).forEach(e => e.removeAttribute('aria-invalid'));
+  let first = null;
+  Object.entries(errs).forEach(([k, msg]) => {
+    const id = map[k]; if (!id) return; const el = document.getElementById(id); const er = document.getElementById(id + '-err') || document.getElementById(id.replace(/-url$/, '') + '-err');
+    if (er) { er.textContent = msg; er.hidden = false; }
+    const tgt = el && (el.closest('.slugrow') || el.closest('.rte') || el.closest('.tags') || el);
+    if (tgt) { tgt.setAttribute('aria-invalid', 'true'); if (!first) first = el; }
+    if (el && er) el.setAttribute('aria-describedby', er.id);
+  });
+  if (first) first.focus();
+  return !Object.keys(errs).length;
+}
+const errP = id => `<p class="err" id="${id}-err" hidden></p>`;
+function bindSlug(form, srcId, slugId) {
+  const src = $('#' + srcId, form), sl = $('#' + slugId, form);
+  if (!sl.value) sl.dataset.auto = '1';
+  src.addEventListener('input', () => { if (sl.dataset.auto) sl.value = slugify(src.value); });
+  sl.addEventListener('input', () => { delete sl.dataset.auto; });
+  sl.addEventListener('blur', () => { const v = slugify(sl.value); if (v !== sl.value) sl.value = v; });
+}
+function sectionForm(id) {
+  if (!W()) return;
+  const s = id ? D.sec(id) : null;
+  const body = `<div class="formgrid">
+    <div class="fld full"><label for="m-name">Tên chuyên mục <span class="req">*</span></label><input id="m-name" class="inp" maxlength="${LIM.name}" value="${esc(s ? s.name : '')}" required autofocus>${errP('m-name')}</div>
+    <div class="fld full"><label for="m-slug">Đường dẫn <span class="req">*</span></label><div class="slugrow"><span>/</span><input id="m-slug" maxlength="${LIM.slug}" value="${esc(s ? s.slug : '')}" spellcheck="false" autocomplete="off"></div><p class="hint">Tự tạo từ tên; có thể sửa. Chỉ chữ thường không dấu, số, dấu gạch ngang.</p>${errP('m-slug')}</div>
+    <div class="fld full"><label for="m-desc">Mô tả</label><textarea id="m-desc" class="ta" maxlength="${LIM.desc}">${esc(s ? s.description : '')}</textarea>${errP('m-desc')}</div>
+    ${imgField('m-img', s ? s.image : '')}
+    <div class="fld"><label for="m-order">Thứ tự hiển thị</label><input id="m-order" class="inp" type="number" min="0" max="9999" step="1" value="${esc(s ? s.order : D.nextOrder(Store.data.sections))}">${errP('m-order')}</div>
+    <div class="fld"><span class="lbl-t">Trạng thái</span><label class="switch"><input type="checkbox" id="m-active" ${!s || s.status === 'active' ? 'checked' : ''}> Hiển thị trên trang</label></div></div>`;
+  Modal.open({title: s ? 'Sửa chuyên mục' : 'Thêm chuyên mục', body, foot: `<button type="button" class="btn btn-line" data-mclose>Huỷ</button><button type="submit" class="btn btn-grad">${s ? 'Lưu thay đổi' : 'Tạo chuyên mục'}</button>`,
+    onMount: f => bindSlug(f, 'm-name', 'm-slug'),
+    onSubmit: async (f, entry) => {
+      const rec = {id: s ? s.id : undefined, name: $('#m-name', f).value.trim(), slug: slugify($('#m-slug', f).value) || slugify($('#m-name', f).value), description: $('#m-desc', f).value.trim(), image: $('#m-img', f).value, order: Number($('#m-order', f).value), status: $('#m-active', f).checked ? 'active' : 'inactive'};
+      $('#m-slug', f).value = rec.slug;
+      if (!showErrors(f, validateSection(rec), {name: 'm-name', slug: 'm-slug', description: 'm-desc', order: 'm-order', image: 'm-img-url'})) return;
+      try { const r = await Repo.saveSection(rec); Modal.close(entry, true); toast(s ? `Đã lưu chuyên mục “${r.name}”.` : `Đã tạo chuyên mục “${r.name}”.`); }
+      catch (e) { toast(e.message || 'Không lưu được chuyên mục.', 'err'); }
+    }});
+}
+function categoryForm(id, presetSec, onCreated) {
+  if (!W()) return;
+  const c = id ? D.cat(id) : null;
+  if (!Store.data.sections.length) { toast('Hãy tạo chuyên mục trước khi tạo danh mục.', 'warn'); sectionForm(); return; }
+  const secId = c ? c.sectionId : (presetSec || (S.filters.categories.section) || D.sections()[0].id);
+  const nArts = c ? D.artsOfCat(c.id).length : 0;
+  const body = `<div class="formgrid">
+    <div class="fld full"><label for="m-name">Tên danh mục <span class="req">*</span></label><input id="m-name" class="inp" maxlength="${LIM.name}" value="${esc(c ? c.name : '')}" required autofocus>${errP('m-name')}</div>
+    <div class="fld full"><label for="m-sec">Thuộc chuyên mục <span class="req">*</span></label>${sel('m-sec', [['', '— Chọn chuyên mục —'], ...secOptions().slice(1)], D.sec(secId) ? secId : '')}${errP('m-sec')}
+      ${c && nArts ? `<p class="hint" id="m-sec-note">Nếu đổi chuyên mục, ${nArts} bài viết trong danh mục này sẽ chuyển theo.</p>` : ''}</div>
+    <div class="fld full"><label for="m-slug">Đường dẫn <span class="req">*</span></label><div class="slugrow"><span>/…/</span><input id="m-slug" maxlength="${LIM.slug}" value="${esc(c ? c.slug : '')}" spellcheck="false" autocomplete="off"></div><p class="hint">Không được trùng trong cùng chuyên mục.</p>${errP('m-slug')}</div>
+    <div class="fld full"><label for="m-desc">Mô tả</label><textarea id="m-desc" class="ta" maxlength="${LIM.desc}">${esc(c ? c.description : '')}</textarea>${errP('m-desc')}</div>
+    ${imgField('m-img', c ? c.image : '', 'Ảnh thu nhỏ hoặc biểu tượng')}
+    <div class="fld"><label for="m-order">Thứ tự trong chuyên mục</label><input id="m-order" class="inp" type="number" min="0" max="9999" step="1" value="${esc(c ? c.order : D.nextOrder(D.catsOf(secId)))}">${errP('m-order')}</div>
+    <div class="fld"><span class="lbl-t">Trạng thái</span><label class="switch"><input type="checkbox" id="m-active" ${!c || c.status === 'active' ? 'checked' : ''}> Hiển thị trên trang</label></div></div>`;
+  Modal.open({title: c ? 'Sửa danh mục' : 'Thêm danh mục', body, foot: `<button type="button" class="btn btn-line" data-mclose>Huỷ</button><button type="submit" class="btn btn-grad">${c ? 'Lưu thay đổi' : 'Tạo danh mục'}</button>`,
+    onMount: f => { bindSlug(f, 'm-name', 'm-slug'); if (!c) $('#m-sec', f).addEventListener('change', e => { $('#m-order', f).value = D.nextOrder(D.catsOf(e.target.value)); }); },
+    onSubmit: async (f, entry) => {
+      const rec = {id: c ? c.id : undefined, sectionId: $('#m-sec', f).value, name: $('#m-name', f).value.trim(), slug: slugify($('#m-slug', f).value) || slugify($('#m-name', f).value), description: $('#m-desc', f).value.trim(), image: $('#m-img', f).value, order: Number($('#m-order', f).value), status: $('#m-active', f).checked ? 'active' : 'inactive'};
+      $('#m-slug', f).value = rec.slug;
+      if (!showErrors(f, validateCategory(rec), {name: 'm-name', sectionId: 'm-sec', slug: 'm-slug', description: 'm-desc', order: 'm-order', image: 'm-img-url'})) return;
+      const moved = c && c.sectionId !== rec.sectionId ? D.artsOfCat(c.id).length : 0;
+      try { const r = await Repo.saveCategory(rec); Modal.close(entry, true); toast((c ? `Đã lưu danh mục “${r.name}”.` : `Đã tạo danh mục “${r.name}”.`) + (moved ? ` ${moved} bài viết đã chuyển theo.` : '')); if (onCreated) onCreated(r); }
+      catch (e) { toast(e.message || 'Không lưu được danh mục.', 'err'); }
+    }});
+}
+function deleteSectionFlow(id) {
+  const s = D.sec(id); if (!s || !W()) return;
+  const cats = D.catsOf(id), arts = D.artsOfSec(id), others = D.sections().filter(x => x.id !== id);
+  if (!cats.length && !arts.length) {
+    return confirmDialog({title: `Xoá chuyên mục “${s.name}”?`, message: 'Chuyên mục này không có danh mục hay bài viết nào. Thao tác không thể hoàn tác.', confirmLabel: 'Xoá chuyên mục', danger: true})
+      .then(async ok => { if (!ok) return; try { await Repo.deleteSection(id, {mode: 'cascade'}); toast(`Đã xoá chuyên mục “${s.name}”.`); if (S.route.name === 'section') go('sections', {}, {push: false}); } catch (e) { toast(e.message || 'Không xoá được.', 'err'); } });
+  }
+  const body = `<div class="notice">${icon('warn')}<div>Chuyên mục <b>${esc(s.name)}</b> đang chứa <b>${cats.length} danh mục</b> và <b>${arts.length} bài viết</b>. Chọn cách xử lý nội dung bên trong trước khi xoá:</div></div>
+    <label class="radio-card"><input type="radio" name="plan" value="move" ${others.length ? 'checked' : 'disabled'}><span><b>Giữ nội dung, chuyển sang chuyên mục khác</b><span class="small muted">Toàn bộ danh mục và bài viết được giữ nguyên, chỉ đổi chuyên mục.</span>${others.length ? `<span class="fld" style="margin-top:8px"><label for="del-target" class="sr">Chuyên mục nhận</label>${sel('del-target', others.map(o => [o.id, o.name]), others[0].id)}</span>` : '<span class="small" style="display:block;color:var(--danger)">Không có chuyên mục khác để chuyển sang.</span>'}</span></label>
+    <label class="radio-card"><input type="radio" name="plan" value="cascade" ${others.length ? '' : 'checked'}><span><b>Xoá luôn ${cats.length} danh mục và ${arts.length} bài viết</b><span class="small muted">Không thể hoàn tác. Nên tải bản sao lưu trước.</span></span></label>
+    <label class="ack" id="del-ack-wrap" ${others.length ? 'hidden' : ''}><input type="checkbox" id="del-ack"> Tôi hiểu nội dung sẽ bị xoá vĩnh viễn</label>`;
+  Modal.open({title: `Xoá chuyên mục “${esc(s.name)}”?`, body, foot: `<button type="button" class="btn btn-line" data-mclose>Huỷ</button><button type="submit" class="btn btn-danger">Xoá chuyên mục</button>`,
+    onMount: f => { const upd = () => { const v = f.querySelector('[name=plan]:checked').value; $('#del-ack-wrap', f).hidden = v !== 'cascade'; const t = $('#del-target', f); if (t) t.disabled = v !== 'move'; }; $$('[name=plan]', f).forEach(r => r.addEventListener('change', upd)); upd(); },
+    onSubmit: async (f, entry) => {
+      const mode = f.querySelector('[name=plan]:checked').value;
+      if (mode === 'cascade' && !$('#del-ack', f).checked) { toast('Hãy đánh dấu xác nhận trước khi xoá nội dung.', 'warn'); $('#del-ack', f).focus(); return; }
+      const targetId = mode === 'move' ? $('#del-target', f).value : null;
+      try { await Repo.deleteSection(id, {mode, targetId}); Modal.close(entry, true);
+        toast(mode === 'move' ? `Đã xoá “${s.name}”, nội dung đã chuyển sang “${D.sec(targetId)?.name || ''}”.` : `Đã xoá “${s.name}” cùng ${cats.length} danh mục và ${arts.length} bài viết.`);
+        if (S.route.name === 'section') go('sections', {}, {push: false}); }
+      catch (e) { toast(e.message || 'Không xoá được.', 'err'); }
+    }});
+}
+function deleteCategoryFlow(id) {
+  const c = D.cat(id); if (!c || !W()) return;
+  const arts = D.artsOfCat(id);
+  const others = D.allCats().filter(x => x.id !== id);
+  if (!arts.length) {
+    return confirmDialog({title: `Xoá danh mục “${c.name}”?`, message: 'Danh mục này không có bài viết nào. Thao tác không thể hoàn tác.', confirmLabel: 'Xoá danh mục', danger: true})
+      .then(async ok => { if (!ok) return; try { await Repo.deleteCategory(id, {mode: 'cascade'}); toast(`Đã xoá danh mục “${c.name}”.`); if (S.route.name === 'category') go('categories', {}, {push: false}); } catch (e) { toast(e.message || 'Không xoá được.', 'err'); } });
+  }
+  const opts = others.map(o => [o.id, (D.sec(o.sectionId)?.name || '?') + ' › ' + o.name]);
+  const pre = others.find(o => o.sectionId === c.sectionId) || others[0];
+  const body = `<div class="notice">${icon('warn')}<div>Danh mục <b>${esc(c.name)}</b> đang có <b>${arts.length} bài viết</b>. Chọn cách xử lý các bài viết này:</div></div>
+    <label class="radio-card"><input type="radio" name="plan" value="move" ${others.length ? 'checked' : 'disabled'}><span><b>Giữ bài viết, chuyển sang danh mục khác</b><span class="small muted">Chuyên mục của bài sẽ cập nhật theo danh mục mới.</span>${others.length ? `<span class="fld" style="margin-top:8px"><label for="del-target" class="sr">Danh mục nhận</label>${sel('del-target', opts, pre.id)}</span>` : '<span class="small" style="display:block;color:var(--danger)">Không có danh mục khác để chuyển sang.</span>'}</span></label>
+    <label class="radio-card"><input type="radio" name="plan" value="cascade" ${others.length ? '' : 'checked'}><span><b>Xoá luôn ${arts.length} bài viết</b><span class="small muted">Không thể hoàn tác.</span></span></label>
+    <label class="ack" id="del-ack-wrap"><input type="checkbox" id="del-ack"> Tôi hiểu bài viết sẽ bị xoá vĩnh viễn</label>`;
+  Modal.open({title: `Xoá danh mục “${esc(c.name)}”?`, body, foot: `<button type="button" class="btn btn-line" data-mclose>Huỷ</button><button type="submit" class="btn btn-danger">Xoá danh mục</button>`,
+    onMount: f => { const upd = () => { const v = f.querySelector('[name=plan]:checked').value; $('#del-ack-wrap', f).hidden = v !== 'cascade'; const t = $('#del-target', f); if (t) t.disabled = v !== 'move'; }; $$('[name=plan]', f).forEach(r => r.addEventListener('change', upd)); upd(); },
+    onSubmit: async (f, entry) => {
+      const mode = f.querySelector('[name=plan]:checked').value;
+      if (mode === 'cascade' && !$('#del-ack', f).checked) { toast('Hãy đánh dấu xác nhận trước khi xoá bài viết.', 'warn'); $('#del-ack', f).focus(); return; }
+      const targetId = mode === 'move' ? $('#del-target', f).value : null;
+      try { await Repo.deleteCategory(id, {mode, targetId}); Modal.close(entry, true);
+        toast(mode === 'move' ? `Đã xoá “${c.name}”, ${arts.length} bài viết đã chuyển sang “${D.cat(targetId)?.name || ''}”.` : `Đã xoá “${c.name}” cùng ${arts.length} bài viết.`);
+        if (S.route.name === 'category') go('categories', {}, {push: false}); }
+      catch (e) { toast(e.message || 'Không xoá được.', 'err'); }
+    }});
+}
+async function deleteArticlesFlow(ids) {
+  ids = ids.filter(D.art); if (!ids.length || !W()) return;
+  const one = ids.length === 1 ? D.art(ids[0]) : null;
+  const pub = ids.filter(id => D.art(id).status === 'published').length;
+  const ok = await confirmDialog({title: one ? `Xoá bài viết “${one.title}”?` : `Xoá ${ids.length} bài viết?`,
+    message: (one ? 'Bài viết sẽ bị xoá vĩnh viễn và không thể khôi phục.' : `Các bài viết đã chọn sẽ bị xoá vĩnh viễn và không thể khôi phục.`) + (pub ? ` <b>${pub} bài đang được xuất bản</b> sẽ biến mất khỏi trang.` : '') + (one ? '' : '<ul style="margin:8px 0 0;padding-left:18px">' + ids.slice(0, 6).map(id => `<li>${esc(D.art(id).title)}</li>`).join('') + (ids.length > 6 ? `<li>… và ${ids.length - 6} bài khác</li>` : '') + '</ul>'),
+    confirmLabel: one ? 'Xoá bài viết' : `Xoá ${ids.length} bài`, danger: true});
+  if (!ok) return false;
+  try { await Repo.deleteArticles(ids); ids.forEach(id => S.selected.delete(id)); toast(one ? `Đã xoá “${one.title}”.` : `Đã xoá ${ids.length} bài viết.`); render(); return true; }
+  catch (e) { toast(e.message || 'Không xoá được.', 'err'); return false; }
+}
+
+/* =========================================================================
+   Article editor
+   ========================================================================= */
+const Editor = {
+  mounted: false, id: null, isNew: true, base: '', tags: [], loadedUpdatedAt: null, saving: false,
+  view({id, sec, cat}) {
+    if (!W()) return band({crumbs: [...crumbsHome, ['Bài viết', 'articles'], ['Chỉnh sửa']], title: 'Không có quyền chỉnh sửa'}) + `<main class="view"><div class="wrap"><div class="notice info">${icon('info')}<div>Tài khoản của bạn chỉ có quyền xem nội dung.</div></div></div></main>`;
+    const a = id ? D.art(id) : null;
+    if (id && !a) return notFound('Bài viết này không còn tồn tại.', 'articles');
+    if (!Store.data.categories.length) return band({crumbs: [...crumbsHome, ['Bài viết', 'articles'], ['Bài viết mới']], title: 'Bài viết mới'}) + `<main class="view"><div class="wrap"><div class="card">${emptyBox({ic: 'folder', title: 'Cần có danh mục trước khi viết bài', text: 'Mỗi bài viết thuộc một chuyên mục và một danh mục.', action: `<button class="btn btn-grad" data-act="${Store.data.sections.length ? 'new-category' : 'new-section'}">${icon('plus')} Tạo ${Store.data.sections.length ? 'danh mục' : 'chuyên mục'}</button>`})}</div></div></main>`;
+    const r = a || {title: '', slug: '', excerpt: '', content: '', cover: '', sectionId: sec && D.sec(sec) ? sec : (cat && D.cat(cat) ? D.cat(cat).sectionId : ''), categoryId: cat && D.cat(cat) ? cat : '', author: lsGet('hdx-cms:author', 'Ban Truyền thông'), tags: [], status: 'draft', publishedAt: null};
+    const st = r.status;
+    if (a) this.id = a.id;
+    const crumbs = [...crumbsHome, ['Bài viết', 'articles'], [a ? a.title : 'Bài viết mới']];
+    return `${band({crumbs, title: a ? 'Sửa bài viết' : 'Bài viết mới', sub: a ? `Tạo ${fmtDate(a.createdAt)} · cập nhật ${relTime(a.updatedAt)}` : 'Lưu nháp bất cứ lúc nào; xuất bản khi đã sẵn sàng.', right: `<span id="ed-status-top">${pillA(st)}</span>`})}
+    <main class="view"><div class="wrap"><form id="ed-form" novalidate>
+      <div id="ed-banner"></div>
+      <div class="edit-grid"><div class="edit-main"><section class="card card-pad stack" style="gap:16px">
+        <div class="fld"><label for="f-title">Tiêu đề <span class="req">*</span></label><input id="f-title" class="inp inp-lg" maxlength="${LIM.title}" value="${esc(r.title)}" placeholder="Ví dụ: Đêm giao lưu lửa trại" autocomplete="off">${errP('f-title')}</div>
+        <div class="fld"><label for="f-slug">Đường dẫn <span class="req">*</span></label><div class="slugrow"><span>/bai-viet/</span><input id="f-slug" maxlength="${LIM.slug}" value="${esc(r.slug)}" spellcheck="false" autocomplete="off"></div>
+          <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><p class="hint">Tự tạo từ tiêu đề cho tới khi bạn sửa tay.</p><button type="button" class="btn btn-ghost btn-sm" data-act="ed-slug-regen" style="padding:2px 8px">Tạo lại từ tiêu đề</button></div>${errP('f-slug')}</div>
+        <div class="fld"><label for="f-excerpt">Mô tả ngắn</label><textarea id="f-excerpt" class="ta" maxlength="${LIM.excerpt}" rows="2" placeholder="Một hai câu tóm tắt, hiện ở thẻ bài viết và đầu bài.">${esc(r.excerpt)}</textarea><p class="hint tnum" id="f-excerpt-count"></p>${errP('f-excerpt')}</div>
+        <div class="fld"><span class="lbl-t" id="lbl-content">Nội dung <span class="req">*</span></span>
+          <div class="rte" id="f-rte">
+            <div class="rte-tb" role="toolbar" aria-label="Định dạng nội dung" aria-controls="f-content">
+              <button type="button" class="tb" data-cmd="formatBlock" data-val="p" title="Đoạn văn" aria-label="Đoạn văn thường">¶</button>
+              <button type="button" class="tb" data-cmd="formatBlock" data-val="h2" title="Tiêu đề lớn" aria-label="Tiêu đề cấp 2">H2</button>
+              <button type="button" class="tb" data-cmd="formatBlock" data-val="h3" title="Tiêu đề nhỏ" aria-label="Tiêu đề cấp 3">H3</button><span class="sepv"></span>
+              <button type="button" class="tb" data-cmd="bold" title="In đậm (Ctrl+B)" aria-label="In đậm" aria-pressed="false"><b>B</b></button>
+              <button type="button" class="tb" data-cmd="italic" title="In nghiêng (Ctrl+I)" aria-label="In nghiêng" aria-pressed="false"><i style="font-family:Georgia,serif">I</i></button>
+              <button type="button" class="tb" data-cmd="underline" title="Gạch chân (Ctrl+U)" aria-label="Gạch chân" aria-pressed="false"><u>U</u></button><span class="sepv"></span>
+              <button type="button" class="tb" data-cmd="insertUnorderedList" title="Danh sách chấm" aria-label="Danh sách gạch đầu dòng" aria-pressed="false">${icon('ul', 18)}</button>
+              <button type="button" class="tb" data-cmd="insertOrderedList" title="Danh sách số" aria-label="Danh sách đánh số" aria-pressed="false">${icon('ol', 18)}</button>
+              <button type="button" class="tb" data-cmd="formatBlock" data-val="blockquote" title="Trích dẫn" aria-label="Trích dẫn">${icon('quote', 18)}</button><span class="sepv"></span>
+              <button type="button" class="tb" data-pop="link" title="Chèn liên kết" aria-label="Chèn liên kết">${icon('link', 18)}</button>
+              <button type="button" class="tb" data-cmd="unlink" title="Bỏ liên kết" aria-label="Bỏ liên kết">${icon('unlink', 18)}</button>
+              <button type="button" class="tb" data-pop="image" title="Chèn ảnh" aria-label="Chèn ảnh">${icon('image', 18)}</button><span class="sepv"></span>
+              <button type="button" class="tb" data-cmd="removeFormat" title="Xoá định dạng" aria-label="Xoá định dạng chữ">${icon('clear', 18)}</button>
+              <button type="button" class="tb" data-cmd="undo" title="Hoàn tác (Ctrl+Z)" aria-label="Hoàn tác">${icon('undo', 18)}</button>
+              <button type="button" class="tb" data-cmd="redo" title="Làm lại (Ctrl+Y)" aria-label="Làm lại">${icon('redo', 18)}</button>
+            </div>
+            <div class="rte-pop" id="pop-link" hidden><div class="fld" style="flex:1 1 220px"><label for="pl-url">Địa chỉ liên kết</label><input id="pl-url" class="inp" type="url" placeholder="https://…"></div><div class="fld" style="flex:1 1 160px"><label for="pl-text">Chữ hiển thị (nếu chưa chọn chữ)</label><input id="pl-text" class="inp"></div><button type="button" class="btn btn-navy btn-sm" data-act="pop-link-ok">Chèn liên kết</button><button type="button" class="btn btn-ghost btn-sm" data-act="pop-close">Huỷ</button></div>
+            <div class="rte-pop" id="pop-image" hidden><div class="fld" style="flex:1 1 220px"><label for="pi-url">Liên kết ảnh</label><input id="pi-url" class="inp" type="url" placeholder="https://…/anh.jpg"></div><div class="fld" style="flex:1 1 160px"><label for="pi-alt">Mô tả ảnh</label><input id="pi-alt" class="inp" placeholder="Ảnh gì, ở đâu?"></div><button type="button" class="btn btn-navy btn-sm" data-act="pop-image-ok">Chèn ảnh</button><span class="btn btn-line btn-sm filebtn">${icon('upload', 16)} Tải ảnh lên<input type="file" accept="image/*" id="pi-file" aria-label="Tải ảnh lên để chèn vào bài"></span><button type="button" class="btn btn-ghost btn-sm" data-act="pop-close">Huỷ</button></div>
+            <div id="f-content" class="rte-body prose" contenteditable="true" role="textbox" aria-multiline="true" aria-labelledby="lbl-content" data-placeholder="Bắt đầu viết nội dung bài…" spellcheck="true"></div>
+            <div class="rte-foot"><span id="f-words" class="tnum"></span><span>Ctrl+S để lưu</span></div>
+          </div>${errP('f-content')}</div>
+      </section></div>
+      <aside class="edit-side">
+        <section class="card card-pad"><h2 class="side-h">Xuất bản</h2>
+          <div class="metaline"><span>Trạng thái: <span id="ed-status">${pillA(st)}</span></span>${a ? `<span>Cập nhật: <b class="tnum">${fmtDate(a.updatedAt)}</b></span>` : '<span>Chưa lưu lần nào</span>'}<span id="ed-dirty" class="small" hidden style="color:var(--draft-fg);font-weight:700">● Có thay đổi chưa lưu</span></div>
+          <div class="side-actions" id="ed-actions">${this.actionsHTML(st, !!a)}</div><p class="err" id="ed-global-err" hidden style="margin-top:10px"></p></section>
+        <section class="card card-pad"><h2 class="side-h">Phân loại</h2><div class="stack" style="gap:12px">
+          <div class="fld"><label for="f-section">Chuyên mục <span class="req">*</span></label>${sel('f-section', [['', '— Chọn chuyên mục —'], ...secOptions().slice(1)], r.sectionId)}${errP('f-section')}</div>
+          <div class="fld"><label for="f-category">Danh mục <span class="req">*</span></label><div id="f-category-wrap">${this.catSelect(r.sectionId, r.categoryId)}</div>${errP('f-category')}<button type="button" class="btn btn-ghost btn-sm" data-act="ed-new-cat" style="align-self:flex-start;padding:4px 8px">${icon('plus', 14)} Danh mục mới</button></div></div></section>
+        <section class="card card-pad"><h2 class="side-h">Thẻ</h2><div class="fld"><label for="f-tag-in" class="sr">Thêm thẻ</label><div class="tags" id="f-tags"></div><p class="hint">Nhấn Enter hoặc dấu phẩy để thêm thẻ.</p>${errP('f-tags')}<datalist id="tag-list">${[...new Set(Store.data.articles.flatMap(x => x.tags || []))].sort(cmp).map(t => `<option value="${esc(t)}">`).join('')}</datalist></div></section>
+        <section class="card card-pad"><h2 class="side-h">Ảnh đại diện</h2><div class="formgrid" style="grid-template-columns:1fr">${imgField('f-cover', r.cover, 'Ảnh bìa')}</div></section>
+        <section class="card card-pad"><h2 class="side-h">Thông tin khác</h2><div class="stack" style="gap:12px">
+          <div class="fld"><label for="f-author">Tác giả</label><input id="f-author" class="inp" maxlength="${LIM.author}" value="${esc(r.author)}">${errP('f-author')}</div>
+          <div class="fld"><label for="f-pubdate">Ngày xuất bản</label><input id="f-pubdate" class="inp" type="datetime-local" value="${esc(toLocalInput(r.publishedAt))}"><p class="hint">Để trống: tự lấy thời điểm bấm Xuất bản.</p></div></div></section>
+      </aside></div>
+      <div class="mbar" id="ed-mbar"></div>
+    </form></div></main>`;
+  },
+  actionsHTML(st, exists) {
+    const prev = `<button type="button" class="btn btn-line" data-act="ed-preview">${icon('eye', 16)} Xem trước</button>`;
+    let h = '';
+    if (st === 'published') h = `<button type="button" class="btn btn-grad" data-act="ed-save" data-to="published">${icon('check', 16)} Cập nhật bài</button><div class="row">${prev}<button type="button" class="btn btn-line" data-act="ed-save" data-to="draft">${icon('unpub', 16)} Gỡ xuất bản</button></div>`;
+    else if (st === 'archived') h = `<button type="button" class="btn btn-navy" data-act="ed-save" data-to="archived">${icon('check', 16)} Lưu</button><div class="row">${prev}<button type="button" class="btn btn-line" data-act="ed-save" data-to="draft">Bỏ lưu trữ</button></div><button type="button" class="btn btn-grad" data-act="ed-save" data-to="published">${icon('send', 16)} Xuất bản lại</button>`;
+    else h = `<button type="button" class="btn btn-grad" data-act="ed-save" data-to="published">${icon('send', 16)} Xuất bản</button><div class="row"><button type="button" class="btn btn-navy" data-act="ed-save" data-to="draft">Lưu nháp</button>${prev}</div>`;
+    if (exists) h += `<div class="row">${st !== 'archived' ? `<button type="button" class="btn btn-ghost btn-sm" data-act="ed-save" data-to="archived">${icon('archive', 16)} Chuyển vào lưu trữ</button>` : ''}<button type="button" class="btn btn-ghost btn-sm" data-act="duplicate" data-id="${esc(this.id)}">${icon('copy', 16)} Nhân bản</button><button type="button" class="btn btn-ghost btn-sm" style="color:var(--danger)" data-act="ed-delete">${icon('trash', 16)} Xoá</button></div>`;
+    return h;
+  },
+  mbarHTML(st) {
+    return `<button type="button" class="btn btn-line" data-act="ed-preview">${icon('eye', 16)} Xem</button>` + (st === 'published'
+      ? `<button type="button" class="btn btn-grad" data-act="ed-save" data-to="published">Cập nhật</button>`
+      : `<button type="button" class="btn btn-navy" data-act="ed-save" data-to="${st === 'archived' ? 'archived' : 'draft'}">${st === 'archived' ? 'Lưu' : 'Lưu nháp'}</button><button type="button" class="btn btn-grad" data-act="ed-save" data-to="published">Xuất bản</button>`);
+  },
+  catSelect(secId, catId) {
+    if (!secId) return sel('f-category', [['', 'Chọn chuyên mục trước', true]], '', 'disabled');
+    const cats = D.catsOf(secId);
+    if (!cats.length) return sel('f-category', [['', 'Chuyên mục này chưa có danh mục', true]], '', 'disabled');
+    return sel('f-category', [['', '— Chọn danh mục —'], ...cats.map(c => [c.id, c.name + (c.status === 'inactive' ? ' (tạm ẩn)' : '')])], cats.some(c => c.id === catId) ? catId : '');
+  },
+  mount({id}) {
+    const form = $('#ed-form'); if (!form) return;
+    const a = id ? D.art(id) : null;
+    this.mounted = true; this.id = a ? a.id : uid('art'); this.isNew = !a; this.status = a ? a.status : 'draft';
+    this.loadedUpdatedAt = a ? a.updatedAt : null; this.tags = a ? (a.tags || []).slice() : [];
+    const ce = $('#f-content'); ce.innerHTML = a ? sanitizeHtml(a.content) : '';
+    try { document.execCommand('defaultParagraphSeparator', false, 'p'); } catch {}
+    const sl = $('#f-slug'); if (!sl.value) sl.dataset.auto = '1';
+    $('#f-title').addEventListener('input', () => { if (sl.dataset.auto) sl.value = slugify($('#f-title').value); });
+    sl.addEventListener('input', () => delete sl.dataset.auto);
+    sl.addEventListener('blur', () => { const v = slugify(sl.value); if (v !== sl.value) { sl.value = v; this.changed(); } });
+    $('#f-section').addEventListener('change', e => { const cur = $('#f-category') ? $('#f-category').value : ''; $('#f-category-wrap').innerHTML = this.catSelect(e.target.value, cur); this.changed(); });
+    this.renderTags();
+    ce.addEventListener('paste', e => { const d = e.clipboardData; if (!d) return; e.preventDefault(); const h = d.getData('text/html'); const t = d.getData('text/plain');
+      const html = h ? sanitizeHtml(h) : esc(t).split(/\n{2,}/).map(p => '<p>' + p.replace(/\n/g, '<br>') + '</p>').join(''); document.execCommand('insertHTML', false, html); });
+    ce.addEventListener('drop', e => { if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) { e.preventDefault(); this.insertImageFile(e.dataTransfer.files[0]); } });
+    ce.addEventListener('keyup', () => this.toolbarState()); ce.addEventListener('mouseup', () => this.toolbarState());
+    ce.addEventListener('focus', () => { if (!ce.textContent.trim() && !ce.querySelector('img,ul,ol,h2,h3,blockquote')) { ce.innerHTML = '<p><br></p>'; const r = document.createRange(); r.setStart(ce.firstChild, 0); r.collapse(true); const s = window.getSelection(); s.removeAllRanges(); s.addRange(r); } });
+    form.addEventListener('input', () => this.changed());
+    form.addEventListener('change', () => this.changed());
+    $('#pi-file').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) this.insertImageFile(f); });
+    $('#ed-mbar').innerHTML = this.mbarHTML(this.status);
+    this.base = this.snapshot(); this.changed();
+  },
+  unmount() { this.mounted = false; this.range = null; },
+  saveRange() { const s = window.getSelection(); if (s && s.rangeCount) { const r = s.getRangeAt(0); if ($('#f-content') && $('#f-content').contains(r.commonAncestorContainer)) this.range = r.cloneRange(); } return this.range; },
+  restoreRange() { const ce = $('#f-content'); ce.focus(); if (this.range) { const s = window.getSelection(); s.removeAllRanges(); s.addRange(this.range); } else { const r = document.createRange(); r.selectNodeContents(ce); r.collapse(false); const s = window.getSelection(); s.removeAllRanges(); s.addRange(r); } },
+  exec(cmd, val) {
+    if (document.activeElement !== $('#f-content')) this.restoreRange();
+    if (cmd === 'formatBlock') {
+      const cur = (document.queryCommandValue('formatBlock') || '').toLowerCase();
+      document.execCommand('formatBlock', false, cur === val && val !== 'p' ? 'p' : val);
+    } else document.execCommand(cmd, false, val || null);
+    this.saveRange(); this.toolbarState(); this.changed();
+  },
+  toolbarState() {
+    $$('.tb[aria-pressed]').forEach(b => { let on = false; try { on = document.queryCommandState(b.dataset.cmd); } catch {} b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
+  },
+  openPop(which) {
+    this.saveRange(); $$('.rte-pop').forEach(p => p.hidden = p.id !== 'pop-' + which);
+    const p = $('#pop-' + which); $$('input', p).forEach(i => { if (i.type !== 'file') i.value = ''; });
+    if (which === 'link') { const sel = window.getSelection(); const t = this.range ? this.range.toString() : ''; $('#pl-text').closest('.fld').hidden = !!t; }
+    $('input', p).focus();
+  },
+  closePop() { $$('.rte-pop').forEach(p => p.hidden = true); },
+  insertLink() {
+    let url = $('#pl-url').value.trim(); if (!url) { $('#pl-url').focus(); toast('Hãy nhập địa chỉ liên kết.', 'warn'); return; }
+    if (!/^(https?:|mailto:|tel:|#|\/)/i.test(url)) url = 'https://' + url;
+    const text = $('#pl-text').value.trim();
+    this.restoreRange();
+    const hasSel = this.range && !this.range.collapsed;
+    if (hasSel) document.execCommand('createLink', false, url);
+    else document.execCommand('insertHTML', false, `<a href="${esc(url)}">${esc(text || url)}</a>`);
+    this.closePop(); this.changed();
+  },
+  insertImage(src, alt) {
+    src = safeImg(src); if (!src) { toast('Liên kết ảnh không hợp lệ. Hãy dùng địa chỉ bắt đầu bằng https://', 'err'); return; }
+    this.restoreRange(); document.execCommand('insertHTML', false, `<img src="${esc(src)}" alt="${esc(alt || '')}"><p><br></p>`);
+    this.closePop(); this.changed();
+  },
+  async insertImageFile(file) {
+    try { const src = await storeImage(await fileToImage(file, 1000, .78)); this.insertImage(src, $('#pi-alt') ? $('#pi-alt').value.trim() : ''); toast('Đã chèn ảnh (' + Math.round(src.length * .75 / 1024) + ' KB).'); }
+    catch (e) { toast(e.message, 'err'); }
+  },
+  renderTags() {
+    const box = $('#f-tags'); if (!box) return;
+    box.innerHTML = this.tags.map((t, i) => `<span class="tag">${esc(t)}<button type="button" data-act="tag-rm" data-i="${i}" aria-label="Bỏ thẻ ${esc(t)}">${icon('x', 12, 2.6)}</button></span>`).join('') + `<input id="f-tag-in" list="tag-list" placeholder="${this.tags.length ? '' : 'ví dụ: 24.10, lửa trại'}" maxlength="${LIM.tag}" autocomplete="off">`;
+    const inp = $('#f-tag-in');
+    inp.addEventListener('keydown', e => {
+      if ((e.key === 'Enter' || e.key === ',') && inp.value.trim()) { e.preventDefault(); const v = inp.value; inp.value = ''; this.addTag(v); }
+      else if (e.key === 'Enter') e.preventDefault();
+      else if (e.key === 'Backspace' && !inp.value && this.tags.length) { this.tags.pop(); this.renderTags(); $('#f-tag-in').focus(); this.changed(); }
+    });
+    inp.addEventListener('blur', () => { if (inp.isConnected && inp.value.trim()) { const v = inp.value; inp.value = ''; this.addTag(v, false); } });
+  },
+  addTag(v, refocus = true) {
+    v.split(',').map(x => x.trim().replace(/^#/, '').slice(0, LIM.tag)).filter(Boolean).forEach(t => { if (!this.tags.some(x => fold(x) === fold(t))) this.tags.push(t); });
+    if (this.tags.length > LIM.tags) { this.tags = this.tags.slice(0, LIM.tags); toast(`Tối đa ${LIM.tags} thẻ.`, 'warn'); }
+    this.renderTags(); if (refocus) $('#f-tag-in').focus(); this.changed();
+  },
+  collect() {
+    return {id: this.id, title: $('#f-title').value.trim(), slug: slugify($('#f-slug').value), excerpt: $('#f-excerpt').value.trim(),
+      content: sanitizeHtml($('#f-content').innerHTML), cover: $('#f-cover').value, sectionId: $('#f-section').value, categoryId: $('#f-category') ? $('#f-category').value : '',
+      author: $('#f-author').value.trim(), tags: this.tags.slice(), publishedAt: fromLocalInput($('#f-pubdate').value)};
+  },
+  snapshot() { return JSON.stringify(this.collect()); },
+  isDirty() { return this.mounted && !!$('#ed-form') && this.snapshot() !== this.base; },
+  changed() {
+    if (!this.mounted) return;
+    const d = this.isDirty(); const el = $('#ed-dirty'); if (el) el.hidden = !d;
+    const ex = $('#f-excerpt'); if (ex) $('#f-excerpt-count').textContent = `${ex.value.length}/${LIM.excerpt} ký tự`;
+    const words = ($('#f-content').textContent || '').trim().split(/\s+/).filter(Boolean).length; $('#f-words').textContent = `${words} từ`;
+  },
+  onData() {
+    // Live data changed while editing: refresh dependent selects without touching typed content.
+    if (!this.mounted) return;
+    const secSel = $('#f-section'); if (!secSel) return;
+    const sv = secSel.value, cv = $('#f-category') ? $('#f-category').value : '';
+    secSel.innerHTML = [['', '— Chọn chuyên mục —'], ...secOptions().slice(1)].map(o => `<option value="${esc(o[0])}" ${o[0] === sv ? 'selected' : ''}>${esc(o[1])}</option>`).join('');
+    $('#f-category-wrap').innerHTML = this.catSelect(secSel.value, cv);
+    const a = D.art(this.id);
+    if (!this.isNew && !a && !this.saving) $('#ed-banner').innerHTML = `<div class="notice danger" style="margin-bottom:16px">${icon('warn')}<div>Bài viết này vừa bị xoá ở nơi khác. Nếu lưu, bài sẽ được tạo lại.</div></div>`;
+    else if (a && this.loadedUpdatedAt && a.updatedAt !== this.loadedUpdatedAt && !this.saving) $('#ed-banner').innerHTML = `<div class="notice" style="margin-bottom:16px">${icon('info')}<div>Bài viết vừa được cập nhật ở nơi khác (${fmtDate(a.updatedAt)}). Nếu bạn lưu, bản của bạn sẽ ghi đè. <button type="button" class="btn btn-line btn-sm" data-act="ed-reload" style="margin-left:6px">Tải lại bản mới</button></div></div>`;
+  },
+  async save(to) {
+    if (this.saving) return;
+    const r = {...this.collect(), status: to};
+    $('#f-slug').value = r.slug;
+    if (!r.slug && r.title) { r.slug = slugify(r.title); $('#f-slug').value = r.slug; }
+    const errs = validateArticle(r);
+    const ge = $('#ed-global-err');
+    if (!showErrors($('#ed-form'), errs, {title: 'f-title', slug: 'f-slug', excerpt: 'f-excerpt', content: 'f-content', sectionId: 'f-section', categoryId: 'f-category', tags: 'f-tags', author: 'f-author', cover: 'f-cover-url'})) {
+      ge.textContent = `Chưa lưu được: còn ${Object.keys(errs).length} mục cần sửa (đánh dấu đỏ).`; ge.hidden = false; toast('Hãy sửa các mục được đánh dấu rồi lưu lại.', 'err'); return;
+    }
+    ge.hidden = true;
+    this.saving = true; $$('#ed-actions .btn, #ed-mbar .btn').forEach(b => b.disabled = true);
+    try {
+      const prevStatus = this.status;
+      const rec = await Repo.saveArticle(r);
+      lsSet('hdx-cms:author', rec.author);
+      this.isNew = false; this.status = rec.status; this.loadedUpdatedAt = rec.updatedAt;
+      if (rec.publishedAt) $('#f-pubdate').value = toLocalInput(rec.publishedAt);
+      this.base = this.snapshot(); $('#ed-banner').innerHTML = '';
+      $('#ed-status').innerHTML = pillA(rec.status); $('#ed-status-top').innerHTML = pillA(rec.status);
+      $('#ed-actions').innerHTML = this.actionsHTML(rec.status, true); $('#ed-mbar').innerHTML = this.mbarHTML(rec.status);
+      const msg = to === 'published' ? (prevStatus === 'published' ? 'Đã cập nhật bài viết đang xuất bản.' : 'Đã xuất bản bài viết.') : to === 'draft' ? (prevStatus === 'published' ? 'Đã gỡ xuất bản, bài trở về bản nháp.' : 'Đã lưu bản nháp.') : 'Đã lưu bài viết vào lưu trữ.';
+      toast(msg);
+      if (S.route.params.id !== rec.id) { S.route = {name: 'edit', params: {id: rec.id}}; saveUiState(); }
+      const h = $('#view-root .band h1'); if (h) h.textContent = 'Sửa bài viết';
+      const cr = $('#view-root .crumbs .here'); if (cr) cr.textContent = rec.title;
+      this.changed();
+    } catch (e) { ge.textContent = e.message || 'Không lưu được bài viết.'; ge.hidden = false; toast(e.message || 'Không lưu được bài viết. Hãy thử lại.', 'err'); }
+    finally { this.saving = false; $$('#ed-actions .btn, #ed-mbar .btn').forEach(b => b.disabled = false); }
+  }
+};
+VIEWS.edit = p => Editor.view(p);
+
+
+function authView() {
+  const m = Store.authMsg ? `<div class="notice ${Store.auth === 'login' ? 'info' : 'danger'}">${icon('info')}<div>${esc(Store.authMsg)}</div></div>` : '';
+  const shell = inner => `<main class="view"><div class="wrap auth-wrap"><div class="auth"><div style="display:flex;align-items:center;gap:12px"><img src="img/logo.png" alt="" width="52" height="52"><div><div class="eyebrow">Anh em ơi! Về nhà</div><h1>Quản trị nội dung</h1></div></div>${m}<div class="card">${inner}</div></div></div></main>`;
+  if (Store.auth === 'checking') return shell(`<p class="muted" style="margin:0">Đang kiểm tra tài khoản…</p>`);
+  if (Store.auth === 'denied') return shell(`<h2 class="h2" style="margin-bottom:8px">Tài khoản không có quyền quản trị</h2><p class="muted">Email <b>${esc(SB.session && SB.session.email || '')}</b> đã đăng nhập nhưng chưa có trong danh sách admin.</p><button class="btn btn-line" data-act="logout">Đăng xuất</button>`);
+  if (Store.auth === 'error') return shell(`<h2 class="h2" style="margin-bottom:8px">Chưa kết nối được</h2><div class="qa"><button class="btn btn-navy" data-act="auth-retry">Thử lại</button><button class="btn btn-line" data-act="logout">Đăng xuất</button></div>`);
+  if (Store.auth === 'setpw') return shell(`<form id="setpw-form" class="stack" style="gap:14px" novalidate><h2 class="h2">Đặt mật khẩu mới</h2>
+    <div class="fld"><label for="sp-1">Mật khẩu mới (ít nhất 8 ký tự)</label><input id="sp-1" class="inp" type="password" autocomplete="new-password" minlength="8" required autofocus></div>
+    <div class="fld"><label for="sp-2">Nhập lại mật khẩu</label><input id="sp-2" class="inp" type="password" autocomplete="new-password" required></div>
+    <p class="err" id="sp-err" hidden></p><button class="btn btn-grad" type="submit">Lưu mật khẩu</button></form>`);
+  if (Store.auth === 'recover') return shell(`<form id="recover-form" class="stack" style="gap:14px" novalidate><h2 class="h2">Quên mật khẩu</h2><p class="muted" style="margin:0">Nhập email admin. Hệ thống sẽ gửi liên kết đặt lại mật khẩu.</p>
+    <div class="fld"><label for="rc-email">Email</label><input id="rc-email" class="inp" type="email" autocomplete="email" required autofocus></div>
+    <p class="err" id="rc-err" hidden></p><button class="btn btn-grad" type="submit">Gửi liên kết</button><button class="btn btn-ghost" type="button" data-act="auth-login">Quay lại đăng nhập</button></form>`);
+  return shell(`<form id="login-form" class="stack" style="gap:14px" novalidate><h2 class="h2">Đăng nhập</h2>
+    <div class="fld"><label for="lg-email">Email</label><input id="lg-email" class="inp" type="email" autocomplete="username" required autofocus></div>
+    <div class="fld"><label for="lg-pw">Mật khẩu</label><input id="lg-pw" class="inp" type="password" autocomplete="current-password" required></div>
+    <p class="err" id="lg-err" hidden></p><button class="btn btn-grad" type="submit">Đăng nhập</button><button class="btn btn-ghost" type="button" data-act="auth-recover">Quên mật khẩu?</button></form>`);
+}
+function setupView() {
+  return band({title: 'Chưa cấu hình máy chủ', showBack: false}) + `<main class="view"><div class="wrap"><div class="notice">${icon('warn')}<div>Tệp <b>config.js</b> chưa có địa chỉ Supabase nên trang quản trị đang chạy ở chế độ thử (lưu trên trình duyệt này). Điền <code>supabaseUrl</code> và <code>supabaseAnonKey</code> vào config.js để bật đăng nhập admin.</div></div></div></main>`;
+}
+document.addEventListener('submit', async e => {
+  const f = e.target; if (!['login-form', 'setpw-form', 'recover-form'].includes(f.id)) return;
+  e.preventDefault(); const btn = f.querySelector('[type=submit]'); btn.disabled = true;
+  const showErr = (id, msg) => { const el = document.getElementById(id); el.textContent = msg; el.hidden = false; };
+  try {
+    if (f.id === 'login-form') {
+      const email = $('#lg-email').value.trim().toLowerCase(), pw = $('#lg-pw').value;
+      if (!email || !pw) { showErr('lg-err', 'Hãy nhập email và mật khẩu.'); return; }
+      try { await SB.signIn(email, pw); } catch (er) { showErr('lg-err', er.code === 'network' ? er.message : (er.code === 'invalid_credentials' || er.status === 400) ? 'Email hoặc mật khẩu không đúng.' : 'Không đăng nhập được: ' + er.message); return; }
+      Store.authMsg = ''; await Store.afterLogin(); if (Store.ready) toast('Đã đăng nhập.');
+    } else if (f.id === 'setpw-form') {
+      const a = $('#sp-1').value, b = $('#sp-2').value;
+      if (a.length < 8) { showErr('sp-err', 'Mật khẩu cần ít nhất 8 ký tự.'); return; }
+      if (a !== b) { showErr('sp-err', 'Hai lần nhập mật khẩu không khớp.'); return; }
+      try { await SB.setPassword(a); } catch (er) { showErr('sp-err', 'Không đổi được mật khẩu: ' + er.message); return; }
+      Store.authNeed = null; Store.authMsg = ''; toast('Đã lưu mật khẩu mới.'); await Store.afterLogin();
+    } else {
+      const email = $('#rc-email').value.trim().toLowerCase(); if (!email) { showErr('rc-err', 'Hãy nhập email.'); return; }
+      try { await SB.recover(email); } catch (er) { showErr('rc-err', 'Không gửi được: ' + er.message); return; }
+      Store.auth = 'login'; Store.authMsg = 'Nếu email này có tài khoản, liên kết đặt lại mật khẩu đã được gửi. Hãy kiểm tra hộp thư (cả mục Spam).'; render();
+    }
+  } finally { if (btn.isConnected) btn.disabled = false; }
+});
+
+/* =========================================================================
+   Render loop
+   ========================================================================= */
+function updateChrome() {
+  const items = [['dashboard', 'Tổng quan'], ['sections', 'Chuyên mục'], ['categories', 'Danh mục'], ['articles', 'Bài viết'], ['site', 'Xem trang'], ['backup', 'Sao lưu & Xuất']];
+  const cur = {section: 'sections', category: 'categories', edit: 'articles', article: 'articles'}[S.route.name] || S.route.name;
+  $('#mainnav').innerHTML = items.map(([r, l]) => `<button class="navpill" ${goAttr(r, r === 'site' ? {} : null)} ${cur === r ? 'aria-current="page"' : ''}>${l}</button>`).join('');
+  $('#mainnav').hidden = !!Store.auth; $('#gsearch').hidden = !!Store.auth;
+  const who = $('#who'); who.hidden = !(Store.mode === 'supabase' && SB.session && Store.auth !== 'login' && Store.auth !== 'recover'); $('#who-email').textContent = SB.session ? SB.session.email : '';
+  const pill = $('#storepill'); pill.className = 'store-pill ' + (Store.mode === 'cloud' || Store.mode === 'supabase' ? 'cloud' : Store.mode === 'loading' ? '' : 'local'); pill.hidden = !!Store.auth;
+  const label = Store.mode === 'supabase' ? 'Đã kết nối' : Store.mode === 'cloud' ? (W() ? 'Đã đồng bộ' : 'Chỉ xem') : Store.mode === 'local' ? 'Chế độ thử (trình duyệt)' : Store.mode === 'memory' ? 'Chưa lưu được' : 'Đang kết nối…';
+  pill.querySelector('.lbl').textContent = label;
+  pill.title = Store.mode === 'supabase' ? 'Dữ liệu lưu trên Supabase, website đọc trực tiếp' : Store.mode === 'cloud' ? 'Dữ liệu lưu trong cơ sở dữ liệu dùng chung của artifact' : Store.mode === 'local' ? 'Dữ liệu chỉ lưu trong trình duyệt này' : 'Nơi lưu dữ liệu';
+  pill.setAttribute('aria-label', 'Nơi lưu dữ liệu: ' + label);
+  $('#topnew').hidden = !Store.ready || !!Store.auth || !W() || S.route.name === 'edit';
+  $('#foot-store').textContent = Store.mode === 'supabase' ? 'Lưu trên Supabase · website cập nhật ngay' : Store.mode === 'cloud' ? 'Lưu trong cơ sở dữ liệu dùng chung' : Store.mode === 'local' ? 'Chỉ lưu trong trình duyệt này' : '';
+}
+function render() {
+  updateChrome();
+  const root = $('#view-root');
+  if (Store.auth) { root.innerHTML = authView(); const af = root.querySelector('[autofocus]'); if (af && !root.contains(document.activeElement)) af.focus(); return; }
+  if (!Store.ready || Store.failed) { root.innerHTML = loadingView(); return; }
+  if (S.route.name === 'edit' && Editor.mounted && $('#ed-form')) { Editor.onData(); return; }
+  const ae = document.activeElement; const focus = ae && ae.id && root.contains(ae) ? {id: ae.id, s: ae.selectionStart, e: ae.selectionEnd} : null;
+  const fn = VIEWS[S.route.name] || (() => notFound());
+  root.innerHTML = fn(S.route.params || {});
+  if (S.route.name === 'edit') Editor.mount(S.route.params || {});
+  if (focus) { const el = document.getElementById(focus.id); if (el) { el.focus({preventScroll: true}); try { if (focus.s != null) el.setSelectionRange(focus.s, focus.e); } catch {} } }
+}
+Store.on(render);
+
+/* =========================================================================
+   Events
+   ========================================================================= */
+const ACT = {
+  logout: async () => { if (S.route.name === 'edit' && Editor.isDirty()) { const ok = await confirmDialog({title: 'Đăng xuất khi chưa lưu?', message: 'Bài viết đang sửa có thay đổi chưa lưu.', confirmLabel: 'Đăng xuất', danger: true}); if (!ok) return; } Editor.unmount(); await SB.signOut(); Store.ready = false; Store.data = {sections: [], categories: [], articles: []}; Store.auth = 'login'; Store.authMsg = 'Đã đăng xuất.'; render(); },
+  'auth-recover': () => { Store.auth = 'recover'; Store.authMsg = ''; render(); },
+  'auth-login': () => { Store.auth = 'login'; Store.authMsg = ''; render(); },
+  'auth-retry': () => Store.afterLogin(),
+  go: el => { let p = {}; try { p = el.dataset.p ? JSON.parse(el.dataset.p) : {}; } catch {} go(el.dataset.r, p); },
+  back: () => back(),
+  'new-article': el => go('edit', {sec: el.dataset.sec || '', cat: el.dataset.cat || ''}),
+  'edit-article': el => go('edit', {id: el.dataset.id}),
+  'preview-article': el => go('article', {id: el.dataset.id}),
+  'new-section': () => sectionForm(),
+  'edit-section': el => sectionForm(el.dataset.id),
+  'delete-section': el => deleteSectionFlow(el.dataset.id),
+  'new-category': el => categoryForm(null, el.dataset.sec),
+  'edit-category': el => categoryForm(el.dataset.id),
+  'delete-category': el => deleteCategoryFlow(el.dataset.id),
+  'delete-article': async el => { const ok = await deleteArticlesFlow([el.dataset.id]); if (ok && (S.route.name === 'article')) go('articles', {}, {push: false}); },
+  toggle: async el => { try { const r = await Repo.toggle(el.dataset.kind, el.dataset.id); if (r) toast(`“${r.name}” ${r.status === 'active' ? 'đã hiển thị trở lại' : 'đã tạm ẩn khỏi trang'}.`); } catch (e) { toast(e.message || 'Không đổi được trạng thái.', 'err'); } },
+  move: async el => { try { await Repo.move(el.dataset.kind, el.dataset.id, Number(el.dataset.dir)); const b = document.querySelector(`[data-act="move"][data-id="${CSS.escape(el.dataset.id)}"][data-dir="${el.dataset.dir}"]:not(:disabled)`) || document.querySelector(`[data-act="move"][data-id="${CSS.escape(el.dataset.id)}"]:not(:disabled)`); if (b) b.focus(); } catch (e) { toast(e.message || 'Không đổi được thứ tự.', 'err'); } },
+  'set-status': async el => { try { const n = await Repo.setStatus([el.dataset.id], el.dataset.status); const a = D.art(el.dataset.id); if (n) toast(el.dataset.status === 'published' ? `Đã xuất bản “${a.title}”.` : `Đã gỡ xuất bản “${a.title}”, bài trở về bản nháp.`); } catch (e) { toast(e.message || 'Không đổi được trạng thái.', 'err'); } },
+  duplicate: async el => { try { const r = await Repo.duplicate(el.dataset.id); if (r) { toast(`Đã tạo bản sao “${r.title}” (bản nháp).`); go('edit', {id: r.id}); } } catch (e) { toast(e.message || 'Không nhân bản được.', 'err'); } },
+  'filter-articles': el => { const f = S.filters.articles; Object.assign(f, {q: '', section: el.dataset.sec || (el.dataset.cat ? D.cat(el.dataset.cat)?.sectionId || '' : ''), category: el.dataset.cat || '', status: el.dataset.status ?? '', from: '', to: '', page: 1}); go('articles'); },
+  'filter-cats': el => { Object.assign(S.filters.categories, {q: '', status: '', section: el.dataset.sec || ''}); go('categories'); },
+  'reset-filters': el => { const v = el.dataset.view; const def = {sections: {q: '', status: '', sort: 'order'}, categories: {q: '', section: '', status: '', sort: 'order'}, articles: {q: '', section: '', category: '', status: '', dateField: 'updatedAt', from: '', to: '', sort: 'updatedAt-desc', page: 1, size: S.filters.articles.size}}; S.filters[v] = def[v]; saveUiState(); render(); toast('Đã đặt lại bộ lọc.'); },
+  page: el => { S.filters.articles.page = Number(el.dataset.p); saveUiState(); render(); $('.tbl') && $('.tbl').scrollIntoView({block: 'nearest'}); },
+  sel: el => { el.checked ? S.selected.add(el.dataset.id) : S.selected.delete(el.dataset.id); render(); },
+  'sel-page': el => { const f = S.filters.articles; const list = filteredArticles().slice((f.page - 1) * f.size, f.page * f.size); list.forEach(a => el.checked ? S.selected.add(a.id) : S.selected.delete(a.id)); render(); },
+  'sel-clear': () => { S.selected.clear(); render(); },
+  'bulk-delete': () => deleteArticlesFlow([...S.selected]),
+  'bulk-status': async el => { const ids = [...S.selected]; try { const n = await Repo.setStatus(ids, el.dataset.status); toast(n ? `Đã chuyển ${n} bài sang “${STATUS_A[el.dataset.status]}”.` : 'Các bài đã chọn vốn đã ở trạng thái này.'); S.selected.clear(); render(); } catch (e) { toast(e.message || 'Không đổi được trạng thái.', 'err'); } },
+  'img-clear': el => { setImg(el.dataset.t, '', 'Ảnh tải lên được thu nhỏ tự động.'); const u = document.getElementById(el.dataset.t + '-url'); if (u) u.value = ''; },
+  'ed-save': el => Editor.save(el.dataset.to),
+  'ed-preview': () => { const r = {...Editor.collect(), status: Editor.status}; previewModal(r); },
+  'ed-delete': async () => { const id = Editor.id; const ok = await deleteArticlesFlow([id]); if (ok) { Editor.base = Editor.snapshot(); go('articles', {}, {push: false, force: true}); } },
+  'ed-slug-regen': () => { const s = $('#f-slug'); s.value = slugify($('#f-title').value); s.dataset.auto = '1'; Editor.changed(); s.focus(); },
+  'ed-new-cat': () => categoryForm(null, $('#f-section').value, c => { $('#f-section').value = c.sectionId; $('#f-category-wrap').innerHTML = Editor.catSelect(c.sectionId, c.id); Editor.changed(); }),
+  'ed-reload': async () => { const ok = !Editor.isDirty() || await confirmDialog({title: 'Tải lại bản mới?', message: 'Thay đổi chưa lưu của bạn sẽ bị bỏ.', confirmLabel: 'Tải lại', danger: true}); if (ok) { Editor.unmount(); render(); } },
+  'tag-rm': el => { Editor.tags.splice(Number(el.dataset.i), 1); Editor.renderTags(); Editor.changed(); $('#f-tag-in').focus(); },
+  'pop-close': () => { Editor.closePop(); Editor.restoreRange(); },
+  'pop-link-ok': () => Editor.insertLink(),
+  'pop-image-ok': () => Editor.insertImage($('#pi-url').value.trim(), $('#pi-alt').value.trim()),
+  'load-sample': async el => {
+    if (Store.data.sections.length || Store.data.articles.length || Store.data.categories.length) return ACT['reset-sample']();
+    el.disabled = true;
+    try { const d = await fetchSample(); await Repo.replaceAll(d); toast(`Đã nạp dữ liệu mẫu: ${d.sections.length} chuyên mục, ${d.categories.length} danh mục, ${d.articles.length} bài viết.`); }
+    catch (e) { toast(e.message || 'Không nạp được dữ liệu mẫu.', 'err'); } finally { if (el.isConnected) el.disabled = false; }
+  },
+  'reset-sample': async () => {
+    const counts = `${Store.data.sections.length} chuyên mục, ${Store.data.categories.length} danh mục và ${Store.data.articles.length} bài viết`;
+    const ok = await confirmDialog({title: 'Khôi phục dữ liệu mẫu?', message: `Toàn bộ ${counts} hiện có sẽ bị <b>xoá và thay bằng dữ liệu mẫu</b>${Store.mode === 'cloud' ? ' cho tất cả mọi người dùng chung artifact này' : ''}. Hãy tải bản sao lưu trước nếu cần giữ lại.`, confirmLabel: 'Xoá và khôi phục mẫu', danger: true, typeToConfirm: 'KHÔI PHỤC'});
+    if (!ok) return;
+    try { const d = await fetchSample(); await Repo.replaceAll(d, (i, n) => { if (n > 20 && i % 10 === 0) toast(`Đang ghi ${i}/${n}…`, 'warn', 1500); }); toast('Đã khôi phục dữ liệu mẫu.'); }
+    catch (e) { toast(e.message || 'Không khôi phục được.', 'err'); }
+  },
+  export: async () => {
+    const name = `hdx-sao-luu-${new Date().toISOString().slice(0, 10)}.json`;
+    const r = await saveFile(name, JSON.stringify(exportData(), null, 2));
+    if (r === 'saved') toast('Đã tải tệp sao lưu.'); else if (r === 'declined') toast('Đã huỷ tải tệp.', 'warn'); else { ACT['export-show'](); toast('Không tải được tệp. Hãy sao chép nội dung bên dưới.', 'warn'); }
+  },
+  'export-show': () => { const box = $('#export-box'); if (!box) return; box.innerHTML = `<div class="fld" style="margin-top:14px"><label for="exp-ta">Nội dung sao lưu (JSON)</label><textarea id="exp-ta" class="ta codebox" readonly>${esc(JSON.stringify(exportData(), null, 2))}</textarea><div class="qa"><button class="btn btn-line btn-sm" data-act="copy-export">${icon('copy', 16)} Sao chép</button></div></div>`; },
+  'copy-export': async el => { const ta = document.getElementById(el.dataset.t || 'exp-ta'); try { await navigator.clipboard.writeText(ta.value); toast('Đã sao chép nội dung sao lưu.'); } catch { ta.focus(); ta.select(); toast('Đã chọn toàn bộ nội dung. Nhấn Ctrl+C (hoặc ⌘C) để sao chép.', 'warn'); } },
+  'import-paste': () => {
+    Modal.open({title: 'Dán nội dung sao lưu', body: `<div class="fld"><label for="imp-ta">Nội dung JSON</label><textarea id="imp-ta" class="ta codebox" autofocus placeholder='{"sections": [...], "categories": [...], "articles": [...]}'></textarea></div>`,
+      foot: `<button type="button" class="btn btn-line" data-mclose>Huỷ</button><button type="submit" class="btn btn-navy">Kiểm tra dữ liệu</button>`,
+      onSubmit: (f, entry) => { const t = $('#imp-ta', f).value; Modal.close(entry, true); importText(t); }});
+  }
+};
+function siteContent() {
+  const secs = D.sections().filter(x => x.status === 'active');
+  const secIds = new Set(secs.map(x => x.id));
+  const cats = D.allCats().filter(c => c.status === 'active' && secIds.has(c.sectionId));
+  const catIds = new Set(cats.map(c => c.id));
+  const arts = Store.data.articles.filter(a => a.status === 'published' && catIds.has(a.categoryId) && D.cat(a.categoryId).sectionId === a.sectionId)
+    .sort((a, b) => cmp(b.publishedAt, a.publishedAt));
+  return {app: 'hdx-site', version: 1, generatedAt: nowISO(),
+    sections: secs.map(({id, name, slug, description, image, order}) => ({id, name, slug, description, image, order})),
+    categories: cats.map(({id, sectionId, name, slug, description, image, order}) => ({id, sectionId, name, slug, description, image, order})),
+    articles: arts.map(({id, title, slug, excerpt, content, cover, sectionId, categoryId, author, tags, publishedAt}) => ({id, title, slug, excerpt, content: sanitizeHtml(content), cover, sectionId, categoryId, author, tags: tags || [], publishedAt}))};
+}
+ACT['export-site'] = async () => {
+  const json = JSON.stringify(siteContent(), null, 1);
+  let dl = null; try { dl = window.claude && window.claude.use ? await window.claude.use('downloads') : null; } catch {}
+  if (dl) { try { await dl.save({filename: 'content.json', data: json}); toast('Đã tải content.json. Giờ hãy tải tệp này lên repo GitHub.'); return; } catch (e) { if (e && e.code === 'declined') { toast('Đã huỷ tải tệp.', 'warn'); return; } } }
+  ACT['export-site-show'](); toast('Trình xem này không cho tải tệp. Hãy sao chép nội dung bên dưới vào tệp content.json.', 'warn');
+};
+ACT['export-site-show'] = () => { const box = $('#export-site-box'); if (!box) return; box.innerHTML = `<div class="fld" style="margin-top:14px"><label for="exp-site-ta">Nội dung content.json</label><textarea id="exp-site-ta" class="ta codebox" readonly>${esc(JSON.stringify(siteContent(), null, 1))}</textarea><div class="qa"><button class="btn btn-line btn-sm" data-act="copy-export" data-t="exp-site-ta">${icon('copy', 16)} Sao chép</button></div></div>`; };
+
+async function saveFile(name, text) {
+  let dl = null; try { dl = window.claude && window.claude.use ? await window.claude.use('downloads') : null; } catch {}
+  if (dl) { try { await dl.save({filename: name, data: text}); return 'saved'; } catch (e) { if (e && e.code === 'declined') return 'declined'; } }
+  try { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], {type: 'application/json'})); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500); return 'saved'; } catch { return 'failed'; }
+}
+function exportData() { return {app: 'hdx-cms', version: 1, exportedAt: nowISO(), sections: Store.data.sections, categories: Store.data.categories, articles: Store.data.articles}; }
+async function importText(text) {
+  let obj; try { obj = JSON.parse(text); } catch { toast('Nội dung không phải JSON hợp lệ.', 'err'); return; }
+  const n = normalizeImport(obj);
+  if (n.errors.length) {
+    Modal.open({title: 'Không thể nhập tệp này', body: `<div class="notice danger">${icon('warn')}<div>Phát hiện ${n.errorCount || n.errors.length} lỗi. Dữ liệu hiện có <b>chưa bị thay đổi</b>.<ul style="margin:8px 0 0;padding-left:18px">${n.errors.map(e => `<li>${esc(e)}</li>`).join('')}</ul></div></div>`, foot: `<button type="button" class="btn btn-navy" data-mclose>Đã hiểu</button>`});
+    return;
+  }
+  const d = n.data, cur = `${Store.data.sections.length} chuyên mục, ${Store.data.categories.length} danh mục, ${Store.data.articles.length} bài viết`;
+  const ok = await confirmDialog({title: 'Thay thế toàn bộ dữ liệu?', message: `Tệp hợp lệ: <b>${d.sections.length} chuyên mục, ${d.categories.length} danh mục, ${d.articles.length} bài viết</b>.<br>Dữ liệu hiện có (${cur}) sẽ bị <b>thay thế hoàn toàn</b>${Store.mode === 'cloud' ? ' cho tất cả người dùng chung' : ''}.`, confirmLabel: 'Thay thế dữ liệu', danger: true, typeToConfirm: 'THAY THẾ'});
+  if (!ok) return;
+  try { await Repo.replaceAll(d, (i, n2) => { if (n2 > 20 && i % 10 === 0) toast(`Đang ghi ${i}/${n2}…`, 'warn', 1500); }); toast('Đã nhập dữ liệu từ bản sao lưu.'); }
+  catch (e) { toast(e.message || 'Nhập dữ liệu thất bại.', 'err'); }
+}
+
+document.addEventListener('click', e => {
+  const tbBtn = e.target.closest('.tb');
+  if (tbBtn) { e.preventDefault(); if (tbBtn.dataset.pop) Editor.openPop(tbBtn.dataset.pop); else Editor.exec(tbBtn.dataset.cmd, tbBtn.dataset.val); return; }
+  const el = e.target.closest('[data-act]'); if (!el) return;
+  const fn = ACT[el.dataset.act]; if (!fn) return;
+  if (el.tagName !== 'INPUT') e.preventDefault();
+  fn(el, e);
+});
+document.addEventListener('mousedown', e => { if (e.target.closest('.tb')) e.preventDefault(); });
+document.addEventListener('selectionchange', () => { if (Editor.mounted && document.activeElement && document.activeElement.id === 'f-content') { Editor.saveRange(); Editor.toolbarState(); } });
+let fTimer = null;
+document.addEventListener('input', e => {
+  const el = e.target;
+  if (el.dataset && el.dataset.f) {
+    const [v, k] = el.dataset.f.split('.'); const f = S.filters[v];
+    f[k] = k === 'size' ? Number(el.value) : el.value;
+    if (v === 'articles' && k !== 'page') f.page = 1;
+    if (v === 'articles' && k === 'section') { const c = D.cat(f.category); if (c && f.section && c.sectionId !== f.section) f.category = ''; }
+    if (v === 'articles' && k === 'category' && f.category) { const c = D.cat(f.category); if (c) f.section = c.sectionId; }
+    saveUiState(); clearTimeout(fTimer); fTimer = setTimeout(render, el.type === 'search' ? 120 : 0);
+  }
+  if (el.dataset && el.dataset.imgurl) { const p = el.dataset.imgurl; const v = el.value.trim(); const s = safeImg(v); const er = document.getElementById(p + '-err');
+    if (er) { er.hidden = !v || !!s; er.textContent = v && !s ? 'Liên kết ảnh phải bắt đầu bằng https://' : ''; }
+    const h = document.getElementById(p); h.value = s || (v ? v : ''); const pv = document.getElementById(p + '-prev'); pv.innerHTML = s ? `<img src="${esc(s)}" alt="Ảnh đang chọn">` : icon('image', 22);
+    const c = document.querySelector(`[data-act="img-clear"][data-t="${p}"]`); if (c) c.hidden = !v; const n = document.getElementById(p + '-note'); if (n) n.textContent = 'Ảnh tải lên được thu nhỏ tự động.'; }
+});
+document.addEventListener('change', async e => {
+  const el = e.target;
+  if (el.dataset && el.dataset.imgfile) { const f = el.files[0]; el.value = ''; if (!f) return; const p = el.dataset.imgfile;
+    try { const src = await storeImage(await fileToImage(f, p === 'f-cover' ? 1400 : 800, .8)); setImg(p, src, src.startsWith('data:') ? `Đang dùng ảnh tải lên (${Math.round(src.length * .75 / 1024)} KB).` : 'Đã tải ảnh lên kho ảnh.'); if (src.startsWith('http')) { const u = document.getElementById(p + '-url'); if (u) { u.value = src; } } if (src.startsWith('data:')) { const u = document.getElementById(p + '-url'); if (u) u.value = ''; } toast('Đã tải ảnh lên.'); }
+    catch (err) { toast(err.message, 'err'); } }
+  if (el.id === 'imp-file') { const f = el.files[0]; el.value = ''; if (!f) return; if (f.size > 20 * 1024 * 1024) { toast('Tệp quá lớn (tối đa 20 MB).', 'err'); return; } importText(await f.text()); }
+});
+$('#gsearch').addEventListener('submit', e => { e.preventDefault(); const q = $('#g-q').value.trim(); S.filters.search.q = q; saveUiState(); if (S.route.name === 'search') render(); else go('search'); });
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's' && S.route.name === 'edit' && Editor.mounted && !Modal.top()) { e.preventDefault(); Editor.save(Editor.status === 'published' ? 'published' : Editor.status === 'archived' ? 'archived' : 'draft'); }
+  if (e.key === '/' && !Modal.top() && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName) && !document.activeElement.isContentEditable) { e.preventDefault(); $('#g-q').focus(); }
+});
+window.addEventListener('beforeunload', e => { if (S.route.name === 'edit' && Editor.isDirty()) { e.preventDefault(); e.returnValue = ''; } });
+
+/* Boot */
+(async function boot() {
+  if (!['dashboard','sections','section','categories','category','articles','article','edit','site','search','backup'].includes(S.route.name)) S.route = {name: 'dashboard', params: {}};
+  render();
+  await Store.init();
+  if (Store.mode === 'local' && Store.localFirstRun) {
+    try { const d = await fetchSample(); await Repo.replaceAll(d); toast('Đã nạp dữ liệu mẫu để bạn thử ngay. Dữ liệu chỉ lưu trên trình duyệt này.', 'warn', 6000); } catch { /* empty state offers a button */ }
+  }
+  render();
+})();
+</script>
+</body>
+</html>

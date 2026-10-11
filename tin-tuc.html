@@ -10,6 +10,7 @@
 <meta property="og:image" content="img/anh-em-oi.webp">
 <meta name="theme-color" content="#174D9C">
 <link rel="icon" href="img/logo.png">
+<script src="config.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap">
@@ -216,8 +217,28 @@ function route() {
   window.scrollTo(0, 0);
 }
 window.addEventListener('hashchange', route);
-fetch('content.json', {cache: 'no-cache'}).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(d => {
+// Nguồn dữ liệu: Supabase (trực tiếp, chỉ nội dung đã xuất bản nhờ RLS) — nếu chưa cấu hình thì dùng content.json.
+async function loadContent() {
+  const cfg = window.HDX_CONFIG || {}, url = String(cfg.supabaseUrl || '').trim().replace(/\/+$/, ''), key = String(cfg.supabaseAnonKey || '').trim();
+  if (url && key) {
+    try {
+      const get = q => fetch(url + '/rest/v1/' + q, {headers: {apikey: key, Authorization: 'Bearer ' + key}}).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
+      const [s, c, a] = await Promise.all([
+        get('sections?select=id,name,slug,description,image,sort_order&status=eq.active&order=sort_order.asc'),
+        get('categories?select=id,section_id,name,slug,description,image,sort_order&status=eq.active&order=sort_order.asc'),
+        get('articles?select=id,title,slug,excerpt,content,cover,section_id,category_id,author,tags,published_at&status=eq.published&order=published_at.desc')]);
+      return {
+        sections: s.map(x => ({id: x.id, name: x.name, slug: x.slug, description: x.description, image: x.image, order: x.sort_order})),
+        categories: c.map(x => ({id: x.id, sectionId: x.section_id, name: x.name, slug: x.slug, description: x.description, image: x.image, order: x.sort_order})),
+        articles: a.map(x => ({id: x.id, title: x.title, slug: x.slug, excerpt: x.excerpt, content: x.content, cover: x.cover, sectionId: x.section_id, categoryId: x.category_id, author: x.author, tags: x.tags || [], publishedAt: x.published_at}))};
+    } catch (e) { console.warn('Supabase không phản hồi, dùng content.json', e); }
+  }
+  const r = await fetch('content.json', {cache: 'no-cache'}); if (!r.ok) throw new Error(r.status); return r.json();
+}
+loadContent().then(d => {
   const arr = k => Array.isArray(d[k]) ? d[k] : [];
+  const secIds = new Set(arr('sections').map(x => x.id)), cats = arr('categories').filter(x => secIds.has(x.sectionId)), catIds = new Set(cats.map(x => x.id));
+  d = {sections: arr('sections'), categories: cats, articles: arr('articles').filter(x => catIds.has(x.categoryId))};
   C = {sections: arr('sections').slice().sort((a, b) => (a.order || 0) - (b.order || 0)), categories: arr('categories'), articles: arr('articles')};
   route();
 }).catch(() => { document.getElementById('app').innerHTML = `<main><div class="wrap"><div class="empty"><h2>Chưa tải được nội dung</h2><p>Hãy kiểm tra tệp content.json đã được tải lên cùng thư mục với trang này.</p></div></div></main>`; });

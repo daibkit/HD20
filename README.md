@@ -1,21 +1,31 @@
 # Anh em ơi! Về nhà — 20 năm Đội SVTN Đồng hương Hải Dương - NEU
 
-Website công khai (tĩnh) cho dịp kỷ niệm 20 năm, triển khai trên Vercel.
+Website công khai triển khai trên Vercel (https://hdx20y.vercel.app).
 
-- `/` (`index.html`) — trang sự kiện (Trang chủ, Giới thiệu Đội, Lịch trình & Hoạt động, Bảo tàng ký ức, Liên hệ & Tài trợ),
-  xuất từ artifact thiết kế; đã thêm mục menu "Tin tức".
-- `/tin-tuc` (`tin-tuc.html`) — bài viết lấy từ CMS qua `content.json`
-  ("Sao lưu & Xuất" → "Tải content.json").
+| Đường dẫn | Tệp | Nội dung |
+|---|---|---|
+| `/` | `index.html` | Trang sự kiện (xuất từ artifact thiết kế), có mục menu "Tin tức" |
+| `/tin-tuc` | `tin-tuc.html` | Tin tức: đọc trực tiếp từ Supabase (dự phòng: `content.json`) |
+| `/admin` | `admin.html` | Trang quản trị: đăng nhập admin, thêm/sửa/xoá chuyên mục, danh mục, bài viết, tải ảnh |
 
-## Cập nhật nội dung
-1. Sửa và xuất bản bài trong CMS.
-2. Tải `content.json` từ CMS.
-3. Trên GitHub: **Add file → Upload files** → kéo `content.json` vào → **Commit changes**.
-4. Khoảng 1 phút sau GitHub Pages cập nhật website.
+`config.js` chứa địa chỉ Supabase và khoá **anon** (khoá công khai — an toàn vì quyền ghi được bảo vệ bằng RLS).
 
-## Cấu trúc
-- `index.html` — trang sự kiện (một tệp tự chạy, gồm sẵn ảnh, font và React)
-- `tin-tuc.html` — trang tin tức (đọc `content.json`, điều hướng bằng `#/chuyen-muc/...`, `#/bai-viet/...`)
-- `content.json` — chuyên mục, danh mục và bài viết đã xuất bản
-- `img/` — logo và ảnh
-- `.nojekyll` — để GitHub Pages phục vụ tệp nguyên trạng
+## Cài đặt Supabase (làm một lần)
+
+1. Vào https://supabase.com → **New project** (Region: Southeast Asia (Singapore)). Ghi nhớ mật khẩu database.
+2. **SQL Editor → New query**: dán toàn bộ `supabase/schema.sql` → **Run**. Sau đó dán `supabase/seed.sql` → **Run** (dữ liệu mẫu).
+   - Email admin được khai báo ở đầu `schema.sql` (bảng `admins`). Đổi nếu cần.
+3. **Authentication → Users → Add user → Create new user**: nhập email admin + mật khẩu, tick **Auto Confirm User**.
+4. **Authentication → Sign In / Providers → Email**: tắt **Allow new users to sign up** (không ai tự đăng ký được).
+5. **Authentication → URL Configuration**: Site URL = `https://hdx20y.vercel.app`; thêm Redirect URLs
+   `https://hdx20y.vercel.app/admin` và `https://hdx20y.vercel.app/admin.html` (để link "Quên mật khẩu" hoạt động).
+6. **Project Settings → API**: chép **Project URL** và khoá **anon public** vào `config.js`, commit → Vercel tự triển khai.
+
+## Bảo mật
+- Khách (anon) chỉ đọc được chuyên mục/danh mục đang hiển thị và bài **đã xuất bản**.
+- Chỉ email trong bảng `admins` mới ghi được dữ liệu và tải ảnh (kiểm tra ở database, không chỉ ở giao diện).
+- Mọi thay đổi gửi qua hàm `apply_ops` trong một giao dịch: không bao giờ để lại bài viết mất danh mục.
+- Thêm admin khác: `insert into public.admins(email) values ('email@...');` rồi tạo user tương ứng ở bước 3.
+
+## Cập nhật trang sự kiện
+Trang sự kiện là bản xuất từ artifact thiết kế; nội dung của nó không sửa qua admin. Khi thiết kế đổi, xuất lại `index.html`.
