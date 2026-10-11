@@ -399,6 +399,7 @@ img{max-width:100%}
 .auth{width:100%;max-width:420px;display:flex;flex-direction:column;gap:16px}
 .auth .card{padding:28px}
 .auth h1{margin:0;font-size:26px;color:var(--ink-strong)}
+.hc-tabs{display:flex;flex-wrap:wrap;gap:6px}.hc-dot{color:var(--accent,#F28A55);font-size:11px}.hc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}.hc-wide{grid-column:1/-1}.hc-rounds{display:flex;flex-direction:column;gap:8px;margin-top:12px}.hc-round{display:grid;grid-template-columns:minmax(120px,1fr) minmax(160px,2fr) auto;gap:8px}.hc-chk{display:flex;gap:8px;align-items:center;font-size:14px;font-weight:500}.hc-item{padding-block:16px}@media(max-width:560px){.hc-round{grid-template-columns:1fr auto}.hc-round .inp:first-child{grid-column:1/-1}}
 </style>
 <script src="config.js"></script>
 </head>
@@ -1045,6 +1046,10 @@ async function go(name, params = {}, opts = {}) {
     const ok = await confirmDialog({title: 'Rời trang khi chưa lưu?', message: 'Bài viết có thay đổi chưa lưu. Nếu rời đi, các thay đổi này sẽ mất.', confirmLabel: 'Rời đi, không lưu', cancelLabel: 'Ở lại chỉnh sửa', danger: true});
     if (!ok) return false;
   }
+  if (!opts.force && S.route.name === 'homecontent' && name !== 'homecontent' && HC.dirty()) {
+    const ok = await confirmDialog({title: 'Rời trang khi chưa lưu?', message: 'Nội dung trang chủ có thay đổi chưa lưu. Nếu rời đi, các thay đổi này sẽ mất.', confirmLabel: 'Rời đi, không lưu', cancelLabel: 'Ở lại'});
+    if (!ok) return false;
+  }
   if (S.route.name === 'edit') Editor.unmount();
   if (opts.push !== false) { S.history.push({...S.route, scroll: window.scrollY}); if (S.history.length > 60) S.history.shift(); }
   if (name !== 'articles') S.selected.clear();
@@ -1112,7 +1117,7 @@ VIEWS.dashboard = () => {
     <button class="stat" data-act="filter-articles" data-status="published"><span class="n n-green tnum">${n('published')}</span><span class="l">Đã xuất bản</span><span class="s">Hiển thị trên trang</span></button>
     <button class="stat" data-act="filter-articles" data-status="draft"><span class="n n-gold tnum">${n('draft')}</span><span class="l">Bản nháp</span><span class="s">Chưa xuất bản</span></button>
   </div>`;
-  html += `<div class="grid-2"><section class="card card-pad"><div class="card-h"><h2>Cập nhật gần đây</h2><button class="btn btn-ghost btn-sm" ${goAttr('articles')}>Tất cả bài viết ${icon('chev', 16)}</button></div>`;
+  html += `<div class="hc-grid"><section class="card card-pad"><div class="card-h"><h2>Cập nhật gần đây</h2><button class="btn btn-ghost btn-sm" ${goAttr('articles')}>Tất cả bài viết ${icon('chev', 16)}</button></div>`;
   html += recent.length ? `<ul class="rlist">${recent.map(a => { const s = D.sec(a.sectionId), c = D.cat(a.categoryId); return `<li><div class="tt">${thumb(a.cover)}<div class="tt-t"><button class="link" data-act="edit-article" data-id="${esc(a.id)}">${esc(a.title)}</button><div class="meta">${esc(s ? s.name : '—')} › ${esc(c ? c.name : '—')} · ${relTime(a.updatedAt)}</div></div></div><span style="margin-left:auto">${pillA(a.status)}</span></li>`; }).join('')}</ul>`
     : emptyBox({title: 'Chưa có bài viết', text: 'Bài viết bạn tạo hoặc sửa sẽ hiện ở đây.', action: W() ? `<button class="btn btn-grad" data-act="new-article">${icon('plus')} Viết bài đầu tiên</button>` : ''});
   html += `</section><section class="card card-pad"><div class="card-h"><h2>Theo chuyên mục</h2><button class="btn btn-ghost btn-sm" ${goAttr('sections')}>Quản lý ${icon('chev', 16)}</button></div>`;
@@ -1403,7 +1408,7 @@ VIEWS.backup = () => {
     <ol class="small" style="margin:0 0 14px;padding-left:18px;color:var(--body)"><li>Bấm “Tải content.json”.</li><li>Mở repo website trên GitHub → <b>Add file › Upload files</b>, kéo tệp vào, bấm <b>Commit changes</b>.</li><li>Khoảng 1 phút sau, website tự cập nhật.</li></ol>
     <div class="qa"><button class="btn btn-grad" data-act="export-site">${icon('download')} Tải content.json</button><button class="btn btn-line" data-act="export-site-show">Hiện để sao chép</button></div><div id="export-site-box"></div></section>`;
   if (Store.mode === 'supabase') html += `<div class="notice info">${icon('globe')}<div>Website đang đọc trực tiếp từ Supabase (${sc.articles.length} bài đang hiển thị trên trang Tin tức). Không cần xuất <b>content.json</b> nữa.</div></div>`;
-  html += `<div class="grid-2"><section class="card card-pad"><div class="card-h"><h2>Xuất bản sao lưu</h2></div><p style="margin:0 0 14px" class="muted">Tải toàn bộ chuyên mục, danh mục và bài viết về một tệp JSON. Ảnh tải lên trực tiếp cũng nằm trong tệp.</p>
+  html += `<div class="hc-grid"><section class="card card-pad"><div class="card-h"><h2>Xuất bản sao lưu</h2></div><p style="margin:0 0 14px" class="muted">Tải toàn bộ chuyên mục, danh mục và bài viết về một tệp JSON. Ảnh tải lên trực tiếp cũng nằm trong tệp.</p>
       <div class="qa"><button class="btn btn-navy" data-act="export">${icon('download')} Tải tệp JSON</button><button class="btn btn-line" data-act="export-show">Hiện để sao chép</button></div><div id="export-box"></div></section>
     <section class="card card-pad"><div class="card-h"><h2>Nhập từ bản sao lưu</h2></div>${W() ? `<p style="margin:0 0 14px" class="muted">Chọn tệp JSON đã xuất trước đây. Hệ thống kiểm tra dữ liệu và liên kết trước, rồi hỏi xác nhận trước khi <b>thay thế toàn bộ</b> dữ liệu hiện có.</p>
       <div class="qa"><span class="btn btn-line filebtn">${icon('upload')} Chọn tệp JSON<input type="file" id="imp-file" accept="application/json,.json" aria-label="Chọn tệp sao lưu JSON"></span><button class="btn btn-ghost" data-act="import-paste">Dán nội dung JSON</button></div>` : '<p class="muted">Cần quyền chỉnh sửa để nhập dữ liệu.</p>'}</section></div>`;
@@ -1836,10 +1841,139 @@ document.addEventListener('submit', async e => {
 });
 
 /* =========================================================================
+   Nội dung trang chủ (bảng site_content) — chỉnh trực tiếp trong admin
+   ========================================================================= */
+const HC_DEFAULTS = {"history":[{"year":"2006","title":"Hội đồng hương Hải Dương ra đời","text":"Ngày 29/10/2006, anh Nguyễn Đức Dũng cùng những người bạn thành lập Hội đồng hương Hải Dương - tiền thân của Đội SVTN Đồng hương Hải Dương."},{"year":"2006–2008","title":"Những ngày đầu khó khăn","text":"Lực lượng và hoạt động còn hạn chế, Đội nhận được sự hỗ trợ nhiệt tình từ Đội SVTN Đồng hương Vĩnh Phúc và CLB Sinh viên tuyên truyền PCTNXH & HIV/AIDS - cùng đi tập huấn, tiếp sức mùa thi."},{"year":"2009","title":"Mùa hè tình nguyện đầu tiên tại quê nhà","text":"Đội được Đoàn trường cử tham gia chiến dịch tình nguyện tại Hải Dương với 25 thành viên tại xã Long Xuyên, huyện Kinh Môn, kèm một suất tài trợ xây nhà tình nghĩa trị giá 20 triệu đồng. Từ điểm khởi đầu đó, Hè Xanh trở thành chiến dịch trọng tâm và là một trong những truyền thống bền bỉ nhất của Đội."},{"year":"28.11.2009","title":"Chính thức trực thuộc Hội Sinh viên","text":"Sau ba năm hoạt động, Hội Sinh viên Trường ĐH Kinh tế Quốc dân công nhận Đội là đơn vị trực thuộc."},{"year":"2010","title":"Hành Trang Sĩ Tử và Tiếp Sức Mùa Thi đầu tiên","text":"Khởi nguồn từ K50 và chính thức triển khai từ K51, Hành Trang Sĩ Tử trở thành hoạt động thường niên mỗi tháng 3 của Đội. Tiếp sức mùa thi cũng là một phần không thể thiếu trong mỗi mùa hè tình nguyện, dù nay đã không còn nhưng vẫn là một chương trình lớn đáng nhớ."},{"year":"2011–2012","title":"Hoàn thiện cơ cấu bộ máy và đánh dấu sự ra đời của cờ Đội","text":"Thành lập Ban Kỹ thuật (2011); bầu Đội phó chuyên môn quản lý chung 5 ban (2012). Chiếc cờ Đội đầu tiên được thiết kế và đưa vào sử dụng."},{"year":"2013","title":"Tết Sum Vầy đầu tiên","text":"Những ngày cuối năm 2013, Tết Sum Vầy lần đầu tiên được tổ chức tại xã Hoàng Hoa Thám, Chí Linh, mang hơi ấm ngày Tết đến với những gia đình còn nhiều khó khăn trên quê hương Hải Dương."},{"year":"2014","title":"Lễ hội Xuân Thành Đông","text":"Một trong những chương trình quy mô và ấn tượng nhất trong lịch sử Đội. Kéo dài hơn một tháng, lễ hội là chuỗi hoạt động sôi nổi từ Cảnh sắc Thành Đông, Con đường màu xanh, Tết Sum Vầy đến không gian văn hóa truyền thống và đêm nhạc Sắc Xuân."},{"year":"2016","title":"Thành lập Ban Phong trào Tình nguyện","text":"Đánh dấu bước phát triển mới trong cơ cấu tổ chức của Đội, Ban Phong trào Tình nguyện chính thức được thành lập, đảm nhận vai trò xây dựng, điều phối và triển khai các hoạt động tình nguyện, góp phần nâng cao tính chuyên nghiệp và lan tỏa mạnh mẽ hơn tinh thần vì cộng đồng."},{"year":"29.10.2016","title":"Dấu mốc 10 năm thành lập","text":"Kỷ niệm 10 năm thành lập, “Mảnh ghép thanh xuân” đánh dấu một chặng trưởng thành của Đội SVTN Đồng hương Hải Dương. Từ một tập thể nhỏ những ngày đầu, sau một thập kỷ, Đội đã lớn mạnh về quy mô, tạo dựng nhiều chương trình mang dấu ấn riêng và kết nối nhiều thế hệ sinh viên Hải Dương."},{"year":"2022","title":"Tình nguyện vùng cao đầu tiên","text":"Năm 2022, Trạm Tấu (Yên Bái) trở thành điểm đến đầu tiên của chương trình Tình nguyện vùng cao, đánh dấu bước chân của màu áo xanh Hải Dương đến với những miền đất ngoài quê hương. Sau Trạm Tấu, chương trình tiếp tục được tổ chức tại Sơn La, Bắc Kạn, mang sức trẻ và những hoạt động sẻ chia đến với trẻ em, người dân địa phương."},{"year":"29.10.2026","title":"Lễ kỷ niệm 20 năm thành lập","text":"20 năm, biết bao thế hệ đã cùng đi qua những mùa tình nguyện, cùng trưởng thành dưới màu áo xanh Hải Dương rồi bước tiếp trên những hành trình riêng. Đến tuổi 20, “Anh em ơi, về nhà!” trở thành cái tên của một cuộc hội ngộ đặc biệt - nơi các thành viên cùng trở về, gặp lại đồng đội, những ký ức thân quen và một phần thanh xuân từng gắn bó với Đội. Một cuộc trở về để nối lại những câu chuyện của 20 năm và cùng bắt đầu một chặng đường mới."}],"sports":[{"name":"Pickleball","format":"Đôi nam · Đôi nam nữ","pic":"Lê Đại","phone":"0926 699 598","rounds":[{"when":"Sáng CN 11.10","what":"Khai mạc, vòng bảng"},{"when":"Sáng T7 24.10","what":"Bán kết, chung kết, tranh hạng 3"}]},{"name":"Cầu lông","format":"Đôi nam · Đôi nam nữ","pic":"Nguyễn Xuân Thành Đạt","phone":"0826 990 906","rounds":[{"when":"Sáng CN 11.10","what":"Khai mạc, vòng bảng"},{"when":"Sáng T7 24.10","what":"Bán kết, chung kết, tranh hạng 3"}]},{"name":"Bóng đá","format":"6 đội · 2 bảng · vòng tròn 1 lượt","pic":"Vũ Việt Anh","phone":"0903 290 163","rounds":[{"when":"Sáng CN 18.10","what":"Khai mạc, vòng bảng"},{"when":"Chiều T7 24.10","what":"Bán kết, chung kết, tranh hạng 3"}]},{"name":"Esport","format":"Liên Minh Huyền Thoại · Liên Quân Mobile · Bo3","pic":"Chu Đức Việt","phone":"0346 192 241","rounds":[{"when":"26 – 27.09 · online","what":"Khai mạc, vòng bảng, bán kết"},{"when":"04.10 (LMHT) · 05.10 (LQ)","what":"Chung kết & tranh hạng 3 · offline"}]}],"activities":[{"name":"Triển lãm đa giác quan “Bảo tàng ký ức”","when":"24.10 · 9h – 17h","photo":"không gian triển lãm","desc":"Con đường kỷ niệm kể câu chuyện “20 năm chung một mái nhà” qua hình ảnh, âm thanh, kỷ vật và tư liệu của 20 thế hệ. Mỗi người đều có thể tìm thấy một phần thanh xuân của mình ở đây — và để lại lá thư gửi chính mình."},{"name":"Quán trà đá & du ca","when":"24.10 · 9h – 17h","photo":"quán trà đá, guitar","desc":"Khoảng hẹn thân quen bên cốc trà đá và tiếng guitar. Ngồi xuống, ôn lại kỷ niệm và cùng hát những bài ca quen thuộc của Đội — Bài ca sinh viên, Mùa hè xanh, Hải Dương xanh."},{"name":"Livestream kết nối các thế hệ","when":"24.10 · 9h – 17h","photo":"set livestream","desc":"Đại diện các khóa kể lại ký ức, kết nối lời nhắn của những anh em chưa thể về. Khoảng cách địa lý không khiến ai đứng ngoài câu chuyện 20 năm."},{"name":"Photobooth","when":"24.10 · 9h – 17h","photo":"khu photobooth","desc":"Booth chụp hình lưu lại khoảnh khắc hội ngộ — cùng K, cùng ban, cùng những người đã đi chung một đoạn đường tuổi trẻ."},{"name":"Buổi họp giao ban","when":"24.10 · 9h – 17h","photo":"buổi họp Đội","desc":"Ngồi lại như một buổi họp Đội ngày nào: các thế hệ cùng nhìn lại chặng đường, chia sẻ chuyện của mình và của mái nhà hôm nay."},{"name":"Đêm giao lưu lửa trại","when":"24.10 · 21h – 6h sáng","photo":"đêm lửa trại","desc":"Ngọn lửa của những mùa hè tình nguyện được thắp lại. Hát cùng nhau, nhảy cùng nhau, thức cùng nhau tới khi trời sáng."}],"radios":[{"title":"Lời hẹn ước","desc":"Số đặc biệt mừng 20 năm.","id":""},{"title":"Đang cập nhật","desc":"","id":""},{"title":"Đang cập nhật","desc":"","id":""},{"title":"Đang cập nhật","desc":"","id":""},{"title":"Đang cập nhật","desc":"","id":""},{"title":"Đang cập nhật","desc":"","id":""},{"title":"Đang cập nhật","desc":"","id":""},{"title":"Đang cập nhật","desc":"","id":""},{"title":"Đang cập nhật","desc":"","id":""}],"songs":[{"title":"Bài ca sinh viên","desc":"Bài hát truyền thống","src":"","yt":""},{"title":"Mùa hè xanh","desc":"Bài hát truyền thống","src":"","yt":""},{"title":"Hải Dương xanh","desc":"Bài hát truyền thống · Sáng tác: Hoàng An","src":"","yt":""},{"title":"Đang cập nhật","desc":"","src":"","yt":""},{"title":"Đang cập nhật","desc":"","src":"","yt":""}],"contacts":[{"role":"Trưởng Ban tổ chức","name":"Đang cập nhật","k":"K—","phone":"Đang cập nhật"},{"role":"Đăng ký & đón tiếp","name":"Đang cập nhật","k":"K—","phone":"Đang cập nhật"},{"role":"Truyền thông","name":"Đang cập nhật","k":"K—","phone":"Đang cập nhật"},{"role":"Triển lãm “Bảo tàng ký ức”","name":"Đang cập nhật","k":"K—","phone":"Đang cập nhật"},{"role":"Livestream & kỹ thuật","name":"Đang cập nhật","k":"K—","phone":"Đang cập nhật"},{"role":"Hậu cần & lửa trại","name":"Đang cập nhật","k":"K—","phone":"Đang cập nhật"},{"role":"Giải Pickleball","name":"Lê Đại","k":"K58","phone":"0926 699 598"},{"role":"Giải Cầu lông","name":"Nguyễn Xuân Thành Đạt","k":"K—","phone":"0826 990 906"},{"role":"Giải Bóng đá","name":"Vũ Việt Anh","k":"K—","phone":"0903 290 163"},{"role":"Giải Esport","name":"Chu Đức Việt","k":"K—","phone":"0346 192 241"}],"slides":[{"text":"Đội là nơi mình học cách làm người lớn, nhưng cũng là nơi mình được là đứa em nhỏ nhất.","who":"Họ và tên","k":"K48"},{"text":"Mùa hè năm ấy ở Hải Dương, mình hiểu thế nào là “anh em”. 20 năm rồi, về thôi!","who":"Họ và tên","k":"K50"},{"text":"Đi xa bao lâu thì nghe tiếng gọi “Anh em ơi!” mình vẫn thấy như vừa về đến cổng nhà.","who":"Họ và tên","k":"K52"},{"text":"Cảm ơn Đội đã cho mình những người bạn đi cùng suốt cả thanh xuân.","who":"Họ và tên","k":"K54"},{"text":"Mình muốn gặp lại cả đội hình chiến dịch năm đó — đủ mặt, không thiếu một ai.","who":"Họ và tên","k":"K56"},{"text":"Có những bài hát chỉ cần cất lên là cả hội trường đứng dậy hát theo. Hẹn hát lại cùng nhau nhé.","who":"Họ và tên","k":"K58"},{"text":"Đội đã lớn lên cùng chúng mình. Giờ đến lượt chúng mình trở về để chúc mừng Đội.","who":"Họ và tên","k":"K60"},{"text":"Mình vào Đội vì cùng quê, ở lại vì những con người ở đây.","who":"Họ và tên","k":"K62"},{"text":"Mong được nghe các anh chị kể chuyện ngày xưa, để thấy mình đang đi tiếp một con đường đẹp.","who":"Họ và tên","k":"K65"},{"text":"Năm đầu tiên ở Đội, mình được đón về đúng dịp 20 năm. Thật may mắn!","who":"Họ và tên","k":"K67"}]};
+const HC_BLOCKS = {
+  history: {label: 'Lịch sử 20 năm', noun: 'mốc', head: 'title', req: 'title', hint: 'Dòng thời gian ở mục “Giới thiệu Đội”.',
+    fields: [{k: 'year', l: 'Mốc thời gian', max: 40, ph: 'VD: 2006 hoặc 29.10.2016'}, {k: 'title', l: 'Tiêu đề', max: 160}, {k: 'text', l: 'Nội dung', max: 1200, ta: 1}]},
+  sports: {label: 'Giải thể thao', noun: 'môn', head: 'name', req: 'name', hint: 'Các giải trong trang “Lịch trình & Hoạt động”.', rounds: true,
+    fields: [{k: 'name', l: 'Tên giải', max: 80}, {k: 'format', l: 'Thể thức', max: 160}, {k: 'pic', l: 'Người phụ trách', max: 80}, {k: 'phone', l: 'Số điện thoại', max: 30}]},
+  activities: {label: 'Hoạt động ngày hội', noun: 'hoạt động', head: 'name', req: 'name', hint: 'Các hoạt động ngày 24.10.',
+    fields: [{k: 'name', l: 'Tên hoạt động', max: 120}, {k: 'when', l: 'Thời gian', max: 80, ph: 'VD: 24.10 · 9h – 17h'}, {k: 'photo', l: 'Gợi ý ảnh (chú thích)', max: 80}, {k: 'desc', l: 'Mô tả', max: 800, ta: 1}]},
+  radios: {label: 'HD Radioshow', noun: 'số radio', head: 'title', req: 'title', hint: 'Dán ID video YouTube (phần sau “v=” trong link) để hiện trình phát.',
+    fields: [{k: 'title', l: 'Tên số', max: 120}, {k: 'desc', l: 'Mô tả', max: 300}, {k: 'id', l: 'ID YouTube', max: 20, ph: 'VD: dQw4w9WgXcQ', re: /^[\w-]{6,20}$/, err: 'ID YouTube chỉ gồm chữ, số, “-”, “_” (6–20 ký tự).'}]},
+  songs: {label: 'Tiếng gọi HDX', noun: 'bài hát', head: 'title', req: 'title', hint: 'Mỗi bài dùng link tệp .mp3 HOẶC ID YouTube (chỉ phát âm thanh).',
+    fields: [{k: 'title', l: 'Tên bài', max: 120}, {k: 'desc', l: 'Mô tả', max: 300}, {k: 'src', l: 'Link tệp âm thanh (.mp3)', max: 500, ph: 'https://…/bai-hat.mp3', re: /^(https?:\/\/[^\s"'<>]+|[\w\-./]+\.(mp3|m4a|ogg|wav))$/i, err: 'Link âm thanh phải bắt đầu bằng https:// hoặc là tệp .mp3/.m4a/.ogg/.wav.'}, {k: 'yt', l: 'hoặc ID YouTube', max: 20, re: /^[\w-]{6,20}$/, err: 'ID YouTube không hợp lệ.'}]},
+  contacts: {label: 'Liên hệ', noun: 'đầu mối', head: 'role', req: 'role', hint: 'Danh sách ở trang “Liên hệ & Tài trợ”.',
+    fields: [{k: 'role', l: 'Vai trò / ban', max: 120}, {k: 'name', l: 'Họ tên', max: 80}, {k: 'k', l: 'Khóa (K…)', max: 20}, {k: 'phone', l: 'Số điện thoại', max: 30}]},
+  slides: {label: 'Lời hẹn ước', noun: 'lời nhắn', head: 'who', req: 'text', hint: 'Các lời nhắn trượt ở trang chủ.',
+    fields: [{k: 'text', l: 'Lời nhắn', max: 400, ta: 1}, {k: 'who', l: 'Người gửi', max: 80}, {k: 'k', l: 'Khóa (K…)', max: 20}]}
+};
+const HC = {
+  data: {}, saved: {}, cur: 'history', loaded: false, loading: false, err: '', saving: false, missingTable: false,
+  keys() { return [...Object.keys(HC_BLOCKS), 'settings']; },
+  snap(k) { return JSON.stringify(this.data[k]); },
+  dirty(k) { return k ? this.snap(k) !== this.saved[k] : this.loaded && this.keys().some(x => this.snap(x) !== this.saved[x]); },
+  async load() {
+    if (this.loading) return; this.loading = true; this.err = ''; this.draw();
+    try {
+      const rows = await SB.req('/rest/v1/site_content?select=key,data');
+      const m = {}; (rows || []).forEach(r => { m[r.key] = r.data; });
+      for (const k of Object.keys(HC_BLOCKS)) this.data[k] = Array.isArray(m[k]) && m[k].length ? clone(m[k]) : clone(HC_DEFAULTS[k]);
+      const st = m.settings && typeof m.settings === 'object' && !Array.isArray(m.settings) ? m.settings : {};
+      this.data.settings = {introVideoId: String(st.introVideoId || ''), registrationOpen: st.registrationOpen !== false, showCountdown: st.showCountdown !== false};
+      this.keys().forEach(k => { this.saved[k] = this.snap(k); });
+      this.loaded = true; this.missingTable = false;
+    } catch (e) {
+      this.missingTable = e && (e.status === 404 || /PGRST205|42P01/.test(String(e.code)));
+      this.err = this.missingTable ? 'Chưa có bảng site_content. Hãy chạy tệp supabase/site_content.sql trong Supabase (SQL Editor), rồi tải lại trang.' : (e && e.message) || 'Không tải được nội dung trang chủ.';
+    }
+    this.loading = false; this.draw();
+  },
+  mount() { if (!this.loaded && !this.loading) this.load(); else this.draw(); },
+  field(f, v, i, r) {
+    const id = `hc-${this.cur}-${i}-${f.k}`, a = `data-i="${i}" data-k="${f.k}" maxlength="${f.max}" ${f.ph ? `placeholder="${esc(f.ph)}"` : ''}`;
+    return `<div class="fld ${f.ta ? 'hc-wide' : ''}"><label for="${id}">${esc(f.l)}</label>${f.ta ? `<textarea id="${id}" class="ta" rows="3" ${a}>${esc(v || '')}</textarea>` : `<input id="${id}" class="inp" type="text" ${a} value="${esc(v || '')}">`}</div>`;
+  },
+  draw() {
+    const root = $('#hc-root'); if (!root) return;
+    if (!W()) { root.innerHTML = `<div class="notice">${icon('warn')}<div>Bạn cần đăng nhập bằng tài khoản admin.</div></div>`; return; }
+    if (Store.mode !== 'supabase') { root.innerHTML = `<div class="notice">${icon('warn')}<div><b>Cần kết nối Supabase.</b> Nội dung trang chủ chỉ chỉnh được khi admin chạy với cơ sở dữ liệu Supabase (điền <code>config.js</code>).</div></div>`; return; }
+    if (this.loading) { root.innerHTML = '<p class="muted" style="padding:20px">Đang tải nội dung trang chủ…</p>'; return; }
+    if (!this.loaded) { root.innerHTML = `<div class="notice danger">${icon('warn')}<div><b>Không tải được.</b> ${esc(this.err)}</div></div><div class="qa" style="margin-top:12px"><button class="btn btn-line" data-hc="reload">${icon('refresh', 16)} Thử lại</button></div>`; return; }
+    const sy = window.scrollY, B = HC_BLOCKS[this.cur];
+    const tabs = this.keys().map(k => `<button class="navpill hc-tab" data-hc="tab" data-k="${k}" ${k === this.cur ? 'aria-current="page"' : ''}>${esc(k === 'settings' ? 'Cài đặt chung' : HC_BLOCKS[k].label)}${this.dirty(k) ? ' <span class="hc-dot" title="Chưa lưu">●</span>' : ''}</button>`).join('');
+    let body = '';
+    if (this.cur === 'settings') {
+      const s = this.data.settings;
+      body = `<div class="hc-grid"><div class="fld"><label for="hc-intro">ID video YouTube giới thiệu (trang chủ)</label><input id="hc-intro" class="inp" type="text" data-set="introVideoId" maxlength="20" value="${esc(s.introVideoId)}" placeholder="Để trống: chưa hiện video"><p class="hint">Phần sau “v=” trong link YouTube.</p></div>
+        <div class="fld"><label class="lbl-t">Hiển thị</label><label class="hc-chk"><input type="checkbox" data-set="showCountdown" ${s.showCountdown ? 'checked' : ''}> Hiện đồng hồ đếm ngược</label><label class="hc-chk"><input type="checkbox" data-set="registrationOpen" ${s.registrationOpen ? 'checked' : ''}> Đang mở đăng ký tham dự</label></div></div>`;
+    } else {
+      const arr = this.data[this.cur];
+      body = `<p class="hint" style="margin:0 0 14px">${esc(B.hint)} Có <b>${arr.length}</b> ${B.noun}.</p>` + arr.map((it, i) => `<section class="card card-pad hc-item"><div class="card-h"><h3 style="margin:0;font-size:16px">#${i + 1} · ${esc(it[B.head] || '(chưa đặt tên)')}</h3>
+        <div class="qa"><button class="btn btn-line btn-sm" data-hc="up" data-i="${i}" ${i === 0 ? 'disabled' : ''} aria-label="Đưa lên">${icon('up', 16)}</button><button class="btn btn-line btn-sm" data-hc="down" data-i="${i}" ${i === arr.length - 1 ? 'disabled' : ''} aria-label="Đưa xuống">${icon('down', 16)}</button><button class="btn btn-danger-line btn-sm" data-hc="del" data-i="${i}" aria-label="Xoá">${icon('trash', 16)}</button></div></div>
+        <div class="hc-grid">${B.fields.map(f => this.field(f, it[f.k], i)).join('')}</div>
+        ${B.rounds ? `<div class="hc-rounds"><span class="lbl-t">Lịch thi đấu</span>${(it.rounds || []).map((r, j) => `<div class="hc-round"><input class="inp" type="text" maxlength="80" data-i="${i}" data-j="${j}" data-k="when" placeholder="Thời gian" aria-label="Thời gian" value="${esc(r.when || '')}"><input class="inp" type="text" maxlength="160" data-i="${i}" data-j="${j}" data-k="what" placeholder="Nội dung" aria-label="Nội dung" value="${esc(r.what || '')}"><button class="btn btn-danger-line btn-sm" data-hc="rdel" data-i="${i}" data-j="${j}" aria-label="Xoá vòng">${icon('x', 16)}</button></div>`).join('')}${(it.rounds || []).length < 10 ? `<button class="btn btn-line btn-sm" data-hc="radd" data-i="${i}">${icon('plus', 16)} Thêm vòng</button>` : ''}</div>` : ''}</section>`).join('')
+        + (arr.length < 60 ? `<div class="qa"><button class="btn btn-hero" data-hc="add">${icon('plus', 16)} Thêm ${B.noun}</button></div>` : '');
+    }
+    const d = this.dirty(this.cur);
+    root.innerHTML = `<div class="hc-tabs" role="tablist">${tabs}</div><section class="card card-pad stack">
+      <div class="card-h"><h2>${esc(this.cur === 'settings' ? 'Cài đặt chung' : B.label)}</h2><div class="qa">${this.cur !== 'settings' ? `<button class="btn btn-line btn-sm" data-hc="reset">Khôi phục mặc định</button>` : ''}<a class="btn btn-line btn-sm" href="./" target="_blank" rel="noopener">Xem trang chủ ↗</a><button class="btn btn-grad" data-hc="save" ${d && !this.saving ? '' : 'disabled'}>${icon('check', 16)} ${this.saving ? 'Đang lưu…' : d ? 'Lưu thay đổi' : 'Đã lưu'}</button></div></div>${body}</section>`;
+    window.scrollTo(0, sy);
+  },
+  validate(k) {
+    if (k === 'settings') { const v = this.data.settings.introVideoId.trim(); if (v && !/^[\w-]{6,20}$/.test(v)) return 'ID video YouTube không hợp lệ.'; return ''; }
+    const B = HC_BLOCKS[k], arr = this.data[k];
+    if (!arr.length) return `Cần ít nhất 1 ${B.noun}. Nếu muốn dùng nội dung gốc, bấm “Khôi phục mặc định”.`;
+    for (let i = 0; i < arr.length; i++) {
+      const it = arr[i];
+      if (!String(it[B.req] || '').trim()) return `#${i + 1}: “${B.fields.find(f => f.k === B.req).l}” không được để trống.`;
+      for (const f of B.fields) { const v = String(it[f.k] || '').trim(); if (v && f.re && !f.re.test(v)) return `#${i + 1}: ${f.err}`; }
+      if (k === 'songs' && !String(it.src || '').trim() && !String(it.yt || '').trim() && !/cập nhật/i.test(it.title)) { /* cho phép bài chưa có nguồn */ }
+    }
+    return '';
+  },
+  async save() {
+    const k = this.cur, bad = this.validate(k); if (bad) { toast(bad, 'err', 6000); return; }
+    let data = this.data[k];
+    if (k === 'settings') data = {introVideoId: data.introVideoId.trim(), registrationOpen: !!data.registrationOpen, showCountdown: !!data.showCountdown};
+    else data = data.map(it => { const o = {}; HC_BLOCKS[k].fields.forEach(f => { o[f.k] = String(it[f.k] || '').trim(); }); if (HC_BLOCKS[k].rounds) o.rounds = (it.rounds || []).map(r => ({when: String(r.when || '').trim(), what: String(r.what || '').trim()})).filter(r => r.when || r.what); return o; });
+    this.saving = true; this.draw();
+    try {
+      await SB.req('/rest/v1/site_content?on_conflict=key', {method: 'POST', headers: {Prefer: 'resolution=merge-duplicates,return=minimal'}, body: {key: k, data, updated_at: new Date().toISOString()}});
+      this.data[k] = clone(data); this.saved[k] = this.snap(k);
+      toast('Đã lưu. Trang chủ cập nhật sau khi tải lại trang.');
+    } catch (e) {
+      toast(e && e.status === 404 ? 'Chưa có bảng site_content: hãy chạy supabase/site_content.sql trong Supabase.' : e && (e.status === 403 || e.code === '42501') ? 'Tài khoản này không có quyền quản trị.' : (e && e.message) || 'Không lưu được.', 'err', 6000);
+    }
+    this.saving = false; this.draw();
+  },
+  onClick(el) {
+    const a = el.dataset.hc, i = +el.dataset.i, arr = this.data[this.cur];
+    if (a === 'tab') { this.cur = el.dataset.k; this.draw(); }
+    else if (a === 'reload') { this.loaded = false; this.load(); }
+    else if (a === 'save') this.save();
+    else if (a === 'add') { const o = {}; HC_BLOCKS[this.cur].fields.forEach(f => { o[f.k] = ''; }); if (HC_BLOCKS[this.cur].rounds) o.rounds = []; arr.push(o); this.draw(); setTimeout(() => { const x = $('#hc-root .hc-item:last-of-type input, #hc-root .hc-item:last-of-type textarea'); if (x) x.focus(); }, 30); }
+    else if (a === 'up' && i > 0) { [arr[i - 1], arr[i]] = [arr[i], arr[i - 1]]; this.draw(); }
+    else if (a === 'down' && i < arr.length - 1) { [arr[i + 1], arr[i]] = [arr[i], arr[i + 1]]; this.draw(); }
+    else if (a === 'del') { const B = HC_BLOCKS[this.cur]; confirmDialog({title: `Xoá ${B.noun} này?`, message: `“${arr[i][B.head] || '(chưa đặt tên)'}” sẽ bị xoá khỏi danh sách (chỉ có hiệu lực trên website sau khi bấm Lưu).`, confirmLabel: 'Xoá', danger: true}).then(ok => { if (ok) { arr.splice(i, 1); this.draw(); } }); }
+    else if (a === 'radd') { (arr[i].rounds = arr[i].rounds || []).push({when: '', what: ''}); this.draw(); }
+    else if (a === 'rdel') { arr[i].rounds.splice(+el.dataset.j, 1); this.draw(); }
+    else if (a === 'reset') confirmDialog({title: 'Khôi phục nội dung mặc định?', message: 'Danh sách này sẽ quay về nội dung gốc của trang. Chưa lưu cho tới khi bạn bấm “Lưu thay đổi”.', confirmLabel: 'Khôi phục'}).then(ok => { if (ok) { this.data[this.cur] = clone(HC_DEFAULTS[this.cur]); this.draw(); } });
+  },
+  onInput(el) {
+    if (el.dataset.set) { this.data.settings[el.dataset.set] = el.type === 'checkbox' ? el.checked : el.value; }
+    else if (el.dataset.k != null && el.dataset.i != null) {
+      const it = this.data[this.cur][+el.dataset.i]; if (!it) return;
+      if (el.dataset.j != null) it.rounds[+el.dataset.j][el.dataset.k] = el.value; else it[el.dataset.k] = el.value;
+    } else return;
+    const b = $('#hc-root [data-hc=save]'); if (b && !this.saving) { const d = this.dirty(this.cur); b.disabled = !d; b.innerHTML = `${icon('check', 16)} ${d ? 'Lưu thay đổi' : 'Đã lưu'}`; }
+    const tab = $(`#hc-root .hc-tab[data-k="${this.cur}"]`); if (tab) { const d = this.dirty(this.cur); tab.querySelector('.hc-dot')?.remove(); if (d) tab.insertAdjacentHTML('beforeend', ' <span class="hc-dot" title="Chưa lưu">●</span>'); }
+  }
+};
+VIEWS.homecontent = () => band({crumbs: [...crumbsHome, ['Trang chủ']], title: 'Nội dung trang chủ', sub: 'Sửa lịch sử, giải thể thao, hoạt động, radio, bài hát, liên hệ và lời hẹn ước hiển thị trên trang chủ website.'})
+  + `<main class="view"><div class="wrap stack"><div id="hc-root"></div></div></main>`;
+document.addEventListener('click', e => { const el = e.target.closest('#hc-root [data-hc]'); if (el && !el.disabled) HC.onClick(el); });
+document.addEventListener('input', e => { if (e.target.closest && e.target.closest('#hc-root')) HC.onInput(e.target); });
+document.addEventListener('change', e => { if (e.target.closest && e.target.closest('#hc-root') && e.target.type === 'checkbox') HC.onInput(e.target); });
+window.addEventListener('beforeunload', e => { if (HC.dirty()) { e.preventDefault(); e.returnValue = ''; } });
+
+/* =========================================================================
    Render loop
    ========================================================================= */
 function updateChrome() {
-  const items = [['dashboard', 'Tổng quan'], ['sections', 'Chuyên mục'], ['categories', 'Danh mục'], ['articles', 'Bài viết'], ['site', 'Xem trang'], ['backup', 'Sao lưu & Xuất']];
+  const items = [['dashboard', 'Tổng quan'], ['sections', 'Chuyên mục'], ['categories', 'Danh mục'], ['articles', 'Bài viết'], ['homecontent', 'Trang chủ'], ['site', 'Xem trang'], ['backup', 'Sao lưu & Xuất']];
   const cur = {section: 'sections', category: 'categories', edit: 'articles', article: 'articles'}[S.route.name] || S.route.name;
   $('#mainnav').innerHTML = items.map(([r, l]) => `<button class="navpill" ${goAttr(r, r === 'site' ? {} : null)} ${cur === r ? 'aria-current="page"' : ''}>${l}</button>`).join('');
   $('#mainnav').hidden = !!Store.auth; $('#gsearch').hidden = !!Store.auth;
@@ -1858,10 +1992,12 @@ function render() {
   if (Store.auth) { root.innerHTML = authView(); const af = root.querySelector('[autofocus]'); if (af && !root.contains(document.activeElement)) af.focus(); return; }
   if (!Store.ready || Store.failed) { root.innerHTML = loadingView(); return; }
   if (S.route.name === 'edit' && Editor.mounted && $('#ed-form')) { Editor.onData(); return; }
+  if (S.route.name === 'homecontent' && $('#hc-root')) { HC.draw(); return; }
   const ae = document.activeElement; const focus = ae && ae.id && root.contains(ae) ? {id: ae.id, s: ae.selectionStart, e: ae.selectionEnd} : null;
   const fn = VIEWS[S.route.name] || (() => notFound());
   root.innerHTML = fn(S.route.params || {});
   if (S.route.name === 'edit') Editor.mount(S.route.params || {});
+  if (S.route.name === 'homecontent') HC.mount();
   if (focus) { const el = document.getElementById(focus.id); if (el) { el.focus({preventScroll: true}); try { if (focus.s != null) el.setSelectionRange(focus.s, focus.e); } catch {} } }
 }
 Store.on(render);
