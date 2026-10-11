@@ -184,6 +184,7 @@
     modal.onkeydown = e => { if (e.key === 'Escape') modal.innerHTML = ''; };
   }
   function findItem(target) {
+    if (target && target.closest && target.closest('#hdx-add-agenda')) return null;
     const vt = videoTarget(target); if (vt) return vt;
     let el = target, d = 0;
     while (el && el !== document.body && el !== document.documentElement && d < 6) {
@@ -210,6 +211,7 @@
   const onClick = e => {
     if (!editing || host.contains(e.target) || e.composedPath().includes(host)) return;
     if (!homeBlocks()) return;
+    if (e.target.closest && e.target.closest('#hdx-add-agenda')) { e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); openItem('agenda', -1); return; }
     const f = findItem(e.target); if (!f) return;
     e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
     if (f.key === 'video') openVideo(); else openItem(f.key, f.i);
@@ -320,13 +322,11 @@
       <span class="sep"></span><button class="save" data-asave>Lưu bài</button><button data-acancel>Bỏ thay đổi</button></div>` : '';
     ui.innerHTML = `${articleTb}<div class="fab" role="region" aria-label="Chế độ chỉnh sửa">
       ${editing ? `<span>${art ? 'Sửa trực tiếp tiêu đề, mô tả, nội dung' : homeBlocks() ? 'Bấm vào chữ có viền cam để sửa' : 'Mở một bài viết để sửa'}</span>` : `<span>${em}</span>`}
-      ${editing && homeBlocks() && !art ? '<button data-addagenda>＋ Thêm hoạt động lịch trình</button>' : ''}
       <button class="${editing ? 'on' : ''}" data-toggle>${editing ? '✓ Thoát chỉnh sửa' : '✎ Chỉnh sửa trang'}</button><a href="admin.html">Quản trị</a></div>`;
   }
   ui.addEventListener('click', e => {
     const t = e.target.closest('button'); if (!t) return;
     if (t.hasAttribute('data-toggle')) { setEditing(!editing); return; }
-    if (t.hasAttribute('data-addagenda')) { const sec = document.getElementById('agenda'); if (!sec) { toast('Mở trang chủ để thêm hoạt động lịch trình.', true); return; } sec.scrollIntoView({behavior: 'smooth', block: 'center'}); openItem('agenda', -1); return; }
     if (t.hasAttribute('data-asave')) { saveArticle(); return; }
     if (t.hasAttribute('data-acancel')) { if (window.route) window.route(); toast('Đã bỏ các thay đổi chưa lưu.'); return; }
     const f = t.dataset.fmt; if (!f) return;
@@ -336,6 +336,17 @@
   });
   ui.addEventListener('mousedown', e => { if (e.target.closest('.tb')) e.preventDefault(); }); // giữ vùng chọn khi bấm nút định dạng
 
+  // Nút “Thêm hoạt động” nằm ngay trong mục “Một ngày để trở về”, chỉ hiện khi đang bật chỉnh sửa.
+  function syncAddBtn() {
+    const sec = document.getElementById('agenda'), cur = document.getElementById('hdx-add-agenda');
+    if (!editing || !sec || !homeBlocks()) { if (cur) cur.remove(); return; }
+    if (cur && cur.parentNode === sec) return;
+    if (cur) cur.remove();
+    const w = document.createElement('div'); w.id = 'hdx-add-agenda'; w.style.cssText = 'display:flex;justify-content:center;margin-top:20px';
+    w.innerHTML = '<button type="button" style="cursor:pointer;font:inherit;font-weight:700;font-size:15px;padding:11px 22px;border-radius:999px;border:2px dashed #F28A55;background:#fff;color:#C4571F">＋ Thêm hoạt động lịch trình</button>';
+    sec.appendChild(w);
+  }
+  setInterval(syncAddBtn, 400);
   function setEditing(on) {
     editing = on; try { sessionStorage.setItem(MODE_K, on ? '1' : ''); } catch (e) {}
     document.documentElement.classList.toggle('hdx-editing', on);
