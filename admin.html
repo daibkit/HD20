@@ -1896,7 +1896,8 @@ const HC = {
       const m = {}; (rows || []).forEach(r => { m[r.key] = r.data; });
       for (const k of Object.keys(HC_BLOCKS)) this.data[k] = Array.isArray(m[k]) && m[k].length ? clone(m[k]) : clone(HC_DEFAULTS[k]);
       const st = m.settings && typeof m.settings === 'object' && !Array.isArray(m.settings) ? m.settings : {};
-      this.data.settings = {introVideoId: String(st.introVideoId || ''), videoTitle: String(st.videoTitle || ''), videoText: String(st.videoText || ''), registrationOpen: st.registrationOpen !== false, showCountdown: st.showCountdown !== false}; this.stExtra = {...st};
+      if (typeof MU !== 'undefined' && !MU.driveUrl) MU.driveUrl = String(st.driveUrl || '');
+      this.data.settings = {introVideoId: String(st.introVideoId || ''), introDriveId: String(st.introDriveId || ''), videoTitle: String(st.videoTitle || ''), videoText: String(st.videoText || ''), registrationOpen: st.registrationOpen !== false, showCountdown: st.showCountdown !== false}; this.stExtra = {...st};
       this.keys().forEach(k => { this.saved[k] = this.snap(k); });
       this.loaded = true; this.missingTable = false;
     } catch (e) {
@@ -1917,6 +1918,17 @@ const HC = {
     return `<div class="hc-media"><span class="lbl-t">Tệp tải lên (âm thanh MP3/M4A… hoặc video MP4/WebM…, tối đa 50 MB)</span>
       ${f ? `<div class="hc-mprev">${prev}<div class="small muted" style="word-break:break-all">${it.ftype === 'video' ? 'Video' : 'Âm thanh'} đã tải lên · <a href="${esc(f)}" target="_blank" rel="noopener">mở tệp ↗</a></div></div>` : ''}
       <div class="qa"><label class="btn btn-line btn-sm ${busy ? 'off' : ''}" style="cursor:pointer">${icon('upload', 16)} ${busy ? 'Đang tải lên…' : f ? 'Thay tệp khác' : 'Tải tệp lên'}<input type="file" data-hcfile="${i}" accept="audio/*,video/*,.mp3,.m4a,.wav,.ogg,.mp4,.webm,.mov" hidden ${busy ? 'disabled' : ''}></label>${f ? `<button class="btn btn-danger-line btn-sm" data-hc="rmfile" data-i="${i}">Gỡ tệp</button>` : ''}</div></div>`;
+  },
+  async uploadIntro(file) {
+    if (!file || this.vbusy) return;
+    if (!(/^video\//.test(file.type) || /\.(mp4|mov|webm|m4v)$/i.test(file.name))) { toast('Chỉ nhận tệp video (MP4, MOV, WebM).', 'err', 6000); return; }
+    if (!MU_URL_RE.test(MU.driveUrl || '')) { toast('Chưa kết nối Google Drive: hãy dán địa chỉ Apps Script ở tab “Bảo tàng ký ức” trước.', 'err', 7000); return; }
+    this.vbusy = true; this.draw();
+    try {
+      const r = await MU.driveUpload(file, 'VIDEO', pct => { const e = $('#hc-vprog'); if (e) e.textContent = pct + '%'; });
+      this.data.settings.introDriveId = r.id; toast('Đã tải video lên Google Drive. Nhớ bấm “Lưu thay đổi”.');
+    } catch (e) { toast((e && e.message) || 'Không tải được video lên.', 'err', 8000); }
+    this.vbusy = false; this.draw();
   },
   async uploadFile(i, file) {
     const it = this.data[this.cur][i]; if (!it || !file) return;
@@ -1948,7 +1960,11 @@ const HC = {
     let body = '';
     if (this.cur === 'settings') {
       const s = this.data.settings;
-      body = `<div class="hc-grid"><div class="fld"><label for="hc-intro">Link hoặc ID video YouTube giới thiệu (trang chủ)</label><input id="hc-intro" class="inp" type="text" data-set="introVideoId" maxlength="300" value="${esc(s.introVideoId)}" placeholder="Để trống: chưa hiện video"><p class="hint">Dán nguyên link YouTube hoặc chỉ ID; hệ thống tự lấy ID.</p></div>
+      body = `<div class="hc-grid"><div class="fld"><label for="hc-intro">Link hoặc ID video YouTube giới thiệu (trang chủ)</label><input id="hc-intro" class="inp" type="text" data-set="introVideoId" maxlength="300" value="${esc(s.introVideoId)}" placeholder="Để trống: chưa hiện video"><p class="hint">Dán nguyên link YouTube hoặc chỉ ID; hệ thống tự lấy ID. Video YouTube <b>không</b> tự phát.</p></div>
+        <div class="fld hc-wide hc-media"><span class="lbl-t">Hoặc tải video lên (lưu trên Google Drive của bạn, tự phát khi mở trang)</span>
+          ${s.introDriveId ? `<div class="small muted">Đã có video tải lên · <a href="https://drive.google.com/file/d/${esc(s.introDriveId)}/view" target="_blank" rel="noopener">xem trên Drive ↗</a> · <b>đang được dùng thay cho link YouTube</b></div>` : ''}
+          <div class="qa"><label class="btn btn-line btn-sm ${this.vbusy ? 'off' : ''}" style="cursor:pointer">${icon('upload', 16)} ${this.vbusy ? 'Đang tải lên…' : s.introDriveId ? 'Thay video khác' : 'Tải video lên'}<input type="file" data-hcvid="1" accept="video/*,.mp4,.mov,.webm,.m4v" hidden ${this.vbusy ? 'disabled' : ''}></label>${s.introDriveId ? '<button class="btn btn-danger-line btn-sm" data-hc="rmvid">Gỡ video đã tải</button>' : ''}<span id="hc-vprog" class="small muted"></span></div>
+          <p class="hint" style="margin:0">Cần đã kết nối Google Drive ở tab “Bảo tàng ký ức”. Video tự phát ở chế độ tắt tiếng (quy định của trình duyệt). Nên dùng MP4 (H.264).</p></div>
         <div class="fld"><label for="hc-vt">Tiêu đề mục Video</label><input id="hc-vt" class="inp" type="text" data-set="videoTitle" maxlength="160" value="${esc(s.videoTitle)}" placeholder="Để trống: dùng tiêu đề mặc định"></div>
         <div class="fld hc-wide"><label for="hc-vx">Mô tả mục Video</label><textarea id="hc-vx" class="ta" rows="3" data-set="videoText" maxlength="700" placeholder="Để trống: dùng mô tả mặc định">${esc(s.videoText)}</textarea></div>
         <div class="fld"><label class="lbl-t">Hiển thị</label><label class="hc-chk"><input type="checkbox" data-set="showCountdown" ${s.showCountdown ? 'checked' : ''}> Hiện đồng hồ đếm ngược</label><label class="hc-chk"><input type="checkbox" data-set="registrationOpen" ${s.registrationOpen ? 'checked' : ''}> Đang mở đăng ký tham dự</label></div></div>`;
@@ -1981,7 +1997,7 @@ const HC = {
   async save() {
     const k = this.cur, bad = this.validate(k); if (bad) { toast(bad, 'err', 6000); return; }
     let data = this.data[k];
-    if (k === 'settings') data = {...(this.stExtra || {}), introVideoId: ytId(data.introVideoId) || '', videoTitle: String(data.videoTitle || '').trim(), videoText: String(data.videoText || '').trim(), registrationOpen: !!data.registrationOpen, showCountdown: !!data.showCountdown};
+    if (k === 'settings') data = {...(this.stExtra || {}), introVideoId: ytId(data.introVideoId) || '', introDriveId: /^[\w-]{10,100}$/.test(String(data.introDriveId || '')) ? String(data.introDriveId) : '', videoTitle: String(data.videoTitle || '').trim(), videoText: String(data.videoText || '').trim(), registrationOpen: !!data.registrationOpen, showCountdown: !!data.showCountdown};
     else data = data.map(it => { const o = {}; HC_BLOCKS[k].fields.forEach(f => { const v = String(it[f.k] || '').trim(); o[f.k] = f.yt ? (ytId(v) || '') : v; }); if (HC_BLOCKS[k].rounds) o.rounds = (it.rounds || []).map(r => ({when: String(r.when || '').trim(), what: String(r.what || '').trim()})).filter(r => r.when || r.what); return o; });
     this.saving = true; this.draw();
     try {
@@ -1996,6 +2012,7 @@ const HC = {
   },
   onClick(el) {
     const a = el.dataset.hc, i = +el.dataset.i, arr = this.data[this.cur];
+    if (a === 'rmvid') { this.data.settings.introDriveId = ''; this.draw(); return; }
     if (a === 'rmfile') { arr[i].file = ''; arr[i].ftype = ''; this.draw(); return; }
     if (a === 'tab') { this.cur = el.dataset.k; this.draw(); }
     else if (a === 'reload') { this.loaded = false; this.load(); }
@@ -2022,7 +2039,8 @@ VIEWS.homecontent = () => band({crumbs: [...crumbsHome, ['Trang chủ']], title:
   + `<main class="view"><div class="wrap stack"><div id="hc-root"></div></div></main>`;
 document.addEventListener('click', e => { const el = e.target.closest('#hc-root [data-hc]'); if (el && !el.disabled) HC.onClick(el); });
 document.addEventListener('input', e => { if (e.target.closest && e.target.closest('#hc-root')) HC.onInput(e.target); });
-document.addEventListener('change', e => { const t = e.target; if (t.closest && t.closest('#hc-root') && t.type === 'checkbox') HC.onInput(t); if (t.dataset && t.dataset.hcfile != null && t.files && t.files[0]) { const f = t.files[0]; t.value = ''; HC.uploadFile(+t.dataset.hcfile, f); } });
+document.addEventListener('change', e => { const t = e.target; if (t.closest && t.closest('#hc-root') && t.type === 'checkbox') HC.onInput(t); if (t.dataset && t.dataset.hcvid != null && t.files && t.files[0]) { const f = t.files[0]; t.value = ''; HC.uploadIntro(f); }
+  if (t.dataset && t.dataset.hcfile != null && t.files && t.files[0]) { const f = t.files[0]; t.value = ''; HC.uploadFile(+t.dataset.hcfile, f); } });
 window.addEventListener('beforeunload', e => { if (HC.dirty()) { e.preventDefault(); e.returnValue = ''; } });
 
 /* =========================================================================

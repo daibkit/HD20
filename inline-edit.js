@@ -115,21 +115,57 @@
     return out;
   }
   const ytId = v => { v = String(v || '').trim(); if (!v) return ''; const m = v.match(/(?:youtu\.be\/|youtube(?:-nocookie)?\.com\/(?:watch\?(?:[^#]*&)?v=|embed\/|shorts\/|live\/|v\/))([\w-]{6,20})/i); if (m) return m[1]; return /^[\w-]{6,20}$/.test(v) ? v : null; };
+  const b64 = blob => new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(String(fr.result).split(',')[1] || ''); fr.onerror = () => rej({message: 'Không đọc được tệp.'}); fr.readAsDataURL(blob); });
+  async function gas(action, extra) {
+    const url = (window.HDX_HOME.settings || {}).driveUrl;
+    if (session && session.expires_at && Date.now() / 1000 > session.expires_at - 90) await refresh();
+    let j; try { const res = await fetch(url, {method: 'POST', headers: {'Content-Type': 'text/plain;charset=utf-8'}, body: JSON.stringify(Object.assign({action, token: session && session.access_token}, extra))}); j = await res.json(); }
+    catch (e) { throw {message: 'Không kết nối được Google Apps Script.'}; }
+    if (!j || !j.ok) throw {message: (j && j.error) || 'Google Drive báo lỗi.'};
+    return j;
+  }
+  async function driveUpload(file, k, onPct) {
+    const mime = file.type || (/\.(mp4|m4v)$/i.test(file.name) ? 'video/mp4' : /\.mov$/i.test(file.name) ? 'video/quicktime' : /\.webm$/i.test(file.name) ? 'video/webm' : '');
+    if (!/^video\//.test(mime)) throw {message: 'Chỉ nhận tệp video.'}; if (!file.size) throw {message: 'Tệp rỗng.'};
+    const st = await gas('start', {k, name: file.name, mime, size: file.size}), CH = 3 * 1024 * 1024; let off = 0, r;
+    while (off < file.size) {
+      const end = Math.min(off + CH, file.size), data = await b64(file.slice(off, end));
+      for (let t = 1; ; t++) { try { r = await gas('chunk', {session: st.session, start: off, total: file.size, data}); break; } catch (e) { if (t >= 3) throw e; await new Promise(r => setTimeout(r, 1500 * t)); } }
+      off = end; onPct(Math.round(off / file.size * 100)); if (r.done) return r.id;
+    }
+    throw {message: 'Google Drive chưa xác nhận tệp đã tải xong, hãy thử lại.'};
+  }
   function videoTarget(target) {
     const sec = target && target.closest && target.closest('#video'); if (!sec || host.contains(target)) return null;
     const el = target.closest('[data-hdx-vid], h2, p'); return el && sec.contains(el) ? {key: 'video', el} : null;
   }
   function openVideo() {
     const H = window.HDX_HOME, S = H.settings || {};
-    const F = [{k: 'videoTitle', l: 'Tiêu đề', max: 160, v: S.videoTitle}, {k: 'videoText', l: 'Mô tả', max: 700, ta: 1, v: S.videoText}, {k: 'introVideoId', l: 'Link hoặc ID video YouTube', max: 300, v: S.introVideoId ? 'https://www.youtube.com/watch?v=' + S.introVideoId : ''}];
+    const F = [{k: 'videoTitle', l: 'Tiêu đề', max: 160, v: S.videoTitle}, {k: 'videoText', l: 'Mô tả', max: 700, ta: 1, v: S.videoText}, {k: 'introVideoId', l: 'Link hoặc ID video YouTube (không tự phát)', max: 300, v: S.introVideoId ? 'https://www.youtube.com/watch?v=' + S.introVideoId : ''}];
+    let driveId = S.introDriveId || '';
     const dom = n => { const e = document.querySelector('#video ' + n); return e ? norm(e.textContent) : ''; };
     F[0].v = F[0].v || dom('h2'); F[1].v = F[1].v || dom('p');
     modal.innerHTML = `<div class="ov" role="dialog" aria-modal="true" aria-label="Sửa mục Video"><div class="md"><h2>Sửa mục Video</h2><p class="sub">Dán nguyên link YouTube (hoặc chỉ ID). Video tự phát (tắt tiếng, theo quy định của trình duyệt). Để trống link để ẩn video. Lưu xong, website đổi ngay.</p><p class="err" id="err"></p>
-      ${F.map((f, n) => fieldHtml(f, f.v, n)).join('')}<div class="row"><button class="b" data-cancel>Huỷ</button><button class="b p" data-save>Lưu thay đổi</button></div></div></div>`;
+      ${F.map((f, n) => fieldHtml(f, f.v, n)).join('')}
+      <div class="fld"><label>Hoặc tải video lên (lưu Google Drive, tự phát tắt tiếng khi mở trang)</label><div id="vinfo" style="font-size:13px;color:#5b6b92"></div>
+        <div class="row" style="justify-content:flex-start;margin:0"><label class="b" style="cursor:pointer" id="vlab">Tải video lên<input type="file" id="vfile" accept="video/*,.mp4,.mov,.webm,.m4v" hidden></label><button class="b d" data-vrm style="margin:0">Gỡ video đã tải</button></div></div>
+      <div class="row"><button class="b" data-cancel>Huỷ</button><button class="b p" data-save>Lưu thay đổi</button></div></div></div>`;
     const q = s => modal.querySelector(s), first = modal.querySelector('input,textarea'); if (first) first.focus();
+    const info = msg => { q('#vinfo').textContent = msg != null ? msg : driveId ? 'Đã có video tải lên — đang được dùng thay cho link YouTube.' : 'Chưa có video tải lên.'; q('[data-vrm]').style.display = driveId ? '' : 'none'; };
+    info();
+    q('#vfile').onchange = async ev => {
+      const f = ev.target.files[0]; ev.target.value = ''; if (!f) return;
+      if (!(/^video\//.test(f.type) || /\.(mp4|mov|webm|m4v)$/i.test(f.name))) { q('#err').textContent = 'Chỉ nhận tệp video (MP4, MOV, WebM).'; return; }
+      if (!/^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec$/.test(S.driveUrl || '')) { q('#err').textContent = 'Chưa kết nối Google Drive: vào Admin → Bảo tàng ký ức dán địa chỉ Apps Script trước.'; return; }
+      q('#err').textContent = ''; q('#vlab').style.opacity = '.55'; q('#vfile').disabled = true;
+      try { driveId = await driveUpload(f, 'VIDEO', pct => info('Đang tải lên Google Drive… ' + pct + '%')); info('Đã tải xong. Bấm “Lưu thay đổi”.'); }
+      catch (er) { q('#err').textContent = (er && er.message) || 'Không tải được video lên.'; info(); }
+      q('#vlab').style.opacity = ''; q('#vfile').disabled = false;
+    };
     modal.onclick = async e => {
       const t = e.target;
       if (t.matches('.ov') || t.hasAttribute('data-cancel')) { modal.innerHTML = ''; return; }
+      if (t.hasAttribute('data-vrm')) { driveId = ''; info(); return; }
       if (!t.hasAttribute('data-save')) return;
       const val = {}; modal.querySelectorAll('[data-k]').forEach(el => { val[el.dataset.k] = el.value.trim(); });
       const id = ytId(val.introVideoId); if (id === null) { q('#err').textContent = 'Link/ID YouTube không hợp lệ.'; return; }
@@ -137,9 +173,9 @@
       try {
         const cur = await req('/rest/v1/site_content?select=data&key=eq.settings').catch(() => []);
         const b0 = cur && cur[0] && cur[0].data && !Array.isArray(cur[0].data) ? cur[0].data : {};
-        const data = Object.assign({}, b0, {videoTitle: val.videoTitle, videoText: val.videoText, introVideoId: id});
+        const data = Object.assign({}, b0, {videoTitle: val.videoTitle, videoText: val.videoText, introVideoId: id, introDriveId: driveId});
         await req('/rest/v1/site_content?on_conflict=key', {method: 'POST', headers: {Prefer: 'resolution=merge-duplicates,return=minimal'}, body: {key: 'settings', data, updated_at: new Date().toISOString()}});
-        Object.assign(S, {videoTitle: val.videoTitle, videoText: val.videoText, introVideoId: id});
+        Object.assign(S, {videoTitle: val.videoTitle, videoText: val.videoText, introVideoId: id, introDriveId: driveId});
         try { const rows = (lsGet(H.cacheKey) || []).filter(r => r && r.key !== 'settings'); rows.push({key: 'settings', data}); lsSet(H.cacheKey, rows); } catch (er) {}
         modal.innerHTML = ''; setHot(null); H.rerender(); toast('Đã lưu. Website đã cập nhật.');
       } catch (er) { const msg = er && er.status === 404 ? 'Chưa có bảng site_content: hãy chạy supabase/site_content.sql trong Supabase.' : errMsg(er); q('#err').textContent = msg; toast(msg, true); t.disabled = false; t.textContent = 'Lưu thay đổi'; }

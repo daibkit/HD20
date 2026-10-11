@@ -65,3 +65,6 @@ Lưu ý khi nâng cấp: chạy lại `supabase/museum.sql` (thêm cột `kind` 
 
 ## Mục Video trên trang chủ
 Admin bật “Sửa trang” trên website rồi bấm vào tiêu đề, mô tả, nút hoặc khung video để sửa chữ và dán link YouTube (hoặc sửa ở Trang chủ → Cài đặt chung). Để trống link thì ẩn video.
+
+### Video giới thiệu tải lên
+Admin → Trang chủ → Cài đặt chung (hoặc “Sửa trang” → bấm vào mục Video) → **Tải video lên**: tệp được lưu trên Google Drive của bạn (thư mục “Video giới thiệu”), tự phát (tắt tiếng) khi mở trang và được ưu tiên hơn link YouTube. Video YouTube không tự phát. Cần **dán lại mã Apps Script mới** (`apps-script/Code.gs.txt`) và triển khai “Phiên bản mới”.
