@@ -1,0 +1,68 @@
+/**
+ * HDX20 — cầu nối giữa website và Google Drive (Bảo tàng ký ức).
+ * Ảnh được lưu trong thư mục "HDX20 - Bảo tàng ký ức" ở Drive của BẠN, mỗi khóa một thư mục con (K48, K49…).
+ * Chỉ tài khoản admin của website mới tải lên / xoá / liệt kê được (kiểm tra qua Supabase).
+ * Hai giá trị bên dưới được admin tự điền khi bấm "Sao chép mã"; nếu dán tay thì thay vào.
+ */
+const SUPABASE_URL = '__SUPABASE_URL__';
+const SUPABASE_KEY = '__SUPABASE_KEY__';
+const ROOT_NAME = 'HDX20 - Bảo tàng ký ức';
+
+function isAdmin_(token) {
+  if (!token || typeof token !== 'string') return false;
+  try {
+    const h = {apikey: SUPABASE_KEY, Authorization: 'Bearer ' + token, 'Content-Type': 'application/json'};
+    const r = UrlFetchApp.fetch(SUPABASE_URL + '/rest/v1/rpc/is_admin', {method: 'post', headers: h, payload: '{}', muteHttpExceptions: true});
+    return r.getResponseCode() === 200 && String(r.getContentText()).trim() === 'true';
+  } catch (e) { return false; }
+}
+function root_() {
+  const p = PropertiesService.getScriptProperties(); let id = p.getProperty('ROOT_ID');
+  if (id) { try { return DriveApp.getFolderById(id); } catch (e) {} }
+  const it = DriveApp.getFoldersByName(ROOT_NAME);
+  const f = it.hasNext() ? it.next() : DriveApp.createFolder(ROOT_NAME);
+  p.setProperty('ROOT_ID', f.getId()); return f;
+}
+function folder_(k) {
+  if (!/^K[0-9]{1,3}$/.test(k)) throw new Error('Tên thư mục không hợp lệ');
+  const r = root_(), it = r.getFoldersByName(k);
+  return it.hasNext() ? it.next() : r.createFolder(k);
+}
+function out_(o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }
+
+function doGet() { return out_({ok: true, name: 'HDX20 Drive', note: 'Dùng POST từ trang quản trị.'}); }
+
+function doPost(e) {
+  try {
+    const q = JSON.parse(e.postData.contents);
+    if (!isAdmin_(q.token)) return out_({ok: false, error: 'Không có quyền (hãy đăng nhập lại ở trang quản trị).'});
+    if (q.action === 'ping') return out_({ok: true, folder: root_().getName()});
+    if (q.action === 'upload') {
+      if (!/^image\/(jpeg|png|webp|gif)$/.test(q.mime || '')) return out_({ok: false, error: 'Chỉ nhận ảnh JPG/PNG/WebP/GIF.'});
+      if (!q.data || q.data.length > 12 * 1024 * 1024) return out_({ok: false, error: 'Ảnh quá lớn.'});
+      const name = String(q.name || 'anh.jpg').replace(/[^\w.\- ]/g, '_').slice(0, 120);
+      const blob = Utilities.newBlob(Utilities.base64Decode(q.data), q.mime, name);
+      const f = folder_(q.k).createFile(blob);
+      f.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      return out_({ok: true, id: f.getId(), name: f.getName()});
+    }
+    if (q.action === 'list') {
+      const it = folder_(q.k).getFiles(), files = [];
+      while (it.hasNext()) {
+        const f = it.next(); if (!/^image\//.test(f.getMimeType())) continue;
+        if (f.getSharingAccess() !== DriveApp.Access.ANYONE_WITH_LINK && f.getSharingAccess() !== DriveApp.Access.ANYONE) f.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+        files.push({id: f.getId(), name: f.getName(), t: f.getDateCreated().getTime()});
+      }
+      files.sort(function (a, b) { return a.t - b.t; });
+      return out_({ok: true, files: files});
+    }
+    if (q.action === 'delete') {
+      if (!/^[\w-]{10,100}$/.test(q.id || '')) return out_({ok: false, error: 'Mã tệp không hợp lệ.'});
+      const f = DriveApp.getFileById(q.id), r = root_(); let inside = false, ps = f.getParents();
+      while (ps.hasNext()) { const p = ps.next(), pp = p.getParents(); if (pp.hasNext() && pp.next().getId() === r.getId()) inside = true; }
+      if (!inside) return out_({ok: false, error: 'Tệp không nằm trong thư mục Bảo tàng ký ức.'});
+      f.setTrashed(true); return out_({ok: true});
+    }
+    return out_({ok: false, error: 'Thao tác không hợp lệ.'});
+  } catch (err) { return out_({ok: false, error: String(err && err.message || err)}); }
+}
