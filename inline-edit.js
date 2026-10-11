@@ -208,9 +208,36 @@
     };
     modal.onkeydown = e => { if (e.key === 'Escape') modal.innerHTML = ''; };
   }
+  function openMeaning() {
+    const H = window.HDX_HOME, S = H.settings || {}, sec = document.getElementById('y-nghia');
+    const dom = (n, i) => { const e = sec && sec.querySelectorAll('[data-hdx-meaning]')[i]; return e ? e.textContent.trim() : ''; };
+    const F = [{k: 'meaningTitle', l: 'Tiêu đề', max: 160, v: S.meaningTitle || dom('', 0)}, {k: 'meaningText', l: 'Đoạn giới thiệu (xuống dòng để tách đoạn)', max: 1500, ta: 1, v: S.meaningText || dom('', 1)},
+      {k: 'meaningC1', l: 'Thẻ “01 · Tiếng gọi”', max: 600, ta: 1, v: S.meaningC1 || (S.meaningHide1 ? '' : dom('', 2))}, {k: 'meaningHide1', l: 'Ẩn (xoá) thẻ 01 khỏi trang chủ', chk: true, v: S.meaningHide1 ? '1' : ''},
+      {k: 'meaningC2', l: 'Thẻ “02 · Lời hẹn”', max: 600, ta: 1, v: S.meaningC2 || (S.meaningHide2 ? '' : dom('', S.meaningHide1 ? 2 : 3))}, {k: 'meaningHide2', l: 'Ẩn (xoá) thẻ 02 khỏi trang chủ', chk: true, v: S.meaningHide2 ? '1' : ''}];
+    modal.innerHTML = `<div class="ov" role="dialog" aria-modal="true" aria-label="Sửa Ý nghĩa sự kiện"><div class="md"><h2>Sửa “Ý nghĩa sự kiện”</h2>${F.map((f, n) => fieldHtml(f, f.v, n)).join('')}<div class="row"><button class="b" data-cancel>Huỷ</button><button class="b p" data-save>Lưu thay đổi</button></div></div></div>`;
+    const q = s => modal.querySelector(s), first = modal.querySelector('input,textarea'); if (first) first.focus();
+    modal.onclick = async e => {
+      const t = e.target;
+      if (t.matches('.ov') || t.hasAttribute('data-cancel')) { modal.innerHTML = ''; return; }
+      if (!t.hasAttribute('data-save')) return;
+      const val = {}; modal.querySelectorAll('[data-k]').forEach(el => { val[el.dataset.k] = el.type === 'checkbox' ? (el.checked ? '1' : '') : el.value.trim(); });
+      t.disabled = true; t.textContent = 'Đang lưu…';
+      try {
+        const cur = await req('/rest/v1/site_content?select=data&key=eq.settings').catch(() => []);
+        const b0 = cur && cur[0] && cur[0].data && !Array.isArray(cur[0].data) ? cur[0].data : {};
+        const data = Object.assign({}, b0, val);
+        await req('/rest/v1/site_content?on_conflict=key', {method: 'POST', headers: {Prefer: 'resolution=merge-duplicates,return=minimal'}, body: {key: 'settings', data, updated_at: new Date().toISOString()}});
+        Object.assign(S, val, {meaningHide1: val.meaningHide1 === '1', meaningHide2: val.meaningHide2 === '1'});
+        try { const rows = (lsGet(H.cacheKey) || []).filter(r => r && r.key !== 'settings'); rows.push({key: 'settings', data}); lsSet(H.cacheKey, rows); } catch (er) {}
+        modal.innerHTML = ''; setHot(null); H.rerender(); toast('Đã lưu. Website đã cập nhật.');
+      } catch (er) { const msg = errMsg(er); q('#err').textContent = msg; toast(msg, true); t.disabled = false; t.textContent = 'Lưu thay đổi'; }
+    };
+    modal.onkeydown = e => { if (e.key === 'Escape') modal.innerHTML = ''; };
+  }
   function findItem(target) {
     if (target && target.closest && target.closest('[data-hdx-add]')) return null;
     const vt = videoTarget(target); if (vt) return vt;
+    const mn = target && target.closest && target.closest('[data-hdx-meaning]'); if (mn && !host.contains(target)) return {key: 'meaning', el: mn};
     const pl = target && target.closest && target.closest('[data-hdx-pledge]'); if (pl && !host.contains(target)) return {key: 'pledge', el: pl};
     let el = target, d = 0;
     while (el && el !== document.body && el !== document.documentElement && d < 6) {
@@ -240,7 +267,7 @@
     const ab = e.target.closest && e.target.closest('[data-hdx-add]'); if (ab) { e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); openItem(ab.dataset.hdxAdd, -1); return; }
     const f = findItem(e.target); if (!f) return;
     e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
-    if (f.key === 'video') openVideo(); else if (f.key === 'pledge') openPledge(); else openItem(f.key, f.i);
+    if (f.key === 'video') openVideo(); else if (f.key === 'pledge') openPledge(); else if (f.key === 'meaning') openMeaning(); else openItem(f.key, f.i);
   };
 
   function fieldHtml(f, v, idx, extra) {
