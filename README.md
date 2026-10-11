@@ -35,3 +35,10 @@ Trang sự kiện là bản xuất từ artifact thiết kế; nội dung của 
 Ngoài Tin tức, admin có mục **Trang chủ** để sửa: Lịch sử 20 năm, Giải thể thao, Hoạt động ngày hội, HD Radioshow, Tiếng gọi HDX, Liên hệ, Lời hẹn ước và Cài đặt chung (video giới thiệu, đồng hồ đếm ngược, mở/đóng đăng ký).
 
 Chạy **một lần** tệp `supabase/site_content.sql` trong Supabase (SQL Editor → New query → dán → Run). Chưa có dữ liệu thì trang chủ dùng nội dung gốc; bấm “Lưu thay đổi” ở admin là trang chủ dùng nội dung mới (người xem thấy sau khi tải lại trang).
+
+## Chỉnh sửa trực tiếp trên website
+
+Đăng nhập ở `/admin` một lần, rồi mở trang chủ hoặc trang Tin tức: góc dưới bên trái có nút **✎ Chỉnh sửa trang** (chỉ admin thấy).
+- **Trang chủ:** bật chế độ, bấm vào chữ có viền cam (lịch sử, giải thể thao, hoạt động, radio, bài hát, liên hệ, lời hẹn ước) → sửa trong hộp thoại → Lưu.
+- **Bài viết (Tin tức):** bật chế độ, sửa trực tiếp tiêu đề, mô tả ngắn, nội dung (có thanh định dạng) → Lưu bài.
+Quyền ghi do Supabase kiểm tra, người không phải admin không lưu được. Cần đã chạy `supabase/site_content.sql` cho phần trang chủ.

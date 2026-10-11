@@ -11,6 +11,7 @@
 <meta name="theme-color" content="#174D9C">
 <link rel="icon" href="img/logo.png">
 <script src="config.js"></script>
+<script src="inline-edit.js" defer></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap">
@@ -215,6 +216,7 @@ function route() {
   const curSec = parts[0] === 'chuyen-muc' ? parts[1] : parts[0] === 'bai-viet' ? (secById((C.articles.find(x => x.slug === parts[1]) || {}).sectionId) || {}).slug : '';
   document.getElementById('nav').innerHTML = `<a href="index.html">← Trang sự kiện</a><a href="#/" ${!parts.length ? 'aria-current="page"' : ''}>Tin tức</a>` + C.sections.map(s => `<a href="${secUrl(s)}" ${curSec === s.slug ? 'aria-current="page"' : ''}>${esc(s.name)}</a>`).join('');
   window.scrollTo(0, 0);
+  if (window.HDXEdit) window.HDXEdit.afterRoute({article: parts[0] === 'bai-viet' ? (C.articles.find(x => x.slug === parts[1]) || null) : null});
 }
 window.addEventListener('hashchange', route);
 // Nguồn dữ liệu: Supabase (trực tiếp, chỉ nội dung đã xuất bản nhờ RLS) — nếu chưa cấu hình thì dùng content.json.
