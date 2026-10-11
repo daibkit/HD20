@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Anh em ơi! Về nhà — 20 năm Đội SVTN Đồng hương Hải Dương</title>
+<meta name="description" content="20 năm chung một mái nhà — Đội SVTN Đồng hương Hải Dương - NEU. Lịch sử, hoạt động ngày hội 24.10.2026 và bảo tàng ký ức.">
+<meta property="og:title" content="Anh em ơi! Về nhà — 20 năm Đội SVTN Đồng hương Hải Dương">
+<meta property="og:description" content="Tự hào một hành trình - Gắn kết những thế hệ.">
+<meta property="og:image" content="img/anh-em-oi.webp">
+<meta name="theme-color" content="#174D9C">
+<link rel="icon" href="img/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap">
+<style>
+/* Public reading site: sticky pill header → navy hero → editorial card grid. Same tokens as the event site. */
+:root{
+  --bg:#FAFCFD; --surface:#FFFFFF; --tint:#EAF5FB; --tint-2:#F3F8FB;
+  --ink:#13204A; --ink-strong:#16285E; --body:#3C4A6E; --muted:#56617D; --line:#E3ECF3;
+  --brand:#0E4C9C; --sky:#2BBDE6; --orange:#F28A55; --gold:#F6CF5C; --green:#2AA56A;
+  --grad:linear-gradient(90deg,#F28A55,#F6CF5C);
+  --hero:linear-gradient(180deg,#3165AC 0%,#174D9C 45%,#1A2D62 100%);
+  --f:'Raleway',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg)}
+body{font-family:var(--f);color:var(--ink);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:var(--brand)}
+::selection{background:var(--gold);color:#13204A}
+img{max-width:100%}
+[hidden]{display:none!important}
+:focus-visible{outline:3px solid var(--sky);outline-offset:2px;border-radius:8px}
+.wrap{max-width:1240px;margin:0 auto;padding-inline:20px}
+@media (max-width:480px){.wrap{padding-inline:16px}}
+header.top{position:sticky;top:0;z-index:50;background:rgba(250,252,253,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.top-in{display:flex;align-items:center;gap:8px 20px;padding-block:10px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink-strong);flex:0 0 auto}
+.logo img{width:44px;height:44px;object-fit:contain}
+.logo b{font-weight:800;font-size:15px;line-height:1.15}
+.logo small{display:block;font-size:12px;color:var(--muted);font-weight:600}
+nav.main{display:flex;gap:2px;flex:1 1 0;min-width:0;overflow-x:auto;justify-content:flex-end;scrollbar-width:none}
+nav.main::-webkit-scrollbar{display:none}
+nav.main a{flex:0 0 auto;text-decoration:none;font-size:14px;font-weight:600;padding:9px 12px;border-radius:999px;white-space:nowrap;color:var(--body)}
+nav.main a:hover{background:var(--tint)}
+nav.main a[aria-current="page"]{background:var(--tint);color:var(--brand)}
+@media (max-width:760px){.top-in{flex-wrap:wrap}nav.main{flex-basis:100%;justify-content:flex-start}header.top{position:static}}
+.hero{background:var(--hero);color:#fff;overflow:hidden}
+.hero-in{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr));gap:24px 48px;align-items:center;padding-block:48px 56px}
+.badges{display:flex;flex-wrap:wrap;gap:8px}
+.badge{font-size:12.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:6px 12px;border-radius:999px;color:#fff}
+.b1{background:linear-gradient(90deg,#2BBDE6,#1E7FC8)}.b2{background:linear-gradient(90deg,#5FBE88,#1F9A5E)}
+.hero h1{margin:16px 0 12px;font-weight:700;font-size:clamp(36px,5.4vw,64px);line-height:1.08;letter-spacing:-.02em;text-wrap:balance}
+.gt{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{margin:0;color:#DCEBF8;font-size:clamp(17px,1.6vw,20px);max-width:540px}
+.facts{display:flex;flex-direction:column;gap:4px;margin-top:16px;font-size:14px}
+.facts span::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:#55D0F2;margin-right:10px;transform:translateY(-1px)}
+.facts span+span::before{background:#3CBA7D}
+.hero-img{display:flex;justify-content:center}
+.hero-img img{width:100%;max-width:520px;aspect-ratio:1;object-fit:cover;-webkit-mask-image:radial-gradient(circle at 50% 50%,#000 52%,transparent 71%);mask-image:radial-gradient(circle at 50% 50%,#000 52%,transparent 71%)}
+.band{background:var(--hero);color:#fff}
+.band-in{padding-block:32px 36px;display:flex;flex-direction:column;gap:10px}
+.band h1{margin:0;font-weight:700;font-size:clamp(28px,4vw,46px);line-height:1.12;letter-spacing:-.015em;text-wrap:balance;max-width:900px}
+.band p{margin:0;color:#DCEBF8;max-width:720px}
+.crumbs{display:flex;flex-wrap:wrap;gap:6px;font-size:13px;font-weight:600;color:#A9D8F2}
+.crumbs a{color:#A9D8F2;text-decoration:none}.crumbs a:hover{color:#fff;text-decoration:underline}
+.meta{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:14px;color:#DCEBF8}
+main{padding-block:40px 72px}
+.stack{display:flex;flex-direction:column;gap:22px}
+.eyebrow{font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--brand)}
+h2.h{margin:0;font-weight:700;font-size:clamp(28px,3.6vw,42px);line-height:1.12;letter-spacing:-.01em;color:var(--ink-strong);text-wrap:balance}
+.lead{margin:0;color:var(--body);max-width:720px;font-size:17px}
+.secs{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:16px}
+.sec{display:grid;grid-template-columns:auto minmax(0,1fr);gap:18px 22px;align-items:center;padding:clamp(18px,2.4vw,26px);border-radius:24px;text-decoration:none;color:var(--ink);background:linear-gradient(140deg,#FFF6EA 0%,#FDEBD3 60%,#E4F3FB 100%);border:1px solid #F6E0C4;transition:transform .2s}
+.sec:nth-child(3n+2){background:linear-gradient(140deg,#EFF9F2 0%,#DDF1E4 60%,#E8F5FA 100%);border-color:#CBE8D5}
+.sec:nth-child(3n+3){background:linear-gradient(140deg,#EAF5FB 0%,#DCEBF8 60%,#F3F8FB 100%);border-color:#CFE3F2}
+.sec:hover{transform:translateY(-2px)}
+.sec img,.sec .ph{width:clamp(96px,11vw,132px);aspect-ratio:1;border-radius:18px;object-fit:cover;background:#DCEBF8}
+.sec h3{margin:0 0 4px;font-size:21px;color:var(--ink-strong);line-height:1.25}
+.sec p{margin:0;font-size:14.5px;color:var(--body)}
+.sec .n{display:inline-block;margin-top:8px;font-weight:700;font-size:14px;color:var(--brand)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:18px}
+.card{display:flex;flex-direction:column;border-radius:24px;background:var(--surface);border:1px solid var(--line);overflow:hidden;text-decoration:none;color:var(--ink);box-shadow:0 1px 2px rgba(19,32,74,.05),0 8px 24px rgba(19,32,74,.05);transition:transform .2s}
+.card:hover{transform:translateY(-3px)}
+.card img,.card .ph{width:100%;aspect-ratio:16/10;object-fit:cover;display:block;background:repeating-linear-gradient(135deg,#1C3270 0 14px,#1A2D66 14px 28px)}
+.card .in{padding:16px 18px 20px;display:flex;flex-direction:column;gap:6px}
+.card .k{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--brand)}
+.card h3{margin:0;font-size:19px;line-height:1.3;color:var(--ink-strong)}
+.card p{margin:0;font-size:14.5px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.card time{font-size:13px;color:var(--muted)}
+.pills{display:flex;flex-wrap:wrap;gap:8px}
+.pill{text-decoration:none;font-weight:600;font-size:14px;padding:8px 16px;border-radius:999px;border:1.5px solid #CBD9E6;color:var(--ink-strong);background:var(--surface)}
+.pill:hover{background:var(--tint)}
+.pill[aria-current="page"]{background:#16285E;color:#fff;border-color:#16285E}
+.read{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+.cover{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:28px}
+.lede{font-size:clamp(18px,2vw,20px);line-height:1.55;color:var(--ink-strong);font-weight:500;margin:0}
+.prose{color:var(--body);font-size:17px;line-height:1.75;overflow-wrap:anywhere}
+.prose>*:first-child{margin-top:0}
+.prose h2{color:var(--ink-strong);font-size:26px;line-height:1.25;margin:1.4em 0 .5em}
+.prose h3{color:var(--ink-strong);font-size:20px;margin:1.3em 0 .4em}
+.prose p{margin:0 0 1em}
+.prose ul,.prose ol{margin:0 0 1em;padding-left:1.4em}
+.prose blockquote{margin:1.2em 0;padding:16px 20px;border-radius:20px;background:linear-gradient(140deg,#FFF6EA,#EAF5FB);color:var(--ink);font-style:italic}
+.prose img{max-width:100%;height:auto;border-radius:20px;display:block;margin:1em 0}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font-size:13px;font-weight:600;padding:4px 12px;border-radius:999px;background:var(--tint);color:var(--brand)}
+.back{display:inline-flex;align-items:center;gap:6px;align-self:flex-start;text-decoration:none;font-size:13px;font-weight:600;color:#fff;border:1px solid rgba(255,255,255,.3);background:rgba(10,25,70,.25);border-radius:999px;padding:5px 12px}
+.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none;font-weight:700;font-size:15px;padding:13px 24px;border-radius:999px;background:var(--grad);color:#fff;align-self:flex-start}
+.btn.ghost{background:transparent;border:1.5px solid rgba(255,255,255,.45)}
+.empty{text-align:center;padding:48px 16px;color:var(--muted)}
+.empty h2{color:var(--ink-strong);margin:0 0 8px}
+.skel{border-radius:24px;background:linear-gradient(90deg,var(--tint) 0%,var(--tint-2) 50%,var(--tint) 100%);background-size:200% 100%;animation:sh 1.4s infinite linear;height:260px}
+@keyframes sh{to{background-position:-200% 0}}
+footer{background:#16285E;color:#DCEBF8;font-size:14px}
+footer .wrap{padding-block:28px;display:flex;flex-wrap:wrap;gap:12px 32px;justify-content:space-between;align-items:center}
+footer img{width:40px;height:40px;object-fit:contain;background:#fff;border-radius:50%}
+footer b{color:#fff}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap top-in">
+  <a class="logo" href="#/" aria-label="Trang chủ"><img src="img/logo.png" alt="Logo Đội SVTN Đồng hương Hải Dương" width="44" height="44"><span><b>Anh em ơi! Về nhà</b><small>20 năm · 2006 – 2026</small></span></a>
+  <nav class="main" id="nav" aria-label="Chuyên mục"></nav>
+</div></header>
+<div id="app" aria-live="polite"><main><div class="wrap stack"><div class="skel"></div><div class="skel" style="height:180px"></div></div></main></div>
+<footer><div class="wrap"><div style="display:flex;gap:12px;align-items:center"><img src="img/logo.png" alt=""><div><b>Đội SVTN Đồng hương Hải Dương - NEU</b><br>29.10.2006 – 29.10.2026</div></div><div>Đại học Kinh tế Quốc dân, 207 Giải Phóng, Hà Nội</div></div></footer>
+<script>
+"use strict";
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const collator = new Intl.Collator('vi', {numeric: true});
+const safeImg = s => { s = String(s || '').trim(); if (/^https?:\/\//i.test(s) || /^data:image\/(png|jpe?g|webp|gif);base64,/i.test(s) || /^(?!\/\/)[\w\-./]+\.(png|jpe?g|webp|gif|svg)$/i.test(s)) return s; return ''; };
+const fmt = iso => { if (!iso) return ''; const d = new Date(iso); if (isNaN(d)) return ''; return d.toLocaleDateString('vi-VN', {day: '2-digit', month: '2-digit', year: 'numeric'}); };
+const ALLOWED = {P:[],H2:[],H3:[],H4:[],STRONG:[],B:[],EM:[],I:[],U:[],S:[],UL:[],OL:[],LI:[],BLOCKQUOTE:[],A:['href'],IMG:['src','alt'],BR:[],HR:[],FIGURE:[],FIGCAPTION:[],CODE:[],PRE:[]};
+function sanitize(html) {
+  const doc = new DOMParser().parseFromString('<body>' + String(html || '') + '</body>', 'text/html');
+  (function walk(n) { Array.from(n.childNodes).forEach(ch => {
+    if (ch.nodeType === 3) return; if (ch.nodeType !== 1) { ch.remove(); return; }
+    const t = ch.tagName;
+    if (!ALLOWED[t]) { if (/^(SCRIPT|STYLE|IFRAME|OBJECT|EMBED|FORM|SVG|MATH|TEMPLATE)$/.test(t)) { ch.remove(); return; } walk(ch); ch.replaceWith(...Array.from(ch.childNodes)); return; }
+    Array.from(ch.attributes).forEach(a => { if (!ALLOWED[t].includes(a.name)) ch.removeAttribute(a.name); });
+    if (t === 'A') { const h = ch.getAttribute('href') || ''; if (!/^(https?:|mailto:|tel:|#|\/)/i.test(h)) ch.removeAttribute('href'); else { ch.target = '_blank'; ch.rel = 'noopener noreferrer'; } }
+    if (t === 'IMG') { const s = safeImg(ch.getAttribute('src')); if (!s) { ch.remove(); return; } ch.setAttribute('src', s); ch.setAttribute('loading', 'lazy'); }
+    walk(ch); }); })(doc.body);
+  return doc.body.innerHTML;
+}
+const textOf = h => { const d = document.createElement('div'); d.innerHTML = sanitize(h); return d.textContent.replace(/\s+/g, ' ').trim(); };
+
+let C = null; // content
+const sec = slug => C.sections.find(s => s.slug === slug);
+const secById = id => C.sections.find(s => s.id === id);
+const catById = id => C.categories.find(c => c.id === id);
+const catsOf = id => C.categories.filter(c => c.sectionId === id).sort((a, b) => a.order - b.order || collator.compare(a.name, b.name));
+const artsWhere = f => C.articles.filter(f).sort((a, b) => collator.compare(b.publishedAt || '', a.publishedAt || ''));
+const artUrl = a => '#/bai-viet/' + encodeURIComponent(a.slug);
+const secUrl = (s, c) => '#/chuyen-muc/' + encodeURIComponent(s.slug) + (c ? '/' + encodeURIComponent(c.slug) : '');
+
+function card(a) {
+  const c = catById(a.categoryId), img = safeImg(a.cover);
+  return `<a class="card" href="${artUrl(a)}">${img ? `<img src="${esc(img)}" alt="" loading="lazy">` : '<span class="ph"></span>'}<div class="in"><span class="k">${esc(c ? c.name : '')}</span><h3>${esc(a.title)}</h3><p>${esc(a.excerpt || textOf(a.content).slice(0, 180))}</p><time datetime="${esc(a.publishedAt || '')}">${fmt(a.publishedAt)}</time></div></a>`;
+}
+function setTitle(t) { document.title = t ? `${t} — Anh em ơi! Về nhà` : 'Anh em ơi! Về nhà — 20 năm Đội SVTN Đồng hương Hải Dương'; }
+
+const R = {
+  home() {
+    setTitle('');
+    const latest = artsWhere(() => true).slice(0, 6);
+    return `<section class="hero"><div class="wrap hero-in"><div>
+      <div class="badges"><span class="badge b1">Đội SVTN Đồng hương Hải Dương - NEU</span><span class="badge b2">Sinh nhật 20 tuổi</span></div>
+      <h1><span class="gt">20 năm</span> chung<br>một mái nhà</h1><p><b>Tự hào một hành trình - Gắn kết những thế hệ.</b></p>
+      <div class="facts"><span>Thứ Bảy 24.10.2026</span><span>Đại học Kinh tế Quốc dân, 207 Giải Phóng, Bạch Mai, Hà Nội</span></div>
+      ${C.sections[0] ? `<p style="margin-top:22px"><a class="btn" href="${secUrl(C.sections[0])}">Khám phá ${esc(C.sections[0].name)} →</a></p>` : ''}
+    </div><div class="hero-img"><img src="img/anh-em-oi.webp" alt="Anh em ơi! Về nhà — 20 năm"></div></div></section>
+    <main><div class="wrap stack" style="gap:40px">
+      ${C.sections.length ? `<section class="stack"><span class="eyebrow">Khám phá</span><h2 class="h">Một ngày trở về, nhiều câu chuyện để kể</h2>
+        <div class="secs">${C.sections.map(s => { const img = safeImg(s.image), n = artsWhere(a => a.sectionId === s.id).length; return `<a class="sec" href="${secUrl(s)}">${img ? `<img src="${esc(img)}" alt="">` : '<span class="ph"></span>'}<div><h3>${esc(s.name)}</h3><p>${esc(s.description || '')}</p><span class="n">${n ? n + ' bài viết →' : 'Đang cập nhật →'}</span></div></a>`; }).join('')}</div></section>` : ''}
+      ${latest.length ? `<section class="stack"><span class="eyebrow">Bài mới</span><h2 class="h">Những năm tháng ấy, vẫn còn ở đây</h2><div class="cards">${latest.map(card).join('')}</div></section>` : `<div class="empty"><h2>Nội dung đang được cập nhật</h2><p>Hẹn gặp lại anh em sớm nhé.</p></div>`}
+    </div></main>`;
+  },
+  section(slug, catSlug) {
+    const s = sec(slug); if (!s) return R.notFound();
+    const cats = catsOf(s.id), cur = cats.find(c => c.slug === catSlug);
+    setTitle(cur ? cur.name : s.name);
+    const arts = artsWhere(a => a.sectionId === s.id && (!cur || a.categoryId === cur.id));
+    return `<section class="band"><div class="wrap band-in"><nav class="crumbs" aria-label="Đường dẫn"><a href="#/">Trang chủ</a><span>/</span>${cur ? `<a href="${secUrl(s)}">${esc(s.name)}</a><span>/</span><span>${esc(cur.name)}</span>` : `<span>${esc(s.name)}</span>`}</nav>
+      <h1>${esc(cur ? cur.name : s.name)}</h1>${(cur ? cur.description : s.description) ? `<p>${esc(cur ? cur.description : s.description)}</p>` : ''}</div></section>
+      <main><div class="wrap stack">${cats.length > 1 ? `<nav class="pills" aria-label="Danh mục"><a class="pill" href="${secUrl(s)}" ${!cur ? 'aria-current="page"' : ''}>Tất cả</a>${cats.map(c => `<a class="pill" href="${secUrl(s, c)}" ${cur && cur.id === c.id ? 'aria-current="page"' : ''}>${esc(c.name)}</a>`).join('')}</nav>` : ''}
+      ${arts.length ? `<div class="cards">${arts.map(card).join('')}</div>` : `<div class="empty"><h2>Chưa có bài viết</h2><p>Nội dung sẽ sớm được cập nhật.</p></div>`}</div></main>`;
+  },
+  article(slug) {
+    const a = C.articles.find(x => x.slug === slug); if (!a) return R.notFound();
+    const s = secById(a.sectionId), c = catById(a.categoryId), cover = safeImg(a.cover);
+    setTitle(a.title);
+    const related = artsWhere(x => x.categoryId === a.categoryId && x.id !== a.id).slice(0, 3);
+    return `<section class="band"><div class="wrap band-in"><nav class="crumbs" aria-label="Đường dẫn"><a href="#/">Trang chủ</a>${s ? `<span>/</span><a href="${secUrl(s)}">${esc(s.name)}</a>` : ''}${s && c ? `<span>/</span><a href="${secUrl(s, c)}">${esc(c.name)}</a>` : ''}</nav>
+      <h1>${esc(a.title)}</h1><div class="meta">${a.author ? `<span>${esc(a.author)}</span>` : ''}${a.publishedAt ? `<time datetime="${esc(a.publishedAt)}">${fmt(a.publishedAt)}</time>` : ''}</div></div></section>
+      <main><div class="wrap stack" style="gap:48px"><article class="read">${cover ? `<img class="cover" src="${esc(cover)}" alt="${esc(a.title)}">` : ''}${a.excerpt ? `<p class="lede">${esc(a.excerpt)}</p>` : ''}<div class="prose">${sanitize(a.content)}</div>
+        ${(a.tags || []).length ? `<div class="tags">${a.tags.map(t => `<span class="tag">#${esc(t)}</span>`).join('')}</div>` : ''}</article>
+        ${related.length ? `<section class="stack"><span class="eyebrow">Cùng danh mục</span><div class="cards">${related.map(card).join('')}</div></section>` : ''}</div></main>`;
+  },
+  notFound() { setTitle('Không tìm thấy'); return `<main><div class="wrap"><div class="empty"><h2>Không tìm thấy trang</h2><p>Bài viết có thể đã được gỡ hoặc đổi địa chỉ.</p><p><a class="btn" href="#/" style="align-self:center">Về trang chủ</a></p></div></div></main>`; }
+};
+
+function route() {
+  if (!C) return;
+  const parts = location.hash.replace(/^#\/?/, '').split('/').filter(Boolean).map(decodeURIComponent);
+  let html;
+  if (parts[0] === 'chuyen-muc' && parts[1]) html = R.section(parts[1], parts[2]);
+  else if (parts[0] === 'bai-viet' && parts[1]) html = R.article(parts[1]);
+  else if (!parts.length) html = R.home();
+  else html = R.notFound();
+  document.getElementById('app').innerHTML = html;
+  const curSec = parts[0] === 'chuyen-muc' ? parts[1] : parts[0] === 'bai-viet' ? (secById((C.articles.find(x => x.slug === parts[1]) || {}).sectionId) || {}).slug : '';
+  document.getElementById('nav').innerHTML = `<a href="#/" ${!parts.length ? 'aria-current="page"' : ''}>Trang chủ</a>` + C.sections.map(s => `<a href="${secUrl(s)}" ${curSec === s.slug ? 'aria-current="page"' : ''}>${esc(s.name)}</a>`).join('');
+  window.scrollTo(0, 0);
+}
+window.addEventListener('hashchange', route);
+fetch('content.json', {cache: 'no-cache'}).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(d => {
+  const arr = k => Array.isArray(d[k]) ? d[k] : [];
+  C = {sections: arr('sections').slice().sort((a, b) => (a.order || 0) - (b.order || 0)), categories: arr('categories'), articles: arr('articles')};
+  route();
+}).catch(() => { document.getElementById('app').innerHTML = `<main><div class="wrap"><div class="empty"><h2>Chưa tải được nội dung</h2><p>Hãy kiểm tra tệp content.json đã được tải lên cùng thư mục với trang này.</p></div></div></main>`; });
+</script>
+</body>
+</html>

@@ -1,0 +1,193 @@
+{
+ "app": "hdx-site",
+ "version": 1,
+ "generatedAt": "2026-10-11T05:17:06.788Z",
+ "sections": [
+  {
+   "id": "sec_gioithieu",
+   "name": "Giới thiệu Đội",
+   "slug": "gioi-thieu-doi",
+   "description": "Lịch sử hình thành, ý nghĩa và những dấu mốc 20 năm của Đội SVTN Đồng hương Hải Dương - NEU.",
+   "image": "img/hd-dem.webp",
+   "order": 1
+  },
+  {
+   "id": "sec_lichtrinh",
+   "name": "Lịch trình & Hoạt động",
+   "slug": "lich-trinh-hoat-dong",
+   "description": "Các hoạt động trong ngày hội trở về 24.10.2026 tại Đại học Kinh tế Quốc dân và chuỗi giải thể thao chào mừng sinh nhật Đội.",
+   "image": "img/mua-he-xanh.webp",
+   "order": 2
+  },
+  {
+   "id": "sec_baotang",
+   "name": "Bảo tàng ký ức",
+   "slug": "bao-tang-ky-uc",
+   "description": "Ảnh, video và lời nhắn của 20 thế hệ thành viên — những năm tháng ấy vẫn còn ở đây.",
+   "image": "img/the-he.webp",
+   "order": 3
+  }
+ ],
+ "categories": [
+  {
+   "id": "cat_lichsu",
+   "sectionId": "sec_gioithieu",
+   "name": "Lịch sử hình thành",
+   "slug": "lich-su-hinh-thanh",
+   "description": "Những dấu mốc từ ngày Hội đồng hương ra đời năm 2006 đến tuổi 20.",
+   "image": "",
+   "order": 1
+  },
+  {
+   "id": "cat_ynghia",
+   "sectionId": "sec_gioithieu",
+   "name": "Ý nghĩa sự kiện",
+   "slug": "y-nghia-su-kien",
+   "description": "Vì sao chúng mình gọi nhau trở về trong dịp 20 năm.",
+   "image": "",
+   "order": 2
+  },
+  {
+   "id": "cat_ngayhoi",
+   "sectionId": "sec_lichtrinh",
+   "name": "Hoạt động ngày hội",
+   "slug": "hoat-dong-ngay-hoi",
+   "description": "Triển lãm, quán trà đá, livestream, photobooth và đêm lửa trại ngày 24.10.",
+   "image": "",
+   "order": 1
+  },
+  {
+   "id": "cat_thethao",
+   "sectionId": "sec_lichtrinh",
+   "name": "Giải thể thao",
+   "slug": "giai-the-thao",
+   "description": "Pickleball, Cầu lông, Bóng đá và Esport.",
+   "image": "",
+   "order": 2
+  },
+  {
+   "id": "cat_loihen",
+   "sectionId": "sec_baotang",
+   "name": "Lời hẹn ước",
+   "slug": "loi-hen-uoc",
+   "description": "Lời nhắn của các thế hệ gửi về mái nhà HDX.",
+   "image": "",
+   "order": 1
+  }
+ ],
+ "articles": [
+  {
+   "id": "art_luatrai",
+   "title": "Đêm giao lưu lửa trại",
+   "slug": "dem-giao-luu-lua-trai",
+   "excerpt": "Ngọn lửa của những mùa hè tình nguyện được thắp lại. Hát cùng nhau, thức cùng nhau tới khi trời sáng.",
+   "content": "<p><strong>24.10 · 21h – 6h sáng</strong></p><p>Ngọn lửa của những mùa hè tình nguyện được thắp lại. Hát cùng nhau, nhảy cùng nhau, thức cùng nhau tới khi trời sáng.</p>",
+   "cover": "img/lua-trai.webp",
+   "sectionId": "sec_lichtrinh",
+   "categoryId": "cat_ngayhoi",
+   "author": "Ban Sự kiện",
+   "tags": [
+    "24.10",
+    "lửa trại"
+   ],
+   "publishedAt": "2026-10-02T01:00:00.000Z"
+  },
+  {
+   "id": "art_trienlam",
+   "title": "Triển lãm đa giác quan “Bảo tàng ký ức”",
+   "slug": "trien-lam-bao-tang-ky-uc",
+   "excerpt": "Con đường kỷ niệm kể câu chuyện “20 năm chung một mái nhà” qua hình ảnh, âm thanh, kỷ vật và tư liệu của 20 thế hệ.",
+   "content": "<p><strong>24.10 · 9h – 17h</strong></p><p>Con đường kỷ niệm kể câu chuyện “20 năm chung một mái nhà” qua hình ảnh, âm thanh, kỷ vật và tư liệu của 20 thế hệ.</p><p>Mỗi người đều có thể tìm thấy một phần thanh xuân của mình ở đây — và để lại lá thư gửi chính mình.</p>",
+   "cover": "img/trien-lam.webp",
+   "sectionId": "sec_lichtrinh",
+   "categoryId": "cat_ngayhoi",
+   "author": "Ban Sự kiện",
+   "tags": [
+    "24.10",
+    "triển lãm"
+   ],
+   "publishedAt": "2026-10-01T01:00:00.000Z"
+  },
+  {
+   "id": "art_thethao",
+   "title": "Lịch thi đấu chuỗi giải thể thao",
+   "slug": "lich-thi-dau-chuoi-giai-the-thao",
+   "excerpt": "Pickleball, Cầu lông, Bóng đá, Esport — ra sân cùng nhau như những ngày còn ở Đội.",
+   "content": "<h2>Pickleball</h2><p>Đôi nam · Đôi nam nữ</p><ul><li>Sáng CN 11.10: khai mạc, vòng bảng</li><li>Sáng T7 24.10: bán kết, chung kết, tranh hạng 3</li></ul><h2>Cầu lông</h2><p>Đôi nam · Đôi nam nữ</p><ul><li>Sáng CN 11.10: khai mạc, vòng bảng</li><li>Sáng T7 24.10: bán kết, chung kết, tranh hạng 3</li></ul><h2>Bóng đá</h2><p>6 đội · 2 bảng · vòng tròn 1 lượt</p><ul><li>Sáng CN 18.10: khai mạc, vòng bảng</li><li>Chiều T7 24.10: bán kết, chung kết, tranh hạng 3</li></ul><h2>Esport</h2><p>Liên Minh Huyền Thoại · Liên Quân Mobile · Bo3</p><ul><li>26 – 27.09 (online): khai mạc, vòng bảng, bán kết</li><li>04.10 (LMHT) · 05.10 (LQ): chung kết &amp; tranh hạng 3, offline</li></ul>",
+   "cover": "",
+   "sectionId": "sec_lichtrinh",
+   "categoryId": "cat_thethao",
+   "author": "Ban Thể thao",
+   "tags": [
+    "thể thao",
+    "lịch thi đấu"
+   ],
+   "publishedAt": "2026-09-20T01:00:00.000Z"
+  },
+  {
+   "id": "art_ynghia",
+   "title": "Một tiếng gọi thân quen, một cuộc trở về",
+   "slug": "mot-tieng-goi-than-quen-mot-cuoc-tro-ve",
+   "excerpt": "Khi Đội tròn 20 tuổi, có một điều vẫn còn nguyên: mong muốn được gặp lại nhau.",
+   "content": "<p>Ngày ấy, rời gia đình lên Hà Nội với nhiều bỡ ngỡ, chúng mình gặp nhau ở Đội. Một tiếng chào đồng hương, rồi thành bạn, thành đồng đội, thành những người ở bên nhau trong những tháng ngày đẹp đẽ và chông chênh nhất của tuổi trẻ.</p><p>Rồi mỗi người lớn lên và đi về một hướng. Nhưng khi Đội tròn 20 tuổi, có một điều vẫn còn nguyên: mong muốn được gặp lại nhau, kể tiếp những câu chuyện cũ và cảm ơn những người đã cùng vun đắp mái nhà này.</p><h2>01 · Tiếng gọi</h2><p>Tiếng gọi đã quen từ những năm tháng cùng khoác áo xanh, cùng đi qua những chuyến đi và cùng tạo nên thanh xuân của nhau.</p><h2>02 · Lời hẹn</h2><p>Có những nơi dù rời xa bao lâu vẫn luôn có cảm giác thuộc về. 20 năm là dịp để chúng mình trở lại bên nhau, gặp lại những gương mặt thân quen và nối tiếp câu chuyện giữa các thế hệ.</p>",
+   "cover": "img/thap-nen.webp",
+   "sectionId": "sec_gioithieu",
+   "categoryId": "cat_ynghia",
+   "author": "Ban Truyền thông",
+   "tags": [
+    "20 năm",
+    "anh em ơi"
+   ],
+   "publishedAt": "2026-09-10T01:00:00.000Z"
+  },
+  {
+   "id": "art_2014",
+   "title": "Lễ hội Xuân Thành Đông",
+   "slug": "le-hoi-xuan-thanh-dong",
+   "excerpt": "Một trong những chương trình quy mô và ấn tượng nhất trong lịch sử Đội, kéo dài hơn một tháng.",
+   "content": "<p>Năm 2014, Lễ hội Xuân Thành Đông trở thành một trong những chương trình quy mô và ấn tượng nhất trong lịch sử Đội.</p><p>Kéo dài hơn một tháng, lễ hội là chuỗi hoạt động sôi nổi:</p><ul><li>Cảnh sắc Thành Đông</li><li>Con đường màu xanh</li><li>Tết Sum Vầy</li><li>Không gian văn hóa truyền thống</li><li>Đêm nhạc Sắc Xuân</li></ul>",
+   "cover": "img/xuan-thanh-dong.webp",
+   "sectionId": "sec_gioithieu",
+   "categoryId": "cat_lichsu",
+   "author": "Ban Truyền thông",
+   "tags": [
+    "2014",
+    "tết sum vầy"
+   ],
+   "publishedAt": "2026-09-08T01:00:00.000Z"
+  },
+  {
+   "id": "art_2009",
+   "title": "Mùa hè tình nguyện đầu tiên tại quê nhà",
+   "slug": "mua-he-tinh-nguyen-dau-tien-tai-que-nha",
+   "excerpt": "Năm 2009, 25 thành viên lên đường về xã Long Xuyên, huyện Kinh Môn — khởi đầu truyền thống Hè Xanh của Đội.",
+   "content": "<p>Năm 2009, Đội được Đoàn trường cử tham gia chiến dịch tình nguyện tại Hải Dương với 25 thành viên tại xã Long Xuyên, huyện Kinh Môn, kèm một suất tài trợ xây nhà tình nghĩa trị giá 20 triệu đồng.</p><p>Từ điểm khởi đầu đó, Hè Xanh trở thành chiến dịch trọng tâm và là một trong những truyền thống bền bỉ nhất của Đội.</p><h2>Chính thức trực thuộc Hội Sinh viên</h2><p>Ngày 28.11.2009, sau ba năm hoạt động, Hội Sinh viên Trường ĐH Kinh tế Quốc dân công nhận Đội là đơn vị trực thuộc.</p>",
+   "cover": "img/mua-he-xanh.webp",
+   "sectionId": "sec_gioithieu",
+   "categoryId": "cat_lichsu",
+   "author": "Ban Truyền thông",
+   "tags": [
+    "2009",
+    "hè xanh",
+    "lịch sử"
+   ],
+   "publishedAt": "2026-09-06T01:00:00.000Z"
+  },
+  {
+   "id": "art_2006",
+   "title": "Hội đồng hương Hải Dương ra đời",
+   "slug": "hoi-dong-huong-hai-duong-ra-doi",
+   "excerpt": "Ngày 29/10/2006, Hội đồng hương Hải Dương được thành lập — tiền thân của Đội SVTN Đồng hương Hải Dương.",
+   "content": "<p>Ngày 29/10/2006, anh Nguyễn Đức Dũng cùng những người bạn thành lập Hội đồng hương Hải Dương — tiền thân của Đội SVTN Đồng hương Hải Dương.</p><h2>Những ngày đầu khó khăn</h2><p>Giai đoạn 2006–2008, lực lượng và hoạt động còn hạn chế. Đội nhận được sự hỗ trợ nhiệt tình từ Đội SVTN Đồng hương Vĩnh Phúc và CLB Sinh viên tuyên truyền PCTNXH &amp; HIV/AIDS — cùng đi tập huấn, cùng tiếp sức mùa thi.</p><blockquote>Từ một nhóm sinh viên đồng hương, Đội đã trở thành nơi nhiều thế hệ gặp nhau, làm việc cùng nhau và trưởng thành cùng nhau.</blockquote>",
+   "cover": "img/hoi-dong-huong.webp",
+   "sectionId": "sec_gioithieu",
+   "categoryId": "cat_lichsu",
+   "author": "Ban Truyền thông",
+   "tags": [
+    "2006",
+    "lịch sử"
+   ],
+   "publishedAt": "2026-09-05T01:00:00.000Z"
+  }
+ ]
+}
