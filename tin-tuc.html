@@ -222,7 +222,8 @@ async function loadContent() {
   const cfg = window.HDX_CONFIG || {}, url = String(cfg.supabaseUrl || '').trim().replace(/\/+$/, ''), key = String(cfg.supabaseAnonKey || '').trim();
   if (url && key) {
     try {
-      const get = q => fetch(url + '/rest/v1/' + q, {headers: {apikey: key, Authorization: 'Bearer ' + key}}).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
+      const hd = /^eyJ/.test(key) ? {apikey: key, Authorization: 'Bearer ' + key} : {apikey: key};
+      const get = q => fetch(url + '/rest/v1/' + q, {headers: hd}).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
       const [s, c, a] = await Promise.all([
         get('sections?select=id,name,slug,description,image,sort_order&status=eq.active&order=sort_order.asc'),
         get('categories?select=id,section_id,name,slug,description,image,sort_order&status=eq.active&order=sort_order.asc'),

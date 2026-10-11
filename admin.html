@@ -521,7 +521,9 @@ const SB = {
   norm(d) { return {access_token: d.access_token, refresh_token: d.refresh_token, expires_at: Number(d.expires_at) || Math.floor(Date.now() / 1000) + (Number(d.expires_in) || 3600), email: (d.user && d.user.email) || (this.session && this.session.email) || ''}; },
   async req(path, {method = 'GET', body, headers = {}, auth = true} = {}) {
     if (auth) await this.ensureFresh();
-    const h = {apikey: this.key, Authorization: 'Bearer ' + (auth && this.session ? this.session.access_token : this.key), ...headers};
+    const h = {apikey: this.key, ...headers};
+    if (auth && this.session) h.Authorization = 'Bearer ' + this.session.access_token;
+    else if (/^eyJ/.test(this.key)) h.Authorization = 'Bearer ' + this.key; // legacy anon JWT; publishable keys go in apikey only
     let b = body;
     if (body !== undefined && !(body instanceof Blob)) { h['Content-Type'] = 'application/json'; b = JSON.stringify(body); }
     let res;
