@@ -1896,7 +1896,7 @@ const HC = {
       const m = {}; (rows || []).forEach(r => { m[r.key] = r.data; });
       for (const k of Object.keys(HC_BLOCKS)) this.data[k] = Array.isArray(m[k]) && m[k].length ? clone(m[k]) : clone(HC_DEFAULTS[k]);
       const st = m.settings && typeof m.settings === 'object' && !Array.isArray(m.settings) ? m.settings : {};
-      this.data.settings = {introVideoId: String(st.introVideoId || ''), registrationOpen: st.registrationOpen !== false, showCountdown: st.showCountdown !== false}; this.stExtra = {...st};
+      this.data.settings = {introVideoId: String(st.introVideoId || ''), videoTitle: String(st.videoTitle || ''), videoText: String(st.videoText || ''), videoBtn: String(st.videoBtn || ''), registrationOpen: st.registrationOpen !== false, showCountdown: st.showCountdown !== false}; this.stExtra = {...st};
       this.keys().forEach(k => { this.saved[k] = this.snap(k); });
       this.loaded = true; this.missingTable = false;
     } catch (e) {
@@ -1949,6 +1949,9 @@ const HC = {
     if (this.cur === 'settings') {
       const s = this.data.settings;
       body = `<div class="hc-grid"><div class="fld"><label for="hc-intro">Link hoặc ID video YouTube giới thiệu (trang chủ)</label><input id="hc-intro" class="inp" type="text" data-set="introVideoId" maxlength="300" value="${esc(s.introVideoId)}" placeholder="Để trống: chưa hiện video"><p class="hint">Dán nguyên link YouTube hoặc chỉ ID; hệ thống tự lấy ID.</p></div>
+        <div class="fld"><label for="hc-vt">Tiêu đề mục Video</label><input id="hc-vt" class="inp" type="text" data-set="videoTitle" maxlength="160" value="${esc(s.videoTitle)}" placeholder="Để trống: dùng tiêu đề mặc định"></div>
+        <div class="fld hc-wide"><label for="hc-vx">Mô tả mục Video</label><textarea id="hc-vx" class="ta" rows="3" data-set="videoText" maxlength="700" placeholder="Để trống: dùng mô tả mặc định">${esc(s.videoText)}</textarea></div>
+        <div class="fld"><label for="hc-vb">Chữ trên nút (mục Video)</label><input id="hc-vb" class="inp" type="text" data-set="videoBtn" maxlength="60" value="${esc(s.videoBtn)}" placeholder="Để trống: Khám phá kho video →"></div>
         <div class="fld"><label class="lbl-t">Hiển thị</label><label class="hc-chk"><input type="checkbox" data-set="showCountdown" ${s.showCountdown ? 'checked' : ''}> Hiện đồng hồ đếm ngược</label><label class="hc-chk"><input type="checkbox" data-set="registrationOpen" ${s.registrationOpen ? 'checked' : ''}> Đang mở đăng ký tham dự</label></div></div>`;
     } else {
       const arr = this.data[this.cur];
@@ -1979,7 +1982,7 @@ const HC = {
   async save() {
     const k = this.cur, bad = this.validate(k); if (bad) { toast(bad, 'err', 6000); return; }
     let data = this.data[k];
-    if (k === 'settings') data = {...(this.stExtra || {}), introVideoId: ytId(data.introVideoId) || '', registrationOpen: !!data.registrationOpen, showCountdown: !!data.showCountdown};
+    if (k === 'settings') data = {...(this.stExtra || {}), introVideoId: ytId(data.introVideoId) || '', videoTitle: String(data.videoTitle || '').trim(), videoText: String(data.videoText || '').trim(), videoBtn: String(data.videoBtn || '').trim(), registrationOpen: !!data.registrationOpen, showCountdown: !!data.showCountdown};
     else data = data.map(it => { const o = {}; HC_BLOCKS[k].fields.forEach(f => { const v = String(it[f.k] || '').trim(); o[f.k] = f.yt ? (ytId(v) || '') : v; }); if (HC_BLOCKS[k].rounds) o.rounds = (it.rounds || []).map(r => ({when: String(r.when || '').trim(), what: String(r.what || '').trim()})).filter(r => r.when || r.what); return o; });
     this.saving = true; this.draw();
     try {

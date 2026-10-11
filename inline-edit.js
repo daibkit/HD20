@@ -82,6 +82,7 @@
 
   const pageCss = document.createElement('style');
   pageCss.textContent = `html.hdx-editing [data-hdx-hot]{outline:2px dashed #F28A55 !important;outline-offset:3px;cursor:text !important;border-radius:4px}
+    html.hdx-editing #video iframe{pointer-events:none}
     html.hdx-editing [contenteditable="true"]{outline:2px dashed #2B8FD9;outline-offset:4px;border-radius:4px;min-height:1em}
     html.hdx-editing [contenteditable="true"]:focus{outline-style:solid;background:rgba(43,143,217,.06)}
     html.hdx-editing .lede:empty:before,html.hdx-editing [data-hdx-ph]:empty:before{content:attr(data-hdx-ph);opacity:.5}`;
@@ -113,7 +114,40 @@
     }
     return out;
   }
+  const ytId = v => { v = String(v || '').trim(); if (!v) return ''; const m = v.match(/(?:youtu\.be\/|youtube(?:-nocookie)?\.com\/(?:watch\?(?:[^#]*&)?v=|embed\/|shorts\/|live\/|v\/))([\w-]{6,20})/i); if (m) return m[1]; return /^[\w-]{6,20}$/.test(v) ? v : null; };
+  function videoTarget(target) {
+    const sec = target && target.closest && target.closest('#video'); if (!sec || host.contains(target)) return null;
+    const el = target.closest('[data-hdx-vid], h2, p, button'); return el && sec.contains(el) ? {key: 'video', el} : null;
+  }
+  function openVideo() {
+    const H = window.HDX_HOME, S = H.settings || {};
+    const F = [{k: 'videoTitle', l: 'Tiêu đề', max: 160, v: S.videoTitle}, {k: 'videoText', l: 'Mô tả', max: 700, ta: 1, v: S.videoText}, {k: 'videoBtn', l: 'Chữ trên nút', max: 60, v: S.videoBtn}, {k: 'introVideoId', l: 'Link hoặc ID video YouTube', max: 300, v: S.introVideoId ? 'https://www.youtube.com/watch?v=' + S.introVideoId : ''}];
+    const dom = n => { const e = document.querySelector('#video ' + n); return e ? norm(e.textContent) : ''; };
+    F[0].v = F[0].v || dom('h2'); F[1].v = F[1].v || dom('p'); F[2].v = F[2].v || dom('button');
+    modal.innerHTML = `<div class="ov" role="dialog" aria-modal="true" aria-label="Sửa mục Video"><div class="md"><h2>Sửa mục Video</h2><p class="sub">Dán nguyên link YouTube (hoặc chỉ ID). Để trống link để ẩn video. Lưu xong, website đổi ngay.</p><p class="err" id="err"></p>
+      ${F.map((f, n) => fieldHtml(f, f.v, n)).join('')}<div class="row"><button class="b" data-cancel>Huỷ</button><button class="b p" data-save>Lưu thay đổi</button></div></div></div>`;
+    const q = s => modal.querySelector(s), first = modal.querySelector('input,textarea'); if (first) first.focus();
+    modal.onclick = async e => {
+      const t = e.target;
+      if (t.matches('.ov') || t.hasAttribute('data-cancel')) { modal.innerHTML = ''; return; }
+      if (!t.hasAttribute('data-save')) return;
+      const val = {}; modal.querySelectorAll('[data-k]').forEach(el => { val[el.dataset.k] = el.value.trim(); });
+      const id = ytId(val.introVideoId); if (id === null) { q('#err').textContent = 'Link/ID YouTube không hợp lệ.'; return; }
+      t.disabled = true; t.textContent = 'Đang lưu…';
+      try {
+        const cur = await req('/rest/v1/site_content?select=data&key=eq.settings').catch(() => []);
+        const b0 = cur && cur[0] && cur[0].data && !Array.isArray(cur[0].data) ? cur[0].data : {};
+        const data = Object.assign({}, b0, {videoTitle: val.videoTitle, videoText: val.videoText, videoBtn: val.videoBtn, introVideoId: id});
+        await req('/rest/v1/site_content?on_conflict=key', {method: 'POST', headers: {Prefer: 'resolution=merge-duplicates,return=minimal'}, body: {key: 'settings', data, updated_at: new Date().toISOString()}});
+        Object.assign(S, {videoTitle: val.videoTitle, videoText: val.videoText, videoBtn: val.videoBtn, introVideoId: id});
+        try { const rows = (lsGet(H.cacheKey) || []).filter(r => r && r.key !== 'settings'); rows.push({key: 'settings', data}); lsSet(H.cacheKey, rows); } catch (er) {}
+        modal.innerHTML = ''; setHot(null); H.rerender(); toast('Đã lưu. Website đã cập nhật.');
+      } catch (er) { const msg = er && er.status === 404 ? 'Chưa có bảng site_content: hãy chạy supabase/site_content.sql trong Supabase.' : errMsg(er); q('#err').textContent = msg; toast(msg, true); t.disabled = false; t.textContent = 'Lưu thay đổi'; }
+    };
+    modal.onkeydown = e => { if (e.key === 'Escape') modal.innerHTML = ''; };
+  }
   function findItem(target) {
+    const vt = videoTarget(target); if (vt) return vt;
     let el = target, d = 0;
     while (el && el !== document.body && el !== document.documentElement && d < 6) {
       if (host.contains(el)) return null;
@@ -141,7 +175,7 @@
     if (!homeBlocks()) return;
     const f = findItem(e.target); if (!f) return;
     e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
-    openItem(f.key, f.i);
+    if (f.key === 'video') openVideo(); else openItem(f.key, f.i);
   };
 
   function fieldHtml(f, v, idx, extra) {

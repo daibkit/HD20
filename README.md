@@ -62,3 +62,6 @@ Lưu ý khi nâng cấp: chạy lại `supabase/museum.sql` (thêm cột `kind` 
 1. Supabase → SQL Editor → chạy `supabase/radio.sql` (một lần) để tạo kho tệp `radio` (tối đa 50 MB/tệp).
 2. Admin → **Trang chủ** → tab **HD Radioshow**: mỗi số radio có ô **Link hoặc ID YouTube** (dán nguyên link, hệ thống tự lấy ID) và nút **Tải tệp lên** (MP3/M4A/WAV/OGG hoặc MP4/WebM/MOV). Có cả hai thì ưu tiên tệp tải lên. Bấm **Lưu thay đổi**.
 3. Tệp lớn hơn 50 MB: đăng lên YouTube rồi dán link. Ô YouTube ở “Tiếng gọi HDX” và video giới thiệu cũng nhận nguyên link.
+
+## Mục Video trên trang chủ
+Admin bật “Sửa trang” trên website rồi bấm vào tiêu đề, mô tả, nút hoặc khung video để sửa chữ và dán link YouTube (hoặc sửa ở Trang chủ → Cài đặt chung). Để trống link thì ẩn video.
