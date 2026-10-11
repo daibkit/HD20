@@ -51,3 +51,7 @@ Quyền ghi do Supabase kiểm tra, người không phải admin không lưu đ�
 Chỉ tài khoản admin mới tải lên / xoá được (Apps Script kiểm tra lại với Supabase).
 
 Lưu ý khi nâng cấp: chạy lại `supabase/museum.sql` (thêm cột `kind` cho video), dán lại mã Apps Script mới (nút “Sao chép mã”) rồi **Triển khai → Phiên bản mới**; lần đầu Google sẽ hỏi cấp lại quyền Drive.
+
+## Form đăng ký tham dự → Google Sheet
+
+Form “Đăng ký tham dự” trên trang chủ gửi dữ liệu tới cùng Apps Script với Bảo tàng ký ức và ghi vào Google Sheet **HDX20 - Đăng ký tham dự** (tự tạo trong thư mục `HDX20 - Bảo tàng ký ức` trên Drive của bạn). Mỗi dòng: thời gian, họ tên, khóa, SĐT, số người đi cùng, trẻ cần trông, thời gian tham dự, lời nhắn. Chống gửi trùng (cùng tên + SĐT trong 1 giờ) và giới hạn 40 lượt/phút. Admin → Bảo tàng ký ức có liên kết “Mở bảng tính đăng ký”. Cần dán lại mã Apps Script mới và **Triển khai → Phiên bản mới** (Google sẽ hỏi thêm quyền Google Sheets).

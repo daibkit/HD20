@@ -1981,7 +1981,7 @@ const muThumb = (id, w, kind) => kind === 'video' ? `https://drive.google.com/th
 const muSleep = ms => new Promise(r => setTimeout(r, ms));
 const muB64 = blob => new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(String(fr.result).split(',')[1]); fr.onerror = rej; fr.readAsDataURL(blob); });
 const MU = {
-  rows: [], loaded: false, loading: false, err: '', cur: 'K48', driveUrl: '', prog: [], busy: false, missing: false, test: '',
+  rows: [], loaded: false, loading: false, err: '', cur: 'K48', driveUrl: '', sheetUrl: '', prog: [], busy: false, missing: false, test: '',
   inK(k) { return this.rows.filter(r => r.k === (k || this.cur)); },
   async load() {
     if (this.loading) return; this.loading = true; this.err = ''; this.draw();
@@ -1990,6 +1990,7 @@ const MU = {
       const st = await SB.req('/rest/v1/site_content?select=data&key=eq.settings').catch(() => []);
       this.driveUrl = String(st && st[0] && st[0].data && st[0].data.driveUrl || '');
       this.loaded = true; this.missing = false;
+      if (MU_URL_RE.test(this.driveUrl)) this.gas('ping').then(j => { this.sheetUrl = /^https:\/\/docs\.google\.com\//.test(j.sheet || '') ? j.sheet : ''; this.draw(); }).catch(() => {});
     } catch (e) {
       this.missing = e && (e.status === 404 || /PGRST205|42P01/.test(String(e.code)));
       this.err = this.missing ? 'Chưa có bảng museum_photos. Hãy chạy tệp supabase/museum.sql trong Supabase (SQL Editor), rồi tải lại trang.' : (e && e.message) || 'Không tải được danh sách ảnh.';
@@ -2063,7 +2064,7 @@ const MU = {
       const cur = await SB.req('/rest/v1/site_content?select=data&key=eq.settings'), base = cur && cur[0] && cur[0].data && !Array.isArray(cur[0].data) ? cur[0].data : {};
       await SB.req('/rest/v1/site_content?on_conflict=key', {method: 'POST', headers: {Prefer: 'resolution=merge-duplicates,return=minimal'}, body: {key: 'settings', data: {...base, driveUrl: url}, updated_at: new Date().toISOString()}});
       this.driveUrl = url; this.test = ''; toast(url ? 'Đã lưu địa chỉ Apps Script.' : 'Đã gỡ kết nối Drive.');
-      if (url) { try { const j = await this.gas('ping'); this.test = `Kết nối tốt — thư mục gốc: “${j.folder}”.`; } catch (e) { this.test = 'Chưa kết nối được: ' + e.message; } }
+      if (url) { try { const j = await this.gas('ping'); this.sheetUrl = /^https:\/\/docs\.google\.com\//.test(j.sheet || '') ? j.sheet : ''; this.test = `Kết nối tốt — thư mục gốc: “${j.folder}”.`; } catch (e) { this.test = 'Chưa kết nối được: ' + e.message; } }
     } catch (e) { toast(e && e.status === 404 ? 'Chưa có bảng site_content: chạy supabase/site_content.sql.' : (e && e.message) || 'Không lưu được.', 'err', 6000); }
     this.draw();
   },
@@ -2114,7 +2115,7 @@ const MU = {
     const sy = window.scrollY, list = this.inK(), conn = MU_URL_RE.test(this.driveUrl);
     const chips = MU_KS.map(k => { const n = this.inK(k).length; return `<button class="navpill hc-tab" data-mu="k" data-k="${k}" ${k === this.cur ? 'aria-current="page"' : ''}>${k} <span class="muted small">${n}</span></button>`; }).join('');
     const setup = `<section class="card card-pad"><div class="card-h"><h2>Kết nối Google Drive</h2><span class="chip">${conn ? 'Đã kết nối' : 'Chưa kết nối'}</span></div>
-      ${conn ? `<p class="small muted" style="margin:0 0 10px">Ảnh được lưu trong thư mục <b>HDX20 - Bảo tàng ký ức</b> (mỗi khóa một thư mục con) trên Google Drive của bạn. ${esc(this.test)}</p>` : `<ol class="small" style="margin:0 0 12px;padding-left:18px;color:var(--body);display:grid;gap:4px"><li>Mở <b>script.google.com</b> → <b>Dự án mới</b>, xoá mã mẫu trong tệp <code>Code.gs</code>.</li><li>Bấm <button class="btn btn-line btn-sm" data-mu="copycode">Sao chép mã Apps Script</button> rồi dán vào, bấm Lưu.</li><li><b>Triển khai → Triển khai mới → Ứng dụng web</b>: “Thực thi với tư cách: <b>Tôi</b>”, “Ai có quyền truy cập: <b>Bất kỳ ai</b>” → Triển khai, cấp quyền khi Google hỏi (Drive, kết nối ngoài).</li><li>Sao chép <b>URL ứng dụng web</b> (đuôi <code>/exec</code>) dán vào ô bên dưới.</li></ol>`}
+      ${conn ? `<p class="small muted" style="margin:0 0 10px">Ảnh được lưu trong thư mục <b>HDX20 - Bảo tàng ký ức</b> (mỗi khóa một thư mục con) trên Google Drive của bạn. ${esc(this.test)}</p>${this.sheetUrl ? `<p class="small" style="margin:0 0 10px">Đăng ký tham dự từ form trên website được ghi vào Google Sheet: <a href="${esc(this.sheetUrl)}" target="_blank" rel="noopener"><b>Mở bảng tính đăng ký ↗</b></a></p>` : ''}` : `<ol class="small" style="margin:0 0 12px;padding-left:18px;color:var(--body);display:grid;gap:4px"><li>Mở <b>script.google.com</b> → <b>Dự án mới</b>, xoá mã mẫu trong tệp <code>Code.gs</code>.</li><li>Bấm <button class="btn btn-line btn-sm" data-mu="copycode">Sao chép mã Apps Script</button> rồi dán vào, bấm Lưu.</li><li><b>Triển khai → Triển khai mới → Ứng dụng web</b>: “Thực thi với tư cách: <b>Tôi</b>”, “Ai có quyền truy cập: <b>Bất kỳ ai</b>” → Triển khai, cấp quyền khi Google hỏi (Drive, kết nối ngoài).</li><li>Sao chép <b>URL ứng dụng web</b> (đuôi <code>/exec</code>) dán vào ô bên dưới.</li></ol>`}
       <div class="qa" style="align-items:flex-end"><div class="fld" style="flex:1 1 320px"><label for="mu-url">Địa chỉ Apps Script (…/exec)</label><input id="mu-url" class="inp" type="url" placeholder="https://script.google.com/macros/s/…/exec" value="${esc(this.driveUrl)}"></div><button class="btn btn-grad" data-mu="saveurl">Lưu & kiểm tra</button>${conn ? '<button class="btn btn-line" data-mu="copycode">Sao chép mã</button>' : ''}</div></section>`;
     const up = `<section class="card card-pad"><div class="card-h"><h2>Tải ảnh / video lên thư mục ${this.cur}</h2><div class="qa"><button class="btn btn-line btn-sm" data-mu="sync" ${conn && !this.busy ? '' : 'disabled'} title="Thêm các ảnh bạn đã bỏ vào thư mục này trên Drive">${icon('refresh', 16)} Đồng bộ từ Drive</button></div></div>
       <label class="mu-drop ${conn ? '' : 'off'}" id="mu-drop"><input id="mu-file" type="file" accept="image/*,video/*,.heic,.heif,.mov,.mp4,.webm" multiple hidden ${conn && !this.busy ? '' : 'disabled'}><b>${this.busy ? 'Đang tải lên…' : 'Chọn ảnh / video hoặc kéo thả vào đây'}</b><span class="small muted">Chọn nhiều ảnh cùng lúc. Cả ảnh và video, không giới hạn dung lượng (chỉ phụ thuộc chỗ trống Google Drive của bạn). Tệp lớn được gửi từng phần nên có thể mất vài phút.</span></label>
