@@ -2243,16 +2243,15 @@ const RG = {
     this.loading = false; this.draw();
   },
   mount() { if (!this.loaded && !this.loading) this.load(); else this.draw(); },
-  guestsN(r) { const n = parseInt(r.guests, 10); return Number.isFinite(n) ? n : 0; },
   filtered() {
     const q = this.q.trim().toLowerCase(), digits = q.replace(/[^0-9]/g, '');
-    return this.rows.filter(r => (!this.fk || r.k === this.fk) && (!this.fd || (r.days || []).includes(this.fd)) && (!this.fh || (this.fh === 'done' ? r.handled : !r.handled))
+    return this.rows.filter(r => (!this.fk || r.k === this.fk) && (!this.fd || (r.dinner || '') === this.fd) && (!this.fh || (this.fh === 'done' ? r.handled : !r.handled))
       && (!q || r.name.toLowerCase().includes(q) || r.k.toLowerCase() === q || (digits.length >= 3 && r.phone.replace(/[^0-9]/g, '').includes(digits)) || (r.note || '').toLowerCase().includes(q)));
   },
   csv(rows) {
     const c = v => { v = String(v == null ? '' : v); if (/^[=+\-@]/.test(v)) v = "'" + v; return '"' + v.replace(/"/g, '""') + '"'; };
-    const head = ['Thời gian', 'Họ và tên', 'Khóa', 'Số điện thoại', 'Số người đi cùng', 'Trẻ cần trông', 'Thời gian tham dự', 'Lời nhắn', 'Đã liên hệ', 'Ghi chú BTC'];
-    return '﻿' + [head, ...rows.map(r => [fmtDate(r.created_at), r.name, r.k, "'" + r.phone, r.guests, r.kids, (r.days || []).join('; '), r.note, r.handled ? 'x' : '', r.admin_note])].map(a => a.map(c).join(',')).join('\r\n');
+    const head = ['Thời gian', 'Họ và tên', 'Khóa', 'Số điện thoại', 'Tham gia tiệc tối', 'Lời nhắn', 'Đã liên hệ', 'Ghi chú BTC'];
+    return '﻿' + [head, ...rows.map(r => [fmtDate(r.created_at), r.name, r.k, "'" + r.phone, r.dinner || '', r.note, r.handled ? 'x' : '', r.admin_note])].map(a => a.map(c).join(',')).join('\r\n');
   },
   async toggle(id) {
     const r = this.rows.find(x => x.id === id); if (!r) return;
@@ -2278,22 +2277,20 @@ const RG = {
     if (this.loading) { root.innerHTML = '<p class="muted" style="padding:20px">Đang tải danh sách đăng ký…</p>'; return; }
     if (!this.loaded) { root.innerHTML = `<div class="notice danger">${icon('warn')}<div><b>Không tải được.</b> ${esc(this.err)}</div></div><div class="qa" style="margin-top:12px"><button class="btn btn-line" data-rg="reload">${icon('refresh', 16)} Thử lại</button></div>`; return; }
     const sy = window.scrollY, all = this.rows, list = this.filtered(), shown = list.slice(0, this.lim);
-    const people = all.reduce((n, r) => n + 1 + this.guestsN(r), 0), kids = all.filter(r => r.kids && r.kids !== 'Không').length, todo = all.filter(r => !r.handled).length;
-    const ks = [...new Set(all.map(r => r.k))].sort((a, b) => a.localeCompare(b, 'vi', {numeric: true})), ds = [...new Set(all.flatMap(r => r.days || []))];
+    const todo = all.filter(r => !r.handled).length, DN = ['Có', 'Không', 'Chưa chắc chắn'], ds = DN;
+    const ks = [...new Set(all.map(r => r.k))].sort((a, b) => a.localeCompare(b, 'vi', {numeric: true}));
+    const cls = {'Có': 'n-green', 'Không': 'n-gold', 'Chưa chắc chắn': 'n-sky'};
     const stats = `<div class="stats"><div class="stat" style="cursor:default"><span class="n n-brand tnum">${all.length}</span><span class="l">Lượt đăng ký</span><span class="s">${todo} chưa liên hệ</span></div>
-      <div class="stat" style="cursor:default"><span class="n n-green tnum">${people}</span><span class="l">Tổng số người dự</span><span class="s">gồm cả người đi cùng (3+ tính là 3)</span></div>
-      <div class="stat" style="cursor:default"><span class="n n-gold tnum">${kids}</span><span class="l">Cần trông trẻ</span><span class="s">lượt đăng ký có bé</span></div>
-      ${ds.map(d => `<div class="stat" style="cursor:default"><span class="n n-sky tnum">${all.filter(r => (r.days || []).includes(d)).length}</span><span class="l">${esc(d)}</span><span class="s">lượt đăng ký</span></div>`).join('')}</div>`;
+      ${DN.map(d => `<div class="stat" style="cursor:default"><span class="n ${cls[d]} tnum">${all.filter(r => (r.dinner || '') === d).length}</span><span class="l">Tiệc tối: ${esc(d)}</span><span class="s">lượt đăng ký</span></div>`).join('')}</div>`;
     const filters = `<div class="card card-pad"><div class="formgrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;align-items:end">
       <div class="fld" style="grid-column:span 2"><label for="rg-q">Tìm tên, số điện thoại, lời nhắn</label><input id="rg-q" class="inp" type="search" value="${esc(this.q)}" placeholder="VD: Nguyễn, 0912…"></div>
       <div class="fld"><label for="rg-k">Khóa</label>${sel('rg-k', [['', 'Tất cả'], ...ks.map(k => [k, k])], this.fk)}</div>
-      <div class="fld"><label for="rg-d">Thời gian tham dự</label>${sel('rg-d', [['', 'Tất cả'], ...ds.map(d => [d, d])], this.fd)}</div>
+      <div class="fld"><label for="rg-d">Tham gia tiệc tối</label>${sel('rg-d', [['', 'Tất cả'], ...ds.map(d => [d, d])], this.fd)}</div>
       <div class="fld"><label for="rg-h">Liên hệ</label>${sel('rg-h', [['', 'Tất cả'], ['todo', 'Chưa liên hệ'], ['done', 'Đã liên hệ']], this.fh)}</div>
       <div class="qa rg-btns"><button class="btn btn-line" data-rg="reload">${icon('refresh', 16)} Tải lại</button><button class="btn btn-grad" data-rg="csv" ${list.length ? '' : 'disabled'}>${icon('download', 16)} Xuất CSV (${list.length})</button></div></div></div>`;
-    const tbl = list.length ? `<div class="card"><div class="tblwrap"><table class="tbl"><caption class="sr">Danh sách đăng ký tham dự</caption><thead><tr><th>Thời gian</th><th>Họ và tên</th><th>Khóa</th><th>Điện thoại</th><th>Đi cùng</th><th>Trẻ</th><th>Tham dự</th><th>Lời nhắn</th><th>Liên hệ</th><th class="actions"><span class="sr">Thao tác</span></th></tr></thead><tbody>${shown.map(r => `<tr>
+    const tbl = list.length ? `<div class="card"><div class="tblwrap"><table class="tbl"><caption class="sr">Danh sách đăng ký tham dự</caption><thead><tr><th>Thời gian</th><th>Họ và tên</th><th>Khóa</th><th>Điện thoại</th><th>Tiệc tối</th><th>Lời nhắn</th><th>Liên hệ</th><th class="actions"><span class="sr">Thao tác</span></th></tr></thead><tbody>${shown.map(r => `<tr>
         <td data-label="Thời gian" class="small muted tnum">${fmtDate(r.created_at)}</td><td data-label="Họ và tên"><b>${esc(r.name)}</b>${r.admin_note ? `<div class="small muted">📝 ${esc(r.admin_note)}</div>` : ''}</td><td data-label="Khóa">${esc(r.k)}</td>
-        <td data-label="Điện thoại" class="tnum"><a href="tel:${esc(r.phone.replace(/[^0-9+]/g, ''))}">${esc(r.phone)}</a></td><td data-label="Đi cùng">${esc(r.guests || '—')}</td><td data-label="Trẻ">${esc(r.kids || '—')}</td>
-        <td data-label="Tham dự">${(r.days || []).map(d => `<span class="chip">${esc(d)}</span>`).join(' ') || '—'}</td><td data-label="Lời nhắn" class="small" style="max-width:260px">${esc(r.note || '')}</td>
+        <td data-label="Điện thoại" class="tnum"><a href="tel:${esc(r.phone.replace(/[^0-9+]/g, ''))}">${esc(r.phone)}</a></td><td data-label="Tiệc tối">${r.dinner ? `<span class="chip">${esc(r.dinner)}</span>` : '—'}</td><td data-label="Lời nhắn" class="small" style="max-width:260px">${esc(r.note || '')}</td>
         <td data-label="Liên hệ"><label class="hc-chk"><input type="checkbox" data-rg="toggle" data-id="${esc(r.id)}" ${r.handled ? 'checked' : ''} aria-label="Đã liên hệ ${esc(r.name)}"> ${r.handled ? 'Đã' : 'Chưa'}</label></td>
         <td class="actions" data-label=""><button class="ibtn" data-rg="note" data-id="${esc(r.id)}" aria-label="Ghi chú">${icon('edit', 16)}</button><button class="ibtn" data-rg="del" data-id="${esc(r.id)}" aria-label="Xoá">${icon('trash', 16)}</button></td></tr>`).join('')}</tbody></table></div></div>
       ${list.length > shown.length ? `<div class="qa" style="justify-content:center"><button class="btn btn-line" data-rg="more">Xem thêm ${Math.min(50, list.length - shown.length)} / còn ${list.length - shown.length}</button></div>` : ''}`

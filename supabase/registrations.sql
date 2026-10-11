@@ -12,10 +12,13 @@ create table if not exists public.registrations (
   guests     text not null default '' check (length(guests) <= 20),
   kids       text not null default '' check (length(kids) <= 20),
   days       text[] not null default '{}' check (cardinality(days) <= 6),
+  dinner     text not null default '' check (length(dinner) <= 20),
   note       text not null default '' check (length(note) <= 600),
   handled    boolean not null default false,
   admin_note text not null default '' check (length(admin_note) <= 600)
 );
+-- Bảng đã tạo trước đó: thêm cột “Tham gia tiệc tối” (chạy lại tệp này là đủ).
+alter table public.registrations add column if not exists dinner text not null default '' check (length(dinner) <= 20);
 -- Cùng tên + cùng số điện thoại chỉ ghi một lần (bấm gửi 2 lần không bị trùng).
 create unique index if not exists registrations_person_key on public.registrations (lower(trim(name)), regexp_replace(phone, '[^0-9+]', '', 'g'));
 create index if not exists registrations_created_idx on public.registrations (created_at desc);
