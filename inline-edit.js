@@ -121,7 +121,7 @@
     if (session && session.expires_at && Date.now() / 1000 > session.expires_at - 90) await refresh();
     let j; try { const res = await fetch(url, {method: 'POST', headers: {'Content-Type': 'text/plain;charset=utf-8'}, body: JSON.stringify(Object.assign({action, token: session && session.access_token}, extra))}); j = await res.json(); }
     catch (e) { throw {message: 'Không kết nối được Google Apps Script.'}; }
-    if (!j || !j.ok) throw {message: (j && j.error) || 'Google Drive báo lỗi.'};
+    if (!j || !j.ok) throw {message: j && /Tên thư mục không hợp lệ|Thao tác không hợp lệ/.test(j.error || '') ? 'Apps Script trên Google đang là BẢN CŨ: vào Admin → Bảo tàng ký ức → “Sao chép mã”, dán lại, Lưu rồi Triển khai “Phiên bản mới”.' : (j && j.error) || 'Google Drive báo lỗi.'};
     return j;
   }
   async function driveUpload(file, k, onPct) {

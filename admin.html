@@ -2074,7 +2074,7 @@ const MU = {
     let res, j;
     try { res = await fetch(this.driveUrl, {method: 'POST', headers: {'Content-Type': 'text/plain;charset=utf-8'}, body: JSON.stringify({action, token: SB.session && SB.session.access_token, ...extra})}); j = await res.json(); }
     catch { throw {message: 'Không kết nối được Google Apps Script. Kiểm tra địa chỉ và quyền truy cập “Bất kỳ ai” khi triển khai.'}; }
-    if (!j || !j.ok) throw {message: (j && j.error) || 'Google Drive báo lỗi.'};
+    if (!j || !j.ok) throw {message: j && /Tên thư mục không hợp lệ|Thao tác không hợp lệ/.test(j.error || '') ? 'Apps Script trên Google đang là BẢN CŨ. Hãy dán lại mã mới (nút “Sao chép mã” ở tab Bảo tàng ký ức), Lưu, rồi Triển khai → Quản lý bản triển khai → Chỉnh sửa → Phiên bản mới → Triển khai.' : (j && j.error) || 'Google Drive báo lỗi.'};
     return j;
   },
   // Tải tệp lên Drive theo từng phần 3 MB (không giới hạn dung lượng; chỉ phụ thuộc chỗ trống Google Drive của bạn).
