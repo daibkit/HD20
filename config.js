@@ -1,8 +1,6 @@
-// Cấu hình kết nối Supabase (khoá "anon" là khoá CÔNG KHAI, an toàn để đặt ở đây:
-// quyền ghi được bảo vệ bằng RLS — chỉ email trong bảng admins mới ghi được).
-// Lấy ở Supabase: Project Settings → API Keys. Dùng khoá "anon public" (eyJ...) hoặc "publishable" (sb_publishable_...).
-// TUYỆT ĐỐI không dán khoá "service_role" hay "secret" vào đây.
+// Cấu hình Supabase (khóa "publishable"/anon là công khai, an toàn để đặt ở đây).
+// TUYỆT ĐỐI không dán khóa service_role / secret vào file này.
 window.HDX_CONFIG = {
-  supabaseUrl: '',
-  supabaseAnonKey: ''
+  supabaseUrl: 'https://tkijmtizymtruknjjebs.supabase.co',
+  supabaseAnonKey: 'sb_publishable_LGOoUP18mYn_l1fRu5BRuA_KkU7bN02'
 };
