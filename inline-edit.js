@@ -184,9 +184,34 @@
     };
     modal.onkeydown = e => { if (e.key === 'Escape') modal.innerHTML = ''; };
   }
+  function openPledge() {
+    const H = window.HDX_HOME, S = H.settings || {};
+    const dom = n => { const e = document.querySelector('#hen-uoc ' + n); return e ? e.textContent.trim() : ''; };
+    const F = [{k: 'pledgeQuote', l: 'Câu hẹn ước (xuống dòng để ngắt dòng)', max: 400, ta: 1, v: S.pledgeQuote || dom('blockquote')}, {k: 'pledgeBy', l: 'Chữ ký', max: 120, v: S.pledgeBy || dom('[data-hdx-pledge]:not(blockquote)')}];
+    modal.innerHTML = `<div class="ov" role="dialog" aria-modal="true" aria-label="Sửa lời hẹn ước"><div class="md"><h2>Sửa “Lời hẹn ước”</h2>${F.map((f, n) => fieldHtml(f, f.v, n)).join('')}<div class="row"><button class="b" data-cancel>Huỷ</button><button class="b p" data-save>Lưu thay đổi</button></div></div></div>`;
+    const q = s => modal.querySelector(s), first = modal.querySelector('input,textarea'); if (first) first.focus();
+    modal.onclick = async e => {
+      const t = e.target;
+      if (t.matches('.ov') || t.hasAttribute('data-cancel')) { modal.innerHTML = ''; return; }
+      if (!t.hasAttribute('data-save')) return;
+      const val = {}; modal.querySelectorAll('[data-k]').forEach(el => { val[el.dataset.k] = el.value.trim(); });
+      t.disabled = true; t.textContent = 'Đang lưu…';
+      try {
+        const cur = await req('/rest/v1/site_content?select=data&key=eq.settings').catch(() => []);
+        const b0 = cur && cur[0] && cur[0].data && !Array.isArray(cur[0].data) ? cur[0].data : {};
+        const data = Object.assign({}, b0, {pledgeQuote: val.pledgeQuote, pledgeBy: val.pledgeBy});
+        await req('/rest/v1/site_content?on_conflict=key', {method: 'POST', headers: {Prefer: 'resolution=merge-duplicates,return=minimal'}, body: {key: 'settings', data, updated_at: new Date().toISOString()}});
+        Object.assign(S, {pledgeQuote: val.pledgeQuote, pledgeBy: val.pledgeBy});
+        try { const rows = (lsGet(H.cacheKey) || []).filter(r => r && r.key !== 'settings'); rows.push({key: 'settings', data}); lsSet(H.cacheKey, rows); } catch (er) {}
+        modal.innerHTML = ''; setHot(null); H.rerender(); toast('Đã lưu. Website đã cập nhật.');
+      } catch (er) { const msg = errMsg(er); q('#err').textContent = msg; toast(msg, true); t.disabled = false; t.textContent = 'Lưu thay đổi'; }
+    };
+    modal.onkeydown = e => { if (e.key === 'Escape') modal.innerHTML = ''; };
+  }
   function findItem(target) {
     if (target && target.closest && target.closest('[data-hdx-add]')) return null;
     const vt = videoTarget(target); if (vt) return vt;
+    const pl = target && target.closest && target.closest('[data-hdx-pledge]'); if (pl && !host.contains(target)) return {key: 'pledge', el: pl};
     let el = target, d = 0;
     while (el && el !== document.body && el !== document.documentElement && d < 6) {
       if (host.contains(el)) return null;
@@ -215,7 +240,7 @@
     const ab = e.target.closest && e.target.closest('[data-hdx-add]'); if (ab) { e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); openItem(ab.dataset.hdxAdd, -1); return; }
     const f = findItem(e.target); if (!f) return;
     e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
-    if (f.key === 'video') openVideo(); else openItem(f.key, f.i);
+    if (f.key === 'video') openVideo(); else if (f.key === 'pledge') openPledge(); else openItem(f.key, f.i);
   };
 
   function fieldHtml(f, v, idx, extra) {
