@@ -51,3 +51,9 @@ Quyền ghi do Supabase kiểm tra, người không phải admin không lưu đ�
 Chỉ tài khoản admin mới tải lên / xoá được (Apps Script kiểm tra lại với Supabase).
 
 Lưu ý khi nâng cấp: chạy lại `supabase/museum.sql` (thêm cột `kind` cho video), dán lại mã Apps Script mới (nút “Sao chép mã”) rồi **Triển khai → Phiên bản mới**; lần đầu Google sẽ hỏi cấp lại quyền Drive.
+
+## Đăng ký tham dự → tab “Đăng ký” trong admin
+1. Supabase → SQL Editor → dán và chạy `supabase/registrations.sql` (một lần).
+2. Form “Đăng ký” trên trang chủ gửi thẳng vào bảng `registrations`. Người xem website **chỉ gửi được, không đọc được** danh sách.
+3. Admin → tab **Đăng ký**: xem thống kê, tìm/lọc (khóa, ngày tham dự, đã liên hệ), đánh dấu đã liên hệ, ghi chú nội bộ, xoá, xuất CSV (mở được bằng Excel/Google Sheets).
+4. Cùng tên + cùng số điện thoại chỉ được ghi một lần (bấm gửi 2 lần không bị trùng).
