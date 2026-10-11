@@ -14,8 +14,11 @@ function adminProblem_(token) {
     return 'mã Apps Script chưa có địa chỉ/khóa Supabase (hai dòng SUPABASE_URL và SUPABASE_KEY ở đầu mã) — hãy bấm “Sao chép mã” trong trang quản trị và dán lại';
   if (!token || typeof token !== 'string') return 'thiếu phiên đăng nhập, hãy đăng nhập lại ở trang quản trị';
   try {
+    let base = String(SUPABASE_URL).trim().replace(/\/+$/, '');
+    if (/^[a-z0-9]{20}$/.test(base)) base = 'https://' + base + '.supabase.co'; // cho phép chỉ dán mã dự án
+    if (!/^https:\/\//.test(base)) return 'SUPABASE_URL phải có dạng https://xxxx.supabase.co';
     const h = {apikey: SUPABASE_KEY, Authorization: 'Bearer ' + token, 'Content-Type': 'application/json'};
-    const r = UrlFetchApp.fetch(SUPABASE_URL + '/rest/v1/rpc/is_admin', {method: 'post', headers: h, payload: '{}', muteHttpExceptions: true});
+    const r = UrlFetchApp.fetch(base + '/rest/v1/rpc/is_admin', {method: 'post', headers: h, payload: '{}', muteHttpExceptions: true});
     const code = r.getResponseCode(), body = String(r.getContentText()).trim();
     if (code === 200 && body === 'true') return '';
     if (code === 200) return 'tài khoản đăng nhập không nằm trong danh sách admin';
