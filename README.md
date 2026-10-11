@@ -57,3 +57,8 @@ Lưu ý khi nâng cấp: chạy lại `supabase/museum.sql` (thêm cột `kind` 
 2. Form “Đăng ký” trên trang chủ gửi thẳng vào bảng `registrations`. Người xem website **chỉ gửi được, không đọc được** danh sách.
 3. Admin → tab **Đăng ký**: xem thống kê, tìm/lọc (khóa, ngày tham dự, đã liên hệ), đánh dấu đã liên hệ, ghi chú nội bộ, xoá, xuất CSV (mở được bằng Excel/Google Sheets).
 4. Cùng tên + cùng số điện thoại chỉ được ghi một lần (bấm gửi 2 lần không bị trùng).
+
+## HD Radioshow: nhúng YouTube hoặc tải tệp lên
+1. Supabase → SQL Editor → chạy `supabase/radio.sql` (một lần) để tạo kho tệp `radio` (tối đa 50 MB/tệp).
+2. Admin → **Trang chủ** → tab **HD Radioshow**: mỗi số radio có ô **Link hoặc ID YouTube** (dán nguyên link, hệ thống tự lấy ID) và nút **Tải tệp lên** (MP3/M4A/WAV/OGG hoặc MP4/WebM/MOV). Có cả hai thì ưu tiên tệp tải lên. Bấm **Lưu thay đổi**.
+3. Tệp lớn hơn 50 MB: đăng lên YouTube rồi dán link. Ô YouTube ở “Tiếng gọi HDX” và video giới thiệu cũng nhận nguyên link.
