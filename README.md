@@ -47,5 +47,7 @@ Quyền ghi do Supabase kiểm tra, người không phải admin không lưu đ�
 
 1. Chạy `supabase/museum.sql` trong Supabase (SQL Editor) — bảng lưu danh sách ảnh (id Drive + tiêu đề, năm, chú thích).
 2. Trong admin → **Bảo tàng ký ức** → làm theo 4 bước ở khung “Kết nối Google Drive” (tạo Google Apps Script từ mã mẫu `apps-script/Code.gs.txt`, triển khai ứng dụng web, dán địa chỉ `/exec` vào admin).
-3. Chọn khóa (K48–K67) → chọn nhiều ảnh hoặc kéo thả. Ảnh được thu nhỏ rồi lưu vào thư mục `HDX20 - Bảo tàng ký ức/K50/…` trên Drive của bạn, và hiện ngay trên trang chủ (mục Bảo tàng ký ức). Có thể sửa tiêu đề/năm/chú thích, đổi thứ tự, xoá; nút “Đồng bộ từ Drive” thêm các ảnh bạn tự bỏ vào thư mục trên Drive.
+3. Chọn khóa (K48–K67) → chọn nhiều ảnh hoặc kéo thả. Ảnh và video (không giới hạn dung lượng, gửi từng phần 3 MB) được lưu nguyên bản vào thư mục `HDX20 - Bảo tàng ký ức/K50/…` trên Drive của bạn, và hiện ngay trên trang chủ (mục Bảo tàng ký ức). Có thể sửa tiêu đề/năm/chú thích, đổi thứ tự, xoá; nút “Đồng bộ từ Drive” thêm các ảnh bạn tự bỏ vào thư mục trên Drive.
 Chỉ tài khoản admin mới tải lên / xoá được (Apps Script kiểm tra lại với Supabase).
+
+Lưu ý khi nâng cấp: chạy lại `supabase/museum.sql` (thêm cột `kind` cho video), dán lại mã Apps Script mới (nút “Sao chép mã”) rồi **Triển khai → Phiên bản mới**; lần đầu Google sẽ hỏi cấp lại quyền Drive.

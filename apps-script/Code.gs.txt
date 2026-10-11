@@ -26,6 +26,16 @@ function adminProblem_(token) {
     return 'Supabase trả về mã ' + code + ' (kiểm tra SUPABASE_URL / SUPABASE_KEY)';
   } catch (e) { return 'Apps Script chưa được phép gọi ra ngoài hoặc địa chỉ Supabase sai: ' + String(e && e.message || e).slice(0, 120); }
 }
+// Nhớ kết quả kiểm tra admin 5 phút để tải nhiều phần không phải hỏi Supabase mỗi lần.
+function adminCached_(token) {
+  const c = CacheService.getScriptCache();
+  const key = 'adm' + Utilities.base64EncodeWebSafe(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, String(token)));
+  if (c.get(key) === '1') return '';
+  const why = adminProblem_(token);
+  if (!why) c.put(key, '1', 300);
+  return why;
+}
+const OK_MIME_ = /^(image\/(jpeg|png|webp|gif|heic|heif|avif)|video\/(mp4|quicktime|webm|x-m4v|3gpp|x-matroska|mpeg|ogg))$/;
 function root_() {
   const p = PropertiesService.getScriptProperties(); let id = p.getProperty('ROOT_ID');
   if (id) { try { return DriveApp.getFolderById(id); } catch (e) {} }
@@ -45,24 +55,45 @@ function doGet() { return out_({ok: true, name: 'HDX20 Drive', note: 'Dùng POST
 function doPost(e) {
   try {
     const q = JSON.parse(e.postData.contents);
-    const why = adminProblem_(q.token);
+    const why = adminCached_(q.token);
     if (why) return out_({ok: false, error: 'Không có quyền: ' + why + '.'});
     if (q.action === 'ping') return out_({ok: true, folder: root_().getName()});
-    if (q.action === 'upload') {
-      if (!/^image\/(jpeg|png|webp|gif)$/.test(q.mime || '')) return out_({ok: false, error: 'Chỉ nhận ảnh JPG/PNG/WebP/GIF.'});
-      if (!q.data || q.data.length > 12 * 1024 * 1024) return out_({ok: false, error: 'Ảnh quá lớn.'});
-      const name = String(q.name || 'anh.jpg').replace(/[^\w.\- ]/g, '_').slice(0, 120);
-      const blob = Utilities.newBlob(Utilities.base64Decode(q.data), q.mime, name);
-      const f = folder_(q.k).createFile(blob);
-      f.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-      return out_({ok: true, id: f.getId(), name: f.getName()});
+    if (q.action === 'start') { // mở phiên tải lên theo từng phần (cho ảnh/video dung lượng lớn)
+      if (!OK_MIME_.test(q.mime || '')) return out_({ok: false, error: 'Chỉ nhận ảnh (JPG/PNG/WebP/GIF/HEIC) và video (MP4/MOV/WebM…).'});
+      const size = Number(q.size); if (!(size > 0)) return out_({ok: false, error: 'Tệp rỗng.'});
+      const name = String(q.name || 'tep').replace(/[^\w.\- ]/g, '_').slice(0, 120);
+      const r = UrlFetchApp.fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&fields=id', {
+        method: 'post', contentType: 'application/json; charset=UTF-8', muteHttpExceptions: true,
+        headers: {Authorization: 'Bearer ' + ScriptApp.getOAuthToken(), 'X-Upload-Content-Type': q.mime, 'X-Upload-Content-Length': String(size)},
+        payload: JSON.stringify({name: name, parents: [folder_(q.k).getId()]})});
+      const hs = r.getAllHeaders(); let loc = '';
+      for (const h in hs) if (h.toLowerCase() === 'location') loc = String(hs[h]);
+      if (r.getResponseCode() !== 200 || !loc) return out_({ok: false, error: 'Google Drive từ chối mở phiên tải lên (' + r.getResponseCode() + '): ' + String(r.getContentText()).slice(0, 160)});
+      return out_({ok: true, session: loc});
+    }
+    if (q.action === 'chunk') {
+      const sess = String(q.session || '');
+      if (sess.indexOf('https://www.googleapis.com/upload/drive/v3/files?') !== 0) return out_({ok: false, error: 'Phiên tải lên không hợp lệ.'});
+      const bytes = Utilities.base64Decode(q.data || ''), start = Number(q.start), total = Number(q.total);
+      if (!bytes.length || !(total > 0) || !(start >= 0)) return out_({ok: false, error: 'Dữ liệu không hợp lệ.'});
+      const end = start + bytes.length - 1;
+      const r = UrlFetchApp.fetch(sess, {method: 'put', contentType: 'application/octet-stream', muteHttpExceptions: true, payload: bytes,
+        headers: {'Content-Range': 'bytes ' + start + '-' + end + '/' + total}});
+      const code = r.getResponseCode();
+      if (code === 308) return out_({ok: true, done: false});
+      if (code === 200 || code === 201) {
+        const id = JSON.parse(r.getContentText()).id, f = DriveApp.getFileById(id);
+        f.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+        return out_({ok: true, done: true, id: id, name: f.getName()});
+      }
+      return out_({ok: false, error: 'Google Drive báo lỗi ' + code + ': ' + String(r.getContentText()).slice(0, 160)});
     }
     if (q.action === 'list') {
       const it = folder_(q.k).getFiles(), files = [];
       while (it.hasNext()) {
-        const f = it.next(); if (!/^image\//.test(f.getMimeType())) continue;
+        const f = it.next(); if (!/^(image|video)\//.test(f.getMimeType())) continue;
         if (f.getSharingAccess() !== DriveApp.Access.ANYONE_WITH_LINK && f.getSharingAccess() !== DriveApp.Access.ANYONE) f.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-        files.push({id: f.getId(), name: f.getName(), t: f.getDateCreated().getTime()});
+        files.push({id: f.getId(), name: f.getName(), mime: f.getMimeType(), t: f.getDateCreated().getTime()});
       }
       files.sort(function (a, b) { return a.t - b.t; });
       return out_({ok: true, files: files});

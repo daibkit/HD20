@@ -14,6 +14,7 @@ create table if not exists public.museum_photos (
   created_at timestamptz not null default now(),
   constraint museum_photos_drive_key unique (k, drive_id)
 );
+alter table public.museum_photos add column if not exists kind text not null default 'image' check (kind in ('image','video'));
 create index if not exists museum_photos_k_idx on public.museum_photos(k, sort_order);
 alter table public.museum_photos enable row level security;
 drop policy if exists "doc_cong_khai" on public.museum_photos;
