@@ -89,6 +89,7 @@
 
   /* ---------- Khối nội dung trang chủ ---------- */
   const FIELDS = {
+    agenda: [{k: 'when', l: 'Thời gian', max: 40}, {k: 'title', l: 'Tên hoạt động', max: 160}, {k: 'desc', l: 'Mô tả', max: 400, ta: 1}, {k: 'main', l: 'Đánh dấu “Điểm hẹn chính” (nổi bật)', chk: true}],
     history: [{k: 'year', l: 'Mốc thời gian', max: 40}, {k: 'title', l: 'Tiêu đề', max: 160}, {k: 'text', l: 'Nội dung', max: 1200, ta: 1}],
     sports: [{k: 'name', l: 'Tên giải', max: 80}, {k: 'format', l: 'Thể thức', max: 160}, {k: 'pic', l: 'Người phụ trách', max: 80}, {k: 'phone', l: 'Số điện thoại', max: 30}],
     activities: [{k: 'name', l: 'Tên hoạt động', max: 120}, {k: 'when', l: 'Thời gian', max: 80}, {k: 'photo', l: 'Gợi ý ảnh', max: 80}, {k: 'desc', l: 'Mô tả', max: 800, ta: 1}],
@@ -97,8 +98,8 @@
     contacts: [{k: 'role', l: 'Vai trò / ban', max: 120}, {k: 'name', l: 'Họ tên', max: 80}, {k: 'k', l: 'Khóa (K…)', max: 20}, {k: 'phone', l: 'Số điện thoại', max: 30}],
     slides: [{k: 'text', l: 'Lời nhắn', max: 400, ta: 1}, {k: 'who', l: 'Người gửi', max: 80}, {k: 'k', l: 'Khóa (K…)', max: 20}]
   };
-  const REQ = {history: 'title', sports: 'name', activities: 'name', radios: 'title', songs: 'title', contacts: 'role', slides: 'text'};
-  const NOUN = {history: 'mốc lịch sử', sports: 'giải', activities: 'hoạt động', radios: 'số radio', songs: 'bài hát', contacts: 'đầu mối', slides: 'lời nhắn'};
+  const REQ = {agenda: 'title', history: 'title', sports: 'name', activities: 'name', radios: 'title', songs: 'title', contacts: 'role', slides: 'text'};
+  const NOUN = {agenda: 'hoạt động lịch trình', history: 'mốc lịch sử', sports: 'giải', activities: 'hoạt động', radios: 'số radio', songs: 'bài hát', contacts: 'đầu mối', slides: 'lời nhắn'};
   const unq = s => s.replace(/^[“"«'‘]+|[”"»'’]+$/g, '').trim();
 
   function homeBlocks() { return window.HDX_HOME && window.HDX_HOME.blocks; }
@@ -107,7 +108,7 @@
     for (const key of Object.keys(FIELDS)) {
       const arr = bl[key] && bl[key].t || [];
       arr.forEach((it, i) => {
-        let hit = FIELDS[key].some(f => { const v = norm(it[f.k]); return v && (v === t || unq(v) === t); });
+        let hit = FIELDS[key].some(f => { if (f.chk) return false; const v = norm(it[f.k]); return v && (v === t || unq(v) === t); });
         if (!hit && key === 'sports') hit = (it.rounds || []).some(r => norm(r.when) === t || norm(r.what) === t);
         if (hit) out.push({key, i});
       });
@@ -187,7 +188,7 @@
     let el = target, d = 0;
     while (el && el !== document.body && el !== document.documentElement && d < 6) {
       if (host.contains(el)) return null;
-      const t = unq(norm(el.textContent));
+      const t = unq(norm(el.textContent)).replace(/Điểm hẹn chính$/, '').trim();
       if (t && t.length <= 1500) {
         const m = candidates(t);
         if (m.length) {
@@ -216,21 +217,22 @@
 
   function fieldHtml(f, v, idx, extra) {
     const id = 'f' + idx;
+    if (f.chk) return `<div class="fld"><label style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" id="${id}" data-k="${f.k}" ${v === '1' || v === true ? 'checked' : ''} style="width:auto"> ${esc(f.l)}</label></div>`;
     return `<div class="fld"><label for="${id}">${esc(f.l)}</label>${f.ta ? `<textarea id="${id}" data-k="${f.k}" maxlength="${f.max}">${esc(v || '')}</textarea>` : `<input id="${id}" data-k="${f.k}" type="text" maxlength="${f.max}" value="${esc(v || '')}">`}</div>`;
   }
   function openItem(key, i) {
-    const B = homeBlocks()[key], fields = FIELDS[key], it = B.clean(B.t[i]), canDel = B.t.length > 1;
+    const B = homeBlocks()[key], fields = FIELDS[key], isNew = i < 0, it = isNew ? B.clean({}) : B.clean(B.t[i]), canDel = !isNew && B.t.length > 1;
     const rounds = key === 'sports' ? (it.rounds || []).map(r => ({...r})) : null;
     const drawRounds = () => `<div class="fld"><label>Lịch thi đấu</label>${rounds.map((r, j) => `<div class="rd"><input data-r="${j}" data-rk="when" maxlength="80" placeholder="Thời gian" value="${esc(r.when)}"><input data-r="${j}" data-rk="what" maxlength="160" placeholder="Nội dung" value="${esc(r.what)}"><button class="b d" data-rdel="${j}" style="margin:0;padding:8px 12px" aria-label="Xoá vòng">✕</button></div>`).join('')}${rounds.length < 10 ? '<button class="b" data-radd style="padding:7px 14px;font-size:13px">+ Thêm vòng</button>' : ''}</div>`;
     const draw = () => {
-      modal.innerHTML = `<div class="ov" role="dialog" aria-modal="true" aria-label="Sửa nội dung"><div class="md"><h2>Sửa ${esc(NOUN[key])} #${i + 1}</h2><p class="sub">Lưu xong, nội dung trên website đổi ngay.</p><p class="err" id="err"></p>
+      modal.innerHTML = `<div class="ov" role="dialog" aria-modal="true" aria-label="Sửa nội dung"><div class="md"><h2>${isNew ? 'Thêm' : 'Sửa'} ${esc(NOUN[key])}${isNew ? '' : ' #' + (i + 1)}</h2><p class="sub">Lưu xong, nội dung trên website đổi ngay.</p><p class="err" id="err"></p>
         ${fields.map((f, n) => fieldHtml(f, it[f.k], n)).join('')}${rounds ? `<div id="rounds">${drawRounds()}</div>` : ''}
         <div class="row">${canDel ? '<button class="b d" data-del>Xoá mục này</button>' : ''}<button class="b" data-cancel>Huỷ</button><button class="b p" data-save>Lưu thay đổi</button></div></div></div>`;
     };
     draw();
     const q = s => modal.querySelector(s), setErr = m => { q('#err').textContent = m || ''; };
     const first = modal.querySelector('input,textarea'); if (first) first.focus();
-    const sync = () => { modal.querySelectorAll('[data-k]').forEach(el => { it[el.dataset.k] = el.value; }); if (rounds) modal.querySelectorAll('[data-r]').forEach(el => { rounds[+el.dataset.r][el.dataset.rk] = el.value; }); };
+    const sync = () => { modal.querySelectorAll('[data-k]').forEach(el => { it[el.dataset.k] = el.type === 'checkbox' ? (el.checked ? '1' : '') : el.value; }); if (rounds) modal.querySelectorAll('[data-r]').forEach(el => { rounds[+el.dataset.r][el.dataset.rk] = el.value; }); };
     modal.onclick = async e => {
       const t = e.target;
       if (t.matches('.ov') || t.hasAttribute('data-cancel')) { modal.innerHTML = ''; return; }
@@ -245,7 +247,7 @@
         if (!norm(it[REQ[key]])) { setErr(`“${fields.find(f => f.k === REQ[key]).l}” không được để trống.`); return; }
         for (const f of fields) { const v = norm(it[f.k]); if (v && f.re && !f.re.test(v)) { setErr(f.err); return; } }
         if (rounds) it.rounds = rounds.filter(r => norm(r.when) || norm(r.what));
-        const arr = B.t.map(B.clean); arr[i] = B.clean(it);
+        const arr = B.t.map(B.clean); if (isNew) arr.push(B.clean(it)); else arr[i] = B.clean(it);
         t.disabled = true; t.textContent = 'Đang lưu…';
         const ok = await commit(key, arr, 'Đã lưu. Website đã cập nhật.');
         if (!ok) { t.disabled = false; t.textContent = 'Lưu thay đổi'; }
@@ -259,7 +261,7 @@
     try {
       await req('/rest/v1/site_content?on_conflict=key', {method: 'POST', headers: {Prefer: 'resolution=merge-duplicates,return=minimal'}, body: {key, data: arr, updated_at: new Date().toISOString()}});
     } catch (e) {
-      const msg = e && e.status === 404 ? 'Chưa có bảng site_content: hãy chạy supabase/site_content.sql trong Supabase.' : errMsg(e);
+      const msg = e && (e.status === 404 || e.code === '23514') ? 'Cần cập nhật cơ sở dữ liệu: chạy lại supabase/site_content.sql trong Supabase (SQL Editor), rồi lưu lại.' : errMsg(e);
       const er = modal.querySelector('#err'); if (er) er.textContent = msg; toast(msg, true); return false;
     }
     B.t.splice(0, B.t.length, ...arr.map(B.derive));
@@ -318,11 +320,13 @@
       <span class="sep"></span><button class="save" data-asave>Lưu bài</button><button data-acancel>Bỏ thay đổi</button></div>` : '';
     ui.innerHTML = `${articleTb}<div class="fab" role="region" aria-label="Chế độ chỉnh sửa">
       ${editing ? `<span>${art ? 'Sửa trực tiếp tiêu đề, mô tả, nội dung' : homeBlocks() ? 'Bấm vào chữ có viền cam để sửa' : 'Mở một bài viết để sửa'}</span>` : `<span>${em}</span>`}
+      ${editing && homeBlocks() && !art ? '<button data-addagenda>＋ Thêm hoạt động lịch trình</button>' : ''}
       <button class="${editing ? 'on' : ''}" data-toggle>${editing ? '✓ Thoát chỉnh sửa' : '✎ Chỉnh sửa trang'}</button><a href="admin.html">Quản trị</a></div>`;
   }
   ui.addEventListener('click', e => {
     const t = e.target.closest('button'); if (!t) return;
     if (t.hasAttribute('data-toggle')) { setEditing(!editing); return; }
+    if (t.hasAttribute('data-addagenda')) { const sec = document.getElementById('agenda'); if (!sec) { toast('Mở trang chủ để thêm hoạt động lịch trình.', true); return; } sec.scrollIntoView({behavior: 'smooth', block: 'center'}); openItem('agenda', -1); return; }
     if (t.hasAttribute('data-asave')) { saveArticle(); return; }
     if (t.hasAttribute('data-acancel')) { if (window.route) window.route(); toast('Đã bỏ các thay đổi chưa lưu.'); return; }
     const f = t.dataset.fmt; if (!f) return;
