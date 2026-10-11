@@ -117,14 +117,14 @@
   const ytId = v => { v = String(v || '').trim(); if (!v) return ''; const m = v.match(/(?:youtu\.be\/|youtube(?:-nocookie)?\.com\/(?:watch\?(?:[^#]*&)?v=|embed\/|shorts\/|live\/|v\/))([\w-]{6,20})/i); if (m) return m[1]; return /^[\w-]{6,20}$/.test(v) ? v : null; };
   function videoTarget(target) {
     const sec = target && target.closest && target.closest('#video'); if (!sec || host.contains(target)) return null;
-    const el = target.closest('[data-hdx-vid], h2, p, button'); return el && sec.contains(el) ? {key: 'video', el} : null;
+    const el = target.closest('[data-hdx-vid], h2, p'); return el && sec.contains(el) ? {key: 'video', el} : null;
   }
   function openVideo() {
     const H = window.HDX_HOME, S = H.settings || {};
-    const F = [{k: 'videoTitle', l: 'Tiêu đề', max: 160, v: S.videoTitle}, {k: 'videoText', l: 'Mô tả', max: 700, ta: 1, v: S.videoText}, {k: 'videoBtn', l: 'Chữ trên nút', max: 60, v: S.videoBtn}, {k: 'introVideoId', l: 'Link hoặc ID video YouTube', max: 300, v: S.introVideoId ? 'https://www.youtube.com/watch?v=' + S.introVideoId : ''}];
+    const F = [{k: 'videoTitle', l: 'Tiêu đề', max: 160, v: S.videoTitle}, {k: 'videoText', l: 'Mô tả', max: 700, ta: 1, v: S.videoText}, {k: 'introVideoId', l: 'Link hoặc ID video YouTube', max: 300, v: S.introVideoId ? 'https://www.youtube.com/watch?v=' + S.introVideoId : ''}];
     const dom = n => { const e = document.querySelector('#video ' + n); return e ? norm(e.textContent) : ''; };
-    F[0].v = F[0].v || dom('h2'); F[1].v = F[1].v || dom('p'); F[2].v = F[2].v || dom('button');
-    modal.innerHTML = `<div class="ov" role="dialog" aria-modal="true" aria-label="Sửa mục Video"><div class="md"><h2>Sửa mục Video</h2><p class="sub">Dán nguyên link YouTube (hoặc chỉ ID). Để trống link để ẩn video. Lưu xong, website đổi ngay.</p><p class="err" id="err"></p>
+    F[0].v = F[0].v || dom('h2'); F[1].v = F[1].v || dom('p');
+    modal.innerHTML = `<div class="ov" role="dialog" aria-modal="true" aria-label="Sửa mục Video"><div class="md"><h2>Sửa mục Video</h2><p class="sub">Dán nguyên link YouTube (hoặc chỉ ID). Video tự phát (tắt tiếng, theo quy định của trình duyệt). Để trống link để ẩn video. Lưu xong, website đổi ngay.</p><p class="err" id="err"></p>
       ${F.map((f, n) => fieldHtml(f, f.v, n)).join('')}<div class="row"><button class="b" data-cancel>Huỷ</button><button class="b p" data-save>Lưu thay đổi</button></div></div></div>`;
     const q = s => modal.querySelector(s), first = modal.querySelector('input,textarea'); if (first) first.focus();
     modal.onclick = async e => {
@@ -137,9 +137,9 @@
       try {
         const cur = await req('/rest/v1/site_content?select=data&key=eq.settings').catch(() => []);
         const b0 = cur && cur[0] && cur[0].data && !Array.isArray(cur[0].data) ? cur[0].data : {};
-        const data = Object.assign({}, b0, {videoTitle: val.videoTitle, videoText: val.videoText, videoBtn: val.videoBtn, introVideoId: id});
+        const data = Object.assign({}, b0, {videoTitle: val.videoTitle, videoText: val.videoText, introVideoId: id});
         await req('/rest/v1/site_content?on_conflict=key', {method: 'POST', headers: {Prefer: 'resolution=merge-duplicates,return=minimal'}, body: {key: 'settings', data, updated_at: new Date().toISOString()}});
-        Object.assign(S, {videoTitle: val.videoTitle, videoText: val.videoText, videoBtn: val.videoBtn, introVideoId: id});
+        Object.assign(S, {videoTitle: val.videoTitle, videoText: val.videoText, introVideoId: id});
         try { const rows = (lsGet(H.cacheKey) || []).filter(r => r && r.key !== 'settings'); rows.push({key: 'settings', data}); lsSet(H.cacheKey, rows); } catch (er) {}
         modal.innerHTML = ''; setHot(null); H.rerender(); toast('Đã lưu. Website đã cập nhật.');
       } catch (er) { const msg = er && er.status === 404 ? 'Chưa có bảng site_content: hãy chạy supabase/site_content.sql trong Supabase.' : errMsg(er); q('#err').textContent = msg; toast(msg, true); t.disabled = false; t.textContent = 'Lưu thay đổi'; }
