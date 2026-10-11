@@ -89,6 +89,7 @@
 
   /* ---------- Khối nội dung trang chủ ---------- */
   const FIELDS = {
+    chain: [{k: 'title', l: 'Tên hoạt động', max: 120}, {k: 'desc', l: 'Mô tả', max: 400, ta: 1}],
     agenda: [{k: 'when', l: 'Thời gian', max: 40}, {k: 'title', l: 'Tên hoạt động', max: 160}, {k: 'desc', l: 'Mô tả', max: 400, ta: 1}, {k: 'main', l: 'Đánh dấu “Điểm hẹn chính” (nổi bật)', chk: true}],
     history: [{k: 'year', l: 'Mốc thời gian', max: 40}, {k: 'title', l: 'Tiêu đề', max: 160}, {k: 'text', l: 'Nội dung', max: 1200, ta: 1}],
     sports: [{k: 'name', l: 'Tên giải', max: 80}, {k: 'format', l: 'Thể thức', max: 160}, {k: 'pic', l: 'Người phụ trách', max: 80}, {k: 'phone', l: 'Số điện thoại', max: 30}],
@@ -98,8 +99,8 @@
     contacts: [{k: 'role', l: 'Vai trò / ban', max: 120}, {k: 'name', l: 'Họ tên', max: 80}, {k: 'k', l: 'Khóa (K…)', max: 20}, {k: 'phone', l: 'Số điện thoại', max: 30}],
     slides: [{k: 'text', l: 'Lời nhắn', max: 400, ta: 1}, {k: 'who', l: 'Người gửi', max: 80}, {k: 'k', l: 'Khóa (K…)', max: 20}]
   };
-  const REQ = {agenda: 'title', history: 'title', sports: 'name', activities: 'name', radios: 'title', songs: 'title', contacts: 'role', slides: 'text'};
-  const NOUN = {agenda: 'hoạt động lịch trình', history: 'mốc lịch sử', sports: 'giải', activities: 'hoạt động', radios: 'số radio', songs: 'bài hát', contacts: 'đầu mối', slides: 'lời nhắn'};
+  const REQ = {chain: 'title', agenda: 'title', history: 'title', sports: 'name', activities: 'name', radios: 'title', songs: 'title', contacts: 'role', slides: 'text'};
+  const NOUN = {chain: 'hoạt động', agenda: 'hoạt động lịch trình', history: 'mốc lịch sử', sports: 'giải', activities: 'hoạt động', radios: 'số radio', songs: 'bài hát', contacts: 'đầu mối', slides: 'lời nhắn'};
   const unq = s => s.replace(/^[“"«'‘]+|[”"»'’]+$/g, '').trim();
 
   function homeBlocks() { return window.HDX_HOME && window.HDX_HOME.blocks; }
@@ -184,7 +185,7 @@
     modal.onkeydown = e => { if (e.key === 'Escape') modal.innerHTML = ''; };
   }
   function findItem(target) {
-    if (target && target.closest && target.closest('#hdx-add-agenda')) return null;
+    if (target && target.closest && target.closest('[data-hdx-add]')) return null;
     const vt = videoTarget(target); if (vt) return vt;
     let el = target, d = 0;
     while (el && el !== document.body && el !== document.documentElement && d < 6) {
@@ -211,7 +212,7 @@
   const onClick = e => {
     if (!editing || host.contains(e.target) || e.composedPath().includes(host)) return;
     if (!homeBlocks()) return;
-    if (e.target.closest && e.target.closest('#hdx-add-agenda')) { e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); openItem('agenda', -1); return; }
+    const ab = e.target.closest && e.target.closest('[data-hdx-add]'); if (ab) { e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); openItem(ab.dataset.hdxAdd, -1); return; }
     const f = findItem(e.target); if (!f) return;
     e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
     if (f.key === 'video') openVideo(); else openItem(f.key, f.i);
@@ -229,7 +230,7 @@
     const draw = () => {
       modal.innerHTML = `<div class="ov" role="dialog" aria-modal="true" aria-label="Sửa nội dung"><div class="md"><h2>${isNew ? 'Thêm' : 'Sửa'} ${esc(NOUN[key])}${isNew ? '' : ' #' + (i + 1)}</h2><p class="sub">Lưu xong, nội dung trên website đổi ngay.</p><p class="err" id="err"></p>
         ${fields.map((f, n) => fieldHtml(f, it[f.k], n)).join('')}${rounds ? `<div id="rounds">${drawRounds()}</div>` : ''}
-        <div class="row">${canDel ? '<button class="b d" data-del>Xoá mục này</button>' : ''}<button class="b" data-cancel>Huỷ</button><button class="b p" data-save>Lưu thay đổi</button></div></div></div>`;
+        <div class="row">${canDel ? '<button class="b d" data-del>Xoá mục này</button>' : ''}${!isNew && B.t.length > 1 ? `<button class="b" data-mv="-1" ${i === 0 ? 'disabled' : ''} title="Đưa lên trước">▲ Lên</button><button class="b" data-mv="1" ${i === B.t.length - 1 ? 'disabled' : ''} title="Đưa xuống sau">▼ Xuống</button>` : ''}<button class="b" data-cancel>Huỷ</button><button class="b p" data-save>Lưu thay đổi</button></div></div></div>`;
     };
     draw();
     const q = s => modal.querySelector(s), setErr = m => { q('#err').textContent = m || ''; };
@@ -240,6 +241,11 @@
       if (t.matches('.ov') || t.hasAttribute('data-cancel')) { modal.innerHTML = ''; return; }
       if (t.hasAttribute('data-radd')) { sync(); rounds.push({when: '', what: ''}); q('#rounds').innerHTML = drawRounds(); return; }
       if (t.hasAttribute('data-rdel')) { sync(); rounds.splice(+t.dataset.rdel, 1); q('#rounds').innerHTML = drawRounds(); return; }
+      if (t.hasAttribute('data-mv')) {
+        const j = i + Number(t.dataset.mv); if (j < 0 || j >= B.t.length) return;
+        sync(); const arr = B.t.map(B.clean); arr[i] = B.clean(it); [arr[i], arr[j]] = [arr[j], arr[i]];
+        t.disabled = true; const ok = await commit(key, arr, 'Đã đổi thứ tự.'); if (ok) { const el = findNth(key, j); if (el) openItemSoon(key, j); } else t.disabled = false; return;
+      }
       if (t.hasAttribute('data-del')) {
         if (!confirm(`Xoá ${NOUN[key]} này khỏi website?`)) return;
         await commit(key, B.t.map(B.clean).filter((_, n) => n !== i), 'Đã xoá.'); return;
@@ -257,6 +263,8 @@
     };
     modal.onkeydown = e => { if (e.key === 'Escape') modal.innerHTML = ''; };
   }
+  function findNth() { return true; }
+  function openItemSoon(key, j) { setTimeout(() => openItem(key, j), 60); }
   async function commit(key, arr, okMsg) {
     const H = window.HDX_HOME, B = H.blocks[key];
     if (!arr.length) { toast('Cần giữ lại ít nhất 1 mục.', true); return false; }
@@ -337,14 +345,18 @@
   ui.addEventListener('mousedown', e => { if (e.target.closest('.tb')) e.preventDefault(); }); // giữ vùng chọn khi bấm nút định dạng
 
   // Nút “Thêm hoạt động” nằm ngay trong mục “Một ngày để trở về”, chỉ hiện khi đang bật chỉnh sửa.
+  const ADD_BTNS = [{key: 'agenda', sec: 'agenda', label: '＋ Thêm hoạt động lịch trình', inner: false}, {key: 'chain', sec: 'hoat-dong', label: '＋ Thêm hoạt động', inner: true}];
   function syncAddBtn() {
-    const sec = document.getElementById('agenda'), cur = document.getElementById('hdx-add-agenda');
-    if (!editing || !sec || !homeBlocks()) { if (cur) cur.remove(); return; }
-    if (cur && cur.parentNode === sec) return;
-    if (cur) cur.remove();
-    const w = document.createElement('div'); w.id = 'hdx-add-agenda'; w.style.cssText = 'display:flex;justify-content:center;margin-top:20px';
-    w.innerHTML = '<button type="button" style="cursor:pointer;font:inherit;font-weight:700;font-size:15px;padding:11px 22px;border-radius:999px;border:2px dashed #F28A55;background:#fff;color:#C4571F">＋ Thêm hoạt động lịch trình</button>';
-    sec.appendChild(w);
+    ADD_BTNS.forEach(d => {
+      const sec = document.getElementById(d.sec), cur = document.querySelector('[data-hdx-add="' + d.key + '"]');
+      if (!editing || !sec || !homeBlocks()) { if (cur) cur.remove(); return; }
+      const host_ = d.inner && sec.firstElementChild ? sec.firstElementChild : sec;
+      if (cur && cur.parentNode === host_) return;
+      if (cur) cur.remove();
+      const w = document.createElement('div'); w.setAttribute('data-hdx-add', d.key); w.style.cssText = 'display:flex;justify-content:center;margin-top:24px';
+      w.innerHTML = '<button type="button" style="cursor:pointer;font:inherit;font-weight:700;font-size:15px;padding:11px 22px;border-radius:999px;border:2px dashed #F28A55;background:#fff;color:#C4571F">' + d.label + '</button>';
+      host_.appendChild(w);
+    });
   }
   setInterval(syncAddBtn, 400);
   function setEditing(on) {
