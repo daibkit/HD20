@@ -429,7 +429,7 @@ img{max-width:100%}
 <div id="app">
   <header class="topbar">
     <div class="wrap topbar-in">
-      <button class="brand" data-act="go" data-r="dashboard" aria-label="Về trang tổng quan">
+      <button class="brand" data-act="go" data-r="museum" aria-label="Về trang quản trị">
         <img src="img/logo.png" alt="" width="42" height="42">
         <span><b>Anh em ơi! Về nhà</b><small>Quản trị nội dung</small></span>
       </button>
@@ -1051,7 +1051,7 @@ async function fetchSample() {
    App state, routing
    ========================================================================= */
 const S = {
-  route: ssGet('hdx-cms:route', {name: 'dashboard', params: {}}),
+  route: ssGet('hdx-cms:route', {name: 'museum', params: {}}),
   history: [],
   filters: ssGet('hdx-cms:filters', null) || {
     sections: {q: '', status: '', sort: 'order'},
@@ -1081,7 +1081,7 @@ async function go(name, params = {}, opts = {}) {
   if (!opts.keepFocus) { const h = $('#view-root h1'); if (h) { h.setAttribute('tabindex', '-1'); h.focus({preventScroll: true}); } }
   return true;
 }
-function back() { const prev = S.history.pop(); if (prev) go(prev.name, prev.params, {push: false, scroll: prev.scroll}); else go('dashboard', {}, {push: false}); }
+function back() { const prev = S.history.pop(); if (prev) go(prev.name, prev.params, {push: false, scroll: prev.scroll}); else go('museum', {}, {push: false}); }
 
 /* =========================================================================
    View helpers
@@ -1109,7 +1109,7 @@ function catOptions(secId, first = 'Tất cả danh mục') {
   else D.sections().forEach(s => D.catsOf(s.id).forEach(c => out.push([c.id, s.name + ' › ' + c.name])));
   return out;
 }
-const crumbsHome = [['Tổng quan', 'dashboard']];
+const crumbsHome = [['Quản trị', 'museum']];
 
 /* =========================================================================
    Views
@@ -1439,7 +1439,7 @@ VIEWS.backup = () => {
   return html + `</div></main>`;
 };
 
-function notFound(msg = 'Không tìm thấy trang.', backTo = 'dashboard') {
+function notFound(msg = 'Không tìm thấy trang.', backTo = 'museum') {
   return band({crumbs: [...crumbsHome, ['Không tìm thấy']], title: 'Không tìm thấy'}) + `<main class="view"><div class="wrap"><div class="card">${emptyBox({ic: 'warn', title: msg, text: 'Có thể nội dung đã bị xoá hoặc đổi chỗ.', action: `<button class="btn btn-line" ${goAttr(backTo)}>Về danh sách</button>`})}</div></div></main>`;
 }
 function loadingView() {
@@ -2322,20 +2322,22 @@ document.addEventListener('input', e => { if (e.target.id === 'rg-q') { RG.q = e
    Render loop
    ========================================================================= */
 function updateChrome() {
-  const items = [['dashboard', 'Tổng quan'], ['sections', 'Chuyên mục'], ['categories', 'Danh mục'], ['articles', 'Bài viết'], ['homecontent', 'Trang chủ'], ['museum', 'Bảo tàng ký ức'], ['registrations', 'Đăng ký'], ['site', 'Xem trang'], ['backup', 'Sao lưu & Xuất']];
+  const items = [['museum', 'Bảo tàng ký ức'], ['registrations', 'Đăng ký'], ['backup', 'Sao lưu & Xuất']];
   const cur = {section: 'sections', category: 'categories', edit: 'articles', article: 'articles'}[S.route.name] || S.route.name;
   $('#mainnav').innerHTML = items.map(([r, l]) => `<button class="navpill" ${goAttr(r, r === 'site' ? {} : null)} ${cur === r ? 'aria-current="page"' : ''}>${l}</button>`).join('');
-  $('#mainnav').hidden = !!Store.auth; $('#gsearch').hidden = !!Store.auth;
+  $('#mainnav').hidden = !!Store.auth; $('#gsearch').hidden = true;
   const who = $('#who'); who.hidden = !(Store.mode === 'supabase' && SB.session && Store.auth !== 'login' && Store.auth !== 'recover'); $('#who-email').textContent = SB.session ? SB.session.email : '';
   const pill = $('#storepill'); pill.className = 'store-pill ' + (Store.mode === 'cloud' || Store.mode === 'supabase' ? 'cloud' : Store.mode === 'loading' ? '' : 'local'); pill.hidden = !!Store.auth;
   const label = Store.mode === 'supabase' ? 'Đã kết nối' : Store.mode === 'cloud' ? (W() ? 'Đã đồng bộ' : 'Chỉ xem') : Store.mode === 'local' ? 'Chế độ thử (trình duyệt)' : Store.mode === 'memory' ? 'Chưa lưu được' : 'Đang kết nối…';
   pill.querySelector('.lbl').textContent = label;
   pill.title = Store.mode === 'supabase' ? 'Dữ liệu lưu trên Supabase, website đọc trực tiếp' : Store.mode === 'cloud' ? 'Dữ liệu lưu trong cơ sở dữ liệu dùng chung của artifact' : Store.mode === 'local' ? 'Dữ liệu chỉ lưu trong trình duyệt này' : 'Nơi lưu dữ liệu';
   pill.setAttribute('aria-label', 'Nơi lưu dữ liệu: ' + label);
-  $('#topnew').hidden = !Store.ready || !!Store.auth || !W() || S.route.name === 'edit';
+  $('#topnew').hidden = true;
   $('#foot-store').textContent = Store.mode === 'supabase' ? 'Lưu trên Supabase · website cập nhật ngay' : Store.mode === 'cloud' ? 'Lưu trong cơ sở dữ liệu dùng chung' : Store.mode === 'local' ? 'Chỉ lưu trong trình duyệt này' : '';
 }
+const ALLOWED_ROUTES = ['museum', 'registrations', 'backup'];
 function render() {
+  if (!ALLOWED_ROUTES.includes(S.route.name)) S.route = {name: 'museum', params: {}};
   updateChrome();
   const root = $('#view-root');
   if (Store.auth) { root.innerHTML = authView(); const af = root.querySelector('[autofocus]'); if (af && !root.contains(document.activeElement)) af.focus(); return; }
@@ -2507,7 +2509,7 @@ window.addEventListener('beforeunload', e => { if (S.route.name === 'edit' && Ed
 
 /* Boot */
 (async function boot() {
-  if (!['dashboard','sections','section','categories','category','articles','article','edit','site','search','backup'].includes(S.route.name)) S.route = {name: 'dashboard', params: {}};
+  if (!ALLOWED_ROUTES.includes(S.route.name)) S.route = {name: 'museum', params: {}};
   render();
   await Store.init();
   if (Store.mode === 'local' && Store.localFirstRun) {
