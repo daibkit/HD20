@@ -21,7 +21,7 @@
     if (opt.auth !== false && session) h.Authorization = 'Bearer ' + session.access_token;
     else if (/^eyJ/.test(KEY)) h.Authorization = 'Bearer ' + KEY;
     if (opt.body !== undefined) h['Content-Type'] = 'application/json';
-    const res = await fetch(URL_ + path, {method: opt.method || 'GET', headers: h, body: opt.body !== undefined ? JSON.stringify(opt.body) : undefined});
+    const res = await fetch(URL_ + path, {method: opt.method || 'GET', headers: h, body: opt.blob !== undefined ? opt.blob : opt.body !== undefined ? JSON.stringify(opt.body) : undefined});
     const text = await res.text(); let data = null; try { data = text ? JSON.parse(text) : null; } catch (e) { data = text; }
     if (!res.ok) throw {status: res.status, code: data && (data.code || data.error_code), message: (data && (data.message || data.msg)) || ('HTTP ' + res.status)};
     return data;
@@ -235,17 +235,40 @@
     };
     modal.onkeydown = e => { if (e.key === 'Escape') modal.innerHTML = ''; };
   }
+  // Thu nhỏ ảnh (tối đa 900px) rồi tải lên kho ảnh “media” của Supabase; trả về địa chỉ công khai.
+  async function uploadImage(file) {
+    if (!/^image\/(jpeg|png|webp|gif)$/.test(file.type)) throw {message: 'Chỉ nhận ảnh JPG, PNG, WebP hoặc GIF.'};
+    let blob = file, ext = {'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/gif': 'gif'}[file.type];
+    if (file.type !== 'image/gif') {
+      try {
+        const bmp = await createImageBitmap(file), sc = Math.min(1, 900 / Math.max(bmp.width, bmp.height)), cv = document.createElement('canvas');
+        cv.width = Math.max(1, Math.round(bmp.width * sc)); cv.height = Math.max(1, Math.round(bmp.height * sc)); cv.getContext('2d').drawImage(bmp, 0, 0, cv.width, cv.height);
+        const keepPng = file.type === 'image/png', out = await new Promise(res => cv.toBlob(res, keepPng ? 'image/png' : 'image/webp', 0.9));
+        if (out) { blob = out; ext = keepPng ? 'png' : 'webp'; }
+      } catch (e) {}
+    }
+    if (blob.size > 5 * 1024 * 1024) throw {message: 'Ảnh quá lớn (tối đa 5 MB).'};
+    const path = 'sponsors/' + new Date().toISOString().slice(0, 7) + '/' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7) + '.' + ext;
+    await req('/storage/v1/object/media/' + path, {method: 'POST', blob, headers: {'Content-Type': blob.type, 'x-upsert': 'false', 'cache-control': '31536000'}});
+    return URL_ + '/storage/v1/object/public/media/' + path;
+  }
   function openSponsor() {
     const H = window.HDX_HOME, S = H.settings || {};
     const F = [{k: 'sponsorTitle', l: 'Tiêu đề', max: 160, v: S.sponsorTitle || 'Cùng Đội viết tiếp hành trình 20 năm'}, {k: 'sponsorText', l: 'Mô tả (xuống dòng để tách đoạn)', max: 500, ta: 1, v: S.sponsorText || 'Cá nhân, cựu thành viên và đơn vị muốn đồng hành cùng sinh nhật 20 năm của Đội, vui lòng liên hệ Ban Đối ngoại.'},
       {k: 'sponsorRole', l: 'Vai trò người liên hệ', max: 80, v: S.sponsorRole || 'Phụ trách Đối ngoại'}, {k: 'sponsorName', l: 'Họ tên · Khóa', max: 120, v: S.sponsorName || 'Phạm Mạnh Hùng · K50'}, {k: 'sponsorPhone', l: 'Số điện thoại', max: 30, v: S.sponsorPhone || '0962.991.386'}];
-    modal.innerHTML = `<div class="ov" role="dialog" aria-modal="true" aria-label="Sửa mục Tài trợ"><div class="md"><h2>Sửa mục “Tài trợ &amp; đồng hành”</h2><p class="err" id="err"></p>${F.map((f, n) => fieldHtml(f, f.v, n)).join('')}<div class="row"><button class="b" data-cancel>Huỷ</button><button class="b p" data-save>Lưu thay đổi</button></div></div></div>`;
+    let imgs = (S.sponsorImages || []).slice();
+    const imgHtml = () => `<div class="fld"><label>Ảnh / logo nhà tài trợ (tối đa 12)</label><div style="display:flex;flex-wrap:wrap;gap:8px">${imgs.map((u, n) => `<div style="position:relative;width:92px;height:62px;border-radius:10px;background:#EAF1F8;display:flex;align-items:center;justify-content:center;overflow:hidden"><img src="${esc(u)}" alt="" style="max-width:100%;max-height:100%;object-fit:contain"><button type="button" data-imgdel="${n}" aria-label="Bỏ ảnh" style="position:absolute;top:2px;right:2px;width:22px;height:22px;border:0;border-radius:50%;background:#16285E;color:#fff;cursor:pointer;line-height:1">×</button></div>`).join('')}${imgs.length < 12 ? '<label class="b" id="imglab" style="cursor:pointer;margin:0;align-self:center">＋ Tải ảnh lên<input type="file" id="imgfile" accept="image/jpeg,image/png,image/webp,image/gif" multiple hidden></label>' : ''}</div><div id="imginfo" style="font-size:13px;color:#5b6b92;margin-top:6px"></div></div>`;
+    modal.innerHTML = `<div class="ov" role="dialog" aria-modal="true" aria-label="Sửa mục Tài trợ"><div class="md"><h2>Sửa mục “Tài trợ &amp; đồng hành”</h2><p class="err" id="err"></p>${F.map((f, n) => fieldHtml(f, f.v, n)).join('')}<div id="imgs">${imgHtml()}</div><div class="row"><button class="b" data-cancel>Huỷ</button><button class="b p" data-save>Lưu thay đổi</button></div></div></div>`;
     const q = s => modal.querySelector(s), first = modal.querySelector('input,textarea'); if (first) first.focus();
+    const redraw = msg => { q('#imgs').innerHTML = imgHtml(); if (msg) q('#imginfo').textContent = msg; wireFile(); };
+    const wireFile = () => { const fi = q('#imgfile'); if (!fi) return; fi.onchange = async ev => { const fs = [...ev.target.files].slice(0, 12 - imgs.length); ev.target.value = ''; let n = 0; for (const f of fs) { q('#imginfo').textContent = 'Đang tải ảnh ' + (++n) + '/' + fs.length + '…'; try { imgs.push(await uploadImage(f)); } catch (er) { q('#err').textContent = (er && er.message) || 'Không tải được ảnh.'; break; } redraw('Đang tải ảnh ' + n + '/' + fs.length + '…'); } redraw(n ? 'Đã tải ảnh lên. Bấm “Lưu thay đổi” để đăng lên website.' : ''); }; };
+    wireFile();
     modal.onclick = async e => {
       const t = e.target;
       if (t.matches('.ov') || t.hasAttribute('data-cancel')) { modal.innerHTML = ''; return; }
+      if (t.hasAttribute('data-imgdel')) { imgs.splice(+t.dataset.imgdel, 1); redraw(); return; }
       if (!t.hasAttribute('data-save')) return;
-      const val = {}; modal.querySelectorAll('[data-k]').forEach(el => { val[el.dataset.k] = el.value.trim(); });
+      const val = {}; modal.querySelectorAll('[data-k]').forEach(el => { val[el.dataset.k] = el.value.trim(); }); val.sponsorImages = imgs.slice();
       t.disabled = true; t.textContent = 'Đang lưu…';
       try {
         const cur = await req('/rest/v1/site_content?select=data&key=eq.settings').catch(() => []);
