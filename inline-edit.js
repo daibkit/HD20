@@ -83,6 +83,7 @@
   const pageCss = document.createElement('style');
   pageCss.textContent = `html.hdx-editing [data-hdx-hot]{outline:2px dashed #F28A55 !important;outline-offset:3px;cursor:text !important;border-radius:4px}
     html.hdx-editing #video iframe{pointer-events:none}
+    html.hdx-editing #hd-radio iframe,html.hdx-editing #hd-radio video,html.hdx-editing #hd-radio audio{pointer-events:none}
     html.hdx-editing [contenteditable="true"]{outline:2px dashed #2B8FD9;outline-offset:4px;border-radius:4px;min-height:1em}
     html.hdx-editing [contenteditable="true"]:focus{outline-style:solid;background:rgba(43,143,217,.06)}
     html.hdx-editing .lede:empty:before,html.hdx-editing [data-hdx-ph]:empty:before{content:attr(data-hdx-ph);opacity:.5}`;
@@ -94,7 +95,7 @@
     history: [{k: 'year', l: 'Mốc thời gian', max: 40}, {k: 'title', l: 'Tiêu đề', max: 160}, {k: 'text', l: 'Nội dung', max: 1200, ta: 1}],
     sports: [{k: 'name', l: 'Tên giải', max: 80}, {k: 'format', l: 'Thể thức', max: 160}, {k: 'pic', l: 'Người phụ trách', max: 80}, {k: 'phone', l: 'Số điện thoại', max: 30}],
     activities: [{k: 'name', l: 'Tên hoạt động', max: 120}, {k: 'when', l: 'Thời gian', max: 80}, {k: 'photo', l: 'Gợi ý ảnh', max: 80}, {k: 'desc', l: 'Mô tả', max: 800, ta: 1}],
-    radios: [{k: 'title', l: 'Tên số', max: 120}, {k: 'desc', l: 'Mô tả', max: 300}, {k: 'id', l: 'ID YouTube', max: 20, re: /^[\w-]{6,20}$/, err: 'ID YouTube chỉ gồm chữ, số, “-”, “_” (6–20 ký tự).'}],
+    radios: [{k: 'title', l: 'Tên số', max: 120}, {k: 'desc', l: 'Mô tả', max: 300}, {k: 'id', l: 'Link hoặc ID video YouTube', max: 300, yt: true}, {k: 'file', l: 'hoặc link tệp video/âm thanh (https://…, .mp4/.mp3) — nếu có sẽ dùng thay cho YouTube', max: 600, re: /^https?:\/\/[^\s"'<>]+$/, err: 'Link tệp phải bắt đầu bằng https://'}],
     songs: [{k: 'title', l: 'Tên bài', max: 120}, {k: 'desc', l: 'Mô tả', max: 300}, {k: 'src', l: 'Link tệp âm thanh (.mp3)', max: 500, re: /^(https?:\/\/[^\s"'<>]+|[\w\-./]+\.(mp3|m4a|ogg|wav))$/i, err: 'Link âm thanh phải bắt đầu bằng https:// hoặc là tệp .mp3/.m4a/.ogg/.wav.'}, {k: 'yt', l: 'hoặc ID YouTube', max: 20, re: /^[\w-]{6,20}$/, err: 'ID YouTube không hợp lệ.'}],
     contacts: [{k: 'role', l: 'Vai trò / ban', max: 120}, {k: 'name', l: 'Họ tên', max: 80}, {k: 'k', l: 'Khóa (K…)', max: 20}, {k: 'phone', l: 'Số điện thoại', max: 30}],
     slides: [{k: 'text', l: 'Lời nhắn', max: 400, ta: 1}, {k: 'who', l: 'Người gửi', max: 80}, {k: 'k', l: 'Khóa (K…)', max: 20}]
@@ -238,6 +239,7 @@
     if (target && target.closest && target.closest('[data-hdx-add]')) return null;
     const vt = videoTarget(target); if (vt) return vt;
     const mn = target && target.closest && target.closest('[data-hdx-meaning]'); if (mn && !host.contains(target)) return {key: 'meaning', el: mn};
+    const rd = target && target.closest && target.closest('[data-hdx-radio]'); if (rd && !host.contains(target)) { const n = parseInt(rd.getAttribute('data-hdx-radio'), 10) - 1; if (n >= 0) return {key: 'radios', i: n, el: rd}; }
     const pl = target && target.closest && target.closest('[data-hdx-pledge]'); if (pl && !host.contains(target)) return {key: 'pledge', el: pl};
     let el = target, d = 0;
     while (el && el !== document.body && el !== document.documentElement && d < 6) {
@@ -305,7 +307,8 @@
       if (t.hasAttribute('data-save')) {
         sync();
         if (!norm(it[REQ[key]])) { setErr(`“${fields.find(f => f.k === REQ[key]).l}” không được để trống.`); return; }
-        for (const f of fields) { const v = norm(it[f.k]); if (v && f.re && !f.re.test(v)) { setErr(f.err); return; } }
+        for (const f of fields) { const v = norm(it[f.k]); if (f.yt) { const y = ytId(v); if (y === null) { setErr('Link/ID YouTube không hợp lệ.'); return; } it[f.k] = y; } else if (v && f.re && !f.re.test(v)) { setErr(f.err); return; } }
+        if (key === 'radios') it.ftype = /\.(mp4|m4v|webm|mov)(\?|#|$)/i.test(it.file || '') ? 'video' : 'audio';
         if (rounds) it.rounds = rounds.filter(r => norm(r.when) || norm(r.what));
         const arr = B.t.map(B.clean); if (isNew) arr.push(B.clean(it)); else arr[i] = B.clean(it);
         t.disabled = true; t.textContent = 'Đang lưu…';
@@ -397,7 +400,7 @@
   ui.addEventListener('mousedown', e => { if (e.target.closest('.tb')) e.preventDefault(); }); // giữ vùng chọn khi bấm nút định dạng
 
   // Nút “Thêm hoạt động” nằm ngay trong mục “Một ngày để trở về”, chỉ hiện khi đang bật chỉnh sửa.
-  const ADD_BTNS = [{key: 'agenda', sec: 'agenda', label: '＋ Thêm hoạt động lịch trình', inner: false}, {key: 'chain', sec: 'hoat-dong', label: '＋ Thêm hoạt động', inner: true}, {key: 'slides', sec: 'hen-uoc', label: '＋ Thêm lời hẹn ước', inner: true}];
+  const ADD_BTNS = [{key: 'agenda', sec: 'agenda', label: '＋ Thêm hoạt động lịch trình', inner: false}, {key: 'chain', sec: 'hoat-dong', label: '＋ Thêm hoạt động', inner: true}, {key: 'slides', sec: 'hen-uoc', label: '＋ Thêm lời hẹn ước', inner: true}, {key: 'radios', sec: 'hd-radio', label: '＋ Thêm số radio', inner: true}];
   function syncAddBtn() {
     ADD_BTNS.forEach(d => {
       const sec = document.getElementById(d.sec), cur = document.querySelector('[data-hdx-add="' + d.key + '"]');
