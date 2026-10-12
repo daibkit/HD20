@@ -68,3 +68,8 @@ Admin bật “Sửa trang” trên website rồi bấm vào tiêu đề, mô t�
 
 ### Video giới thiệu tải lên
 Admin → Trang chủ → Cài đặt chung (hoặc “Sửa trang” → bấm vào mục Video) → **Tải video lên**: tệp được lưu trên Google Drive của bạn (thư mục “Video giới thiệu”), tự phát (tắt tiếng) khi mở trang và được ưu tiên hơn link YouTube. Video YouTube không tự phát. Cần **dán lại mã Apps Script mới** (`apps-script/Code.gs.txt`) và triển khai “Phiên bản mới”.
+
+
+### Thư mục Drive & xoá ảnh (Bảo tàng ký ức)
+- Admin → Bảo tàng ký ức → **Tạo thư mục Drive**: tạo sẵn đủ K48–K67 và “Video giới thiệu” trong thư mục gốc trên Google Drive (cần dán lại mã Apps Script mới và Triển khai → Phiên bản mới).
+- **Xoá** một ảnh chỉ gỡ nó khỏi website (cột `hidden`): dòng dữ liệu và tệp trên Drive được giữ nguyên, khôi phục ở mục “Ảnh đã gỡ”. Cần chạy lại `supabase/museum.sql` một lần để có cột `hidden`.

@@ -15,6 +15,8 @@ create table if not exists public.museum_photos (
   constraint museum_photos_drive_key unique (k, drive_id)
 );
 alter table public.museum_photos add column if not exists kind text not null default 'image' check (kind in ('image','video'));
+-- “Xoá” ảnh trong admin chỉ gỡ khỏi website (hidden = true): dòng dữ liệu và tệp trên Drive được giữ nguyên, có thể khôi phục.
+alter table public.museum_photos add column if not exists hidden boolean not null default false;
 create index if not exists museum_photos_k_idx on public.museum_photos(k, sort_order);
 alter table public.museum_photos enable row level security;
 drop policy if exists "doc_cong_khai" on public.museum_photos;
