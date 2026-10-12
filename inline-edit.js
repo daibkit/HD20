@@ -235,10 +235,36 @@
     };
     modal.onkeydown = e => { if (e.key === 'Escape') modal.innerHTML = ''; };
   }
+  function openSponsor() {
+    const H = window.HDX_HOME, S = H.settings || {};
+    const F = [{k: 'sponsorTitle', l: 'Tiêu đề', max: 160, v: S.sponsorTitle || 'Cùng Đội viết tiếp hành trình 20 năm'}, {k: 'sponsorText', l: 'Mô tả (xuống dòng để tách đoạn)', max: 500, ta: 1, v: S.sponsorText || 'Cá nhân, cựu thành viên và đơn vị muốn đồng hành cùng sinh nhật 20 năm của Đội, vui lòng liên hệ Ban Đối ngoại.'},
+      {k: 'sponsorRole', l: 'Vai trò người liên hệ', max: 80, v: S.sponsorRole || 'Phụ trách Đối ngoại'}, {k: 'sponsorName', l: 'Họ tên · Khóa', max: 120, v: S.sponsorName || 'Phạm Mạnh Hùng · K50'}, {k: 'sponsorPhone', l: 'Số điện thoại', max: 30, v: S.sponsorPhone || '0962.991.386'}];
+    modal.innerHTML = `<div class="ov" role="dialog" aria-modal="true" aria-label="Sửa mục Tài trợ"><div class="md"><h2>Sửa mục “Tài trợ &amp; đồng hành”</h2><p class="err" id="err"></p>${F.map((f, n) => fieldHtml(f, f.v, n)).join('')}<div class="row"><button class="b" data-cancel>Huỷ</button><button class="b p" data-save>Lưu thay đổi</button></div></div></div>`;
+    const q = s => modal.querySelector(s), first = modal.querySelector('input,textarea'); if (first) first.focus();
+    modal.onclick = async e => {
+      const t = e.target;
+      if (t.matches('.ov') || t.hasAttribute('data-cancel')) { modal.innerHTML = ''; return; }
+      if (!t.hasAttribute('data-save')) return;
+      const val = {}; modal.querySelectorAll('[data-k]').forEach(el => { val[el.dataset.k] = el.value.trim(); });
+      t.disabled = true; t.textContent = 'Đang lưu…';
+      try {
+        const cur = await req('/rest/v1/site_content?select=data&key=eq.settings').catch(() => []);
+        const b0 = cur && cur[0] && cur[0].data && !Array.isArray(cur[0].data) ? cur[0].data : {};
+        const data = Object.assign({}, b0, val);
+        await req('/rest/v1/site_content?on_conflict=key', {method: 'POST', headers: {Prefer: 'resolution=merge-duplicates,return=minimal'}, body: {key: 'settings', data, updated_at: new Date().toISOString()}});
+        Object.assign(S, val);
+        try { const rows = (lsGet(H.cacheKey) || []).filter(r => r && r.key !== 'settings'); rows.push({key: 'settings', data}); lsSet(H.cacheKey, rows); } catch (er) {}
+        modal.innerHTML = ''; setHot(null); H.rerender(); toast('Đã lưu. Website đã cập nhật.');
+      } catch (er) { const msg = errMsg(er); q('#err').textContent = msg; toast(msg, true); t.disabled = false; t.textContent = 'Lưu thay đổi'; }
+    };
+    modal.onkeydown = e => { if (e.key === 'Escape') modal.innerHTML = ''; };
+  }
   function findItem(target) {
     if (target && target.closest && target.closest('[data-hdx-add]')) return null;
     const vt = videoTarget(target); if (vt) return vt;
     const mn = target && target.closest && target.closest('[data-hdx-meaning]'); if (mn && !host.contains(target)) return {key: 'meaning', el: mn};
+    const ct = target && target.closest && target.closest('[data-hdx-contact]'); if (ct && !host.contains(target)) { const n = parseInt(ct.getAttribute('data-hdx-contact'), 10) - 1; if (n >= 0) return {key: 'contacts', i: n, el: ct}; }
+    const sp = target && target.closest && target.closest('[data-hdx-sponsor]'); if (sp && !host.contains(target)) return {key: 'sponsor', el: sp};
     const rd = target && target.closest && target.closest('[data-hdx-radio]'); if (rd && !host.contains(target)) { const n = parseInt(rd.getAttribute('data-hdx-radio'), 10) - 1; if (n >= 0) return {key: 'radios', i: n, el: rd}; }
     const pl = target && target.closest && target.closest('[data-hdx-pledge]'); if (pl && !host.contains(target)) return {key: 'pledge', el: pl};
     let el = target, d = 0;
@@ -269,7 +295,7 @@
     const ab = e.target.closest && e.target.closest('[data-hdx-add]'); if (ab) { e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); openItem(ab.dataset.hdxAdd, -1); return; }
     const f = findItem(e.target); if (!f) return;
     e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
-    if (f.key === 'video') openVideo(); else if (f.key === 'pledge') openPledge(); else if (f.key === 'meaning') openMeaning(); else openItem(f.key, f.i);
+    if (f.key === 'video') openVideo(); else if (f.key === 'pledge') openPledge(); else if (f.key === 'meaning') openMeaning(); else if (f.key === 'sponsor') openSponsor(); else openItem(f.key, f.i);
   };
 
   function fieldHtml(f, v, idx, extra) {
@@ -400,17 +426,17 @@
   ui.addEventListener('mousedown', e => { if (e.target.closest('.tb')) e.preventDefault(); }); // giữ vùng chọn khi bấm nút định dạng
 
   // Nút “Thêm hoạt động” nằm ngay trong mục “Một ngày để trở về”, chỉ hiện khi đang bật chỉnh sửa.
-  const ADD_BTNS = [{key: 'agenda', sec: 'agenda', label: '＋ Thêm hoạt động lịch trình', inner: false}, {key: 'chain', sec: 'hoat-dong', label: '＋ Thêm hoạt động', inner: true}, {key: 'slides', sec: 'hen-uoc', label: '＋ Thêm lời hẹn ước', inner: true}, {key: 'radios', sec: 'hd-radio', label: '＋ Thêm số radio', inner: true}];
+  const ADD_BTNS = [{key: 'agenda', sec: 'agenda', label: '＋ Thêm hoạt động lịch trình', inner: false}, {key: 'chain', sec: 'hoat-dong', label: '＋ Thêm hoạt động', inner: true}, {key: 'slides', sec: 'hen-uoc', label: '＋ Thêm lời hẹn ước', inner: true}, {key: 'radios', sec: 'hd-radio', label: '＋ Thêm số radio', inner: true}, {key: 'contacts', sec: 'tai-tro', label: '＋ Thêm đầu mối liên hệ', before: true}];
   function syncAddBtn() {
     ADD_BTNS.forEach(d => {
       const sec = document.getElementById(d.sec), cur = document.querySelector('[data-hdx-add="' + d.key + '"]');
       if (!editing || !sec || !homeBlocks()) { if (cur) cur.remove(); return; }
-      const host_ = d.inner && sec.firstElementChild ? sec.firstElementChild : sec;
-      if (cur && cur.parentNode === host_) return;
+      const host_ = d.before ? sec.parentNode : d.inner && sec.firstElementChild ? sec.firstElementChild : sec;
+      if (cur && cur.parentNode === host_ && (!d.before || cur.nextSibling === sec)) return;
       if (cur) cur.remove();
       const w = document.createElement('div'); w.setAttribute('data-hdx-add', d.key); w.style.cssText = 'display:flex;justify-content:center;margin-top:24px';
       w.innerHTML = '<button type="button" style="cursor:pointer;font:inherit;font-weight:700;font-size:15px;padding:11px 22px;border-radius:999px;border:2px dashed #F28A55;background:#fff;color:#C4571F">' + d.label + '</button>';
-      host_.appendChild(w);
+      if (d.before) host_.insertBefore(w, sec); else host_.appendChild(w);
     });
   }
   setInterval(syncAddBtn, 400);
