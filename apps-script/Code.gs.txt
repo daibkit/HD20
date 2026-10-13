@@ -14,6 +14,8 @@ function authorize() {
   DriveApp.getRootFolder();
   UrlFetchApp.fetch('https://www.googleapis.com/discovery/v1/apis', {muteHttpExceptions: true});
   const f = root_();
+  try { f.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); Logger.log('Đã bật chia sẻ “bất kỳ ai có liên kết” cho thư mục gốc.'); }
+  catch (e) { Logger.log('KHÔNG bật được chia sẻ công khai: ' + e.message + ' — có thể quản trị viên Google Workspace chặn chia sẻ ra ngoài.'); }
   Logger.log('OK — đã cấp quyền. Thư mục gốc: ' + f.getUrl());
 }
 
@@ -50,7 +52,9 @@ function root_() {
   if (id) { try { return DriveApp.getFolderById(id); } catch (e) {} }
   const it = DriveApp.getFoldersByName(ROOT_NAME);
   const f = it.hasNext() ? it.next() : DriveApp.createFolder(ROOT_NAME);
-  p.setProperty('ROOT_ID', f.getId()); return f;
+  p.setProperty('ROOT_ID', f.getId());
+  try { f.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch (e) {}
+  return f;
 }
 function folder_(k) {
   if (k === 'VIDEO') k = 'Video giới thiệu'; // video ở trang chủ
@@ -92,11 +96,11 @@ function doPost(e) {
       const code = r.getResponseCode();
       if (code === 308) return out_({ok: true, done: false});
       if (code === 200 || code === 201) {
-        const id = JSON.parse(r.getContentText()).id, f = DriveApp.getFileById(id);
-        f.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-        let where = '', url = '';
-        try { const par = f.getParents().next(); where = par.getName(); url = par.getUrl(); } catch (e) {}
-        return out_({ok: true, done: true, id: id, name: f.getName(), folder: where, folderUrl: url});
+        const id = JSON.parse(r.getContentText()).id;
+        let where = '', url = '', name = '', shared = true, why = '';
+        try { const f = DriveApp.getFileById(id); name = f.getName(); const par = f.getParents().next(); where = par.getName(); url = par.getUrl(); } catch (e) { why = String(e && e.message || e); }
+        try { DriveApp.getFileById(id).setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch (e) { shared = false; why = String(e && e.message || e); }
+        return out_({ok: true, done: true, id: id, name: name, folder: where, folderUrl: url, shared: shared, warn: why});
       }
       return out_({ok: false, error: 'Google Drive báo lỗi ' + code + ': ' + String(r.getContentText()).slice(0, 160)});
     }

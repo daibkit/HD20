@@ -2101,7 +2101,7 @@ const MU = {
       const end = Math.min(off + CH, file.size), data = await muB64(file.slice(off, end));
       for (let t = 1; ; t++) { try { r = await this.gas('chunk', {session: st.session, start: off, total: file.size, data}); break; } catch (e) { if (t >= 3 || (e && e.code === 'session_expired')) throw e; await muSleep(1500 * t); } }
       off = end; onPct(Math.round(off / file.size * 100));
-      if (r.done) return {id: r.id, kind: mime.startsWith('video/') ? 'video' : 'image', folder: r.folder || '', folderUrl: r.folderUrl || ''};
+      if (r.done) return {id: r.id, kind: mime.startsWith('video/') ? 'video' : 'image', folder: r.folder || '', folderUrl: r.folderUrl || '', shared: r.shared !== false, warn: r.warn || ''};
     }
     throw {message: 'Google Drive chưa xác nhận tệp đã tải xong, hãy thử lại.'};
   },
@@ -2118,7 +2118,7 @@ const MU = {
         const row = {id: uid('mp'), k, drive_id: j.id, title: '', year: '', caption: '', sort_order: ++base};
         if (j.kind === 'video') row.kind = 'video';
         await SB.req('/rest/v1/museum_photos', {method: 'POST', headers: {Prefer: 'return=minimal'}, body: row});
-        this.rows.push({kind: 'image', ...row, created_at: new Date().toISOString()}); this.prog[i].st = 'ok'; this.prog[i].msg = j.folder ? 'Drive › …/' + j.folder : ''; if (j.folder && j.folder !== (k === 'VIDEO' ? 'Video giới thiệu' : k)) { this.prog[i].st = 'err'; this.prog[i].msg = 'Tệp nằm trong thư mục “' + j.folder + '” trên Drive, không phải ' + k + '. Mở Drive để kiểm tra.'; ok--; } ok++;
+        this.rows.push({kind: 'image', ...row, created_at: new Date().toISOString()}); this.prog[i].st = 'ok'; if (j.shared === false) toast('Ảnh đã lên Drive nhưng chưa bật được chia sẻ công khai (' + (j.warn || '') + '). Khách có thể chưa xem được ảnh.', 'err', 9000); this.prog[i].msg = j.folder ? 'Drive › …/' + j.folder : ''; if (j.folder && j.folder !== (k === 'VIDEO' ? 'Video giới thiệu' : k)) { this.prog[i].st = 'err'; this.prog[i].msg = 'Tệp nằm trong thư mục “' + j.folder + '” trên Drive, không phải ' + k + '. Mở Drive để kiểm tra.'; ok--; } ok++;
       } catch (e) {
         this.prog[i].st = 'err'; this.prog[i].msg = e && e.status === 400 && /kind/.test(String(e.message)) ? 'chưa chạy lại supabase/museum.sql (thiếu cột kind) để lưu video' : (e && e.message) || 'Lỗi';
         if (e && e.code === 'session_expired') break;
