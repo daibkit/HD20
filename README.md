@@ -82,3 +82,7 @@ Admin → Trang chủ → Cài đặt chung (hoặc “Sửa trang” → bấm 
 ## Hoạt động trong năm (trang Giới thiệu Đội)
 
 Mục "Một năm của Đội" lấy dữ liệu từ khóa `activities`. Ở chế độ chỉnh sửa: bấm thẻ để sửa nhóm/tên/mô tả/ảnh, "＋ Thêm hoạt động trong năm" để thêm; "Viết bài chi tiết →" để soạn bài (ảnh, video, liên kết) tại `#/ngay-hoi/N`. Không cần chạy thêm SQL.
+
+## Thống kê truy cập & click
+
+Chạy `supabase/stats.sql` một lần. Website ghi lượt truy cập, lượt xem trang và lượt click từng mục (ẩn danh, qua hàm `hit()`); tổng lượt truy cập hiện ở chân trang. Admin xem chi tiết ở tab "Thống kê". Không đếm khi đang bật chế độ chỉnh sửa; muốn tắt đếm trên một trình duyệt: `localStorage.hdx_nostat='1'`.

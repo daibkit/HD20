@@ -2342,10 +2342,56 @@ document.addEventListener('change', e => {
 document.addEventListener('input', e => { if (e.target.id === 'rg-q') { RG.q = e.target.value; RG.lim = 50; clearTimeout(RG.qt); RG.qt = setTimeout(() => { RG.draw(); const i = $('#rg-q'); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }, 250); } });
 
 /* =========================================================================
+   Thống kê — lượt truy cập & lượt click từng mục (bảng site_hits)
+   ========================================================================= */
+const ST = {
+  rows: [], loaded: false, loading: false, err: '', range: '30', q: '',
+  async load() {
+    if (this.loading) return; this.loading = true; this.err = ''; this.draw();
+    try { this.rows = await SB.req('/rest/v1/site_hits?select=k,day,label,n&order=day.desc&limit=50000') || []; this.loaded = true; }
+    catch (e) { this.err = e && (e.status === 404 || /PGRST205|42P01/.test(String(e.code))) ? 'Chưa có bảng thống kê. Hãy chạy tệp supabase/stats.sql trong Supabase (SQL Editor), rồi bấm Tải lại.' : (e && e.message) || 'Không tải được thống kê.'; }
+    this.loading = false; this.draw();
+  },
+  mount() { if (!this.loaded && !this.loading) this.load(); else this.draw(); },
+  inRange() { if (this.range === 'all') return this.rows; const lim = new Date(Date.now() - (+this.range - 1) * 864e5 + 7 * 36e5).toISOString().slice(0, 10); return this.rows.filter(r => r.day >= lim); },
+  sum(rows) { return rows.reduce((a, r) => a + (+r.n || 0), 0); },
+  group(rows, pre) { const m = new Map(); rows.filter(r => r.k.startsWith(pre)).forEach(r => { const g = m.get(r.k) || {k: r.k, label: r.label || r.k, n: 0}; g.n += +r.n || 0; if (r.label) g.label = r.label; m.set(r.k, g); }); return [...m.values()].sort((a, b) => b.n - a.n); },
+  draw() {
+    const root = $('#st-root'); if (!root) return;
+    if (!W()) { root.innerHTML = `<div class="notice">${icon('warn')}<div>Bạn cần đăng nhập bằng tài khoản admin.</div></div>`; return; }
+    if (Store.mode !== 'supabase') { root.innerHTML = `<div class="notice">${icon('warn')}<div><b>Cần kết nối Supabase.</b></div></div>`; return; }
+    if (this.loading) { root.innerHTML = '<p class="muted" style="padding:20px">Đang tải thống kê…</p>'; return; }
+    if (!this.loaded) { root.innerHTML = `<div class="notice danger">${icon('warn')}<div><b>Không tải được.</b> ${esc(this.err)}</div></div><div class="qa" style="margin-top:12px"><button class="btn btn-line" data-st="reload">${icon('refresh', 16)} Tải lại</button></div>`; return; }
+    const all = this.rows, r = this.inRange(), q = this.q.trim().toLowerCase();
+    const visits = this.sum(r.filter(x => x.k === 'visit')), uniq = this.sum(r.filter(x => x.k === 'uniq')), clicks = this.sum(r.filter(x => x.k.startsWith('c:')));
+    const total = this.sum(all.filter(x => x.k === 'visit'));
+    const days = new Map(); r.filter(x => x.k === 'visit').forEach(x => days.set(x.day, (days.get(x.day) || 0) + (+x.n || 0)));
+    const dl = [...days.entries()].sort((a, b) => a[0] < b[0] ? 1 : -1).slice(0, 14), mx = Math.max(1, ...dl.map(d => d[1]));
+    const bars = dl.length ? dl.map(([d, n]) => `<div style="display:grid;grid-template-columns:90px 1fr 50px;gap:10px;align-items:center;font-size:14px"><span class="muted tnum">${esc(d.split('-').reverse().join('/'))}</span><span style="background:var(--line,#e3e8f2);border-radius:6px;height:12px;overflow:hidden"><i style="display:block;height:100%;width:${Math.max(2, Math.round(n / mx * 100))}%;background:linear-gradient(90deg,#0E4C9C,#2BB3C0)"></i></span><b class="tnum" style="text-align:right">${n}</b></div>`).join('') : '<p class="muted">Chưa có dữ liệu trong khoảng này.</p>';
+    const tbl = (title, list) => { list = list.filter(x => !q || (x.label + x.k).toLowerCase().includes(q)); const m = Math.max(1, ...list.map(x => x.n)); return `<div class="card card-pad"><h3 style="margin:0 0 10px">${title}</h3>${list.length ? `<div style="display:grid;gap:7px">${list.slice(0, 60).map(x => `<div style="display:grid;grid-template-columns:minmax(0,1fr) 140px 52px;gap:10px;align-items:center;font-size:14px"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(x.label)}">${esc(x.label)}</span><span style="background:var(--line,#e3e8f2);border-radius:6px;height:10px;overflow:hidden"><i style="display:block;height:100%;width:${Math.max(2, Math.round(x.n / m * 100))}%;background:#F28A55"></i></span><b class="tnum" style="text-align:right">${x.n}</b></div>`).join('')}</div>` : '<p class="muted">Chưa có dữ liệu.</p>'}</div>`; };
+    root.innerHTML = `<div class="stats"><div class="stat" style="cursor:default"><span class="n n-brand tnum">${visits}</span><span class="l">Lượt truy cập</span><span class="s">Tổng từ đầu: ${total}</span></div>
+      <div class="stat" style="cursor:default"><span class="n n-green tnum">${uniq}</span><span class="l">Người truy cập mới</span><span class="s">Mỗi trình duyệt tính một lần</span></div>
+      <div class="stat" style="cursor:default"><span class="n n-gold tnum">${clicks}</span><span class="l">Lượt click mục</span><span class="s">Menu, nút, thẻ, bài viết…</span></div></div>
+      <div class="card card-pad"><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;align-items:end">
+        <div class="fld"><label for="st-r">Khoảng thời gian</label>${sel('st-r', [['1', 'Hôm nay'], ['7', '7 ngày'], ['30', '30 ngày'], ['all', 'Từ đầu']], this.range)}</div>
+        <div class="fld" style="grid-column:span 2"><label for="st-q">Lọc theo tên mục</label><input id="st-q" class="inp" type="search" value="${esc(this.q)}" placeholder="VD: radio, đăng ký, tiếng gọi…"></div>
+        <div class="qa"><button class="btn btn-line" data-st="reload">${icon('refresh', 16)} Tải lại</button></div></div></div>
+      <div class="card card-pad"><h3 style="margin:0 0 10px">Lượt truy cập theo ngày</h3><div style="display:grid;gap:7px">${bars}</div></div>
+      ${tbl('Click từng mục', this.group(r, 'c:'))}${tbl('Lượt xem trang / bài viết', this.group(r, 'p:'))}`;
+  },
+  onClick(el) { if (el.dataset.st === 'reload') { this.loaded = false; this.load(); } }
+};
+VIEWS.stats = () => band({crumbs: [...crumbsHome, ['Thống kê']], title: 'Thống kê truy cập', sub: 'Số lượt truy cập website và lượt click từng mục. Chỉ admin xem được.'})
+  + `<main class="view"><div class="wrap stack"><div id="st-root"></div></div></main>`;
+document.addEventListener('click', e => { const el = e.target.closest('#st-root [data-st]'); if (el) ST.onClick(el); });
+document.addEventListener('change', e => { if (e.target.id === 'st-r') { ST.range = e.target.value; ST.draw(); } });
+document.addEventListener('input', e => { if (e.target.id === 'st-q') { ST.q = e.target.value; clearTimeout(ST.qt); ST.qt = setTimeout(() => { ST.draw(); const i = $('#st-q'); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }, 250); } });
+
+/* =========================================================================
    Render loop
    ========================================================================= */
 function updateChrome() {
-  const items = [['museum', 'Bảo tàng ký ức'], ['registrations', 'Đăng ký'], ['backup', 'Sao lưu & Xuất']];
+  const items = [['museum', 'Bảo tàng ký ức'], ['registrations', 'Đăng ký'], ['stats', 'Thống kê'], ['backup', 'Sao lưu & Xuất']];
   const cur = {section: 'sections', category: 'categories', edit: 'articles', article: 'articles'}[S.route.name] || S.route.name;
   $('#mainnav').innerHTML = items.map(([r, l]) => `<button class="navpill" ${goAttr(r, r === 'site' ? {} : null)} ${cur === r ? 'aria-current="page"' : ''}>${l}</button>`).join('');
   $('#mainnav').hidden = !!Store.auth; $('#gsearch').hidden = true;
@@ -2358,7 +2404,7 @@ function updateChrome() {
   $('#topnew').hidden = true;
   $('#foot-store').textContent = Store.mode === 'supabase' ? 'Lưu trên Supabase · website cập nhật ngay' : Store.mode === 'cloud' ? 'Lưu trong cơ sở dữ liệu dùng chung' : Store.mode === 'local' ? 'Chỉ lưu trong trình duyệt này' : '';
 }
-const ALLOWED_ROUTES = ['museum', 'registrations', 'backup'];
+const ALLOWED_ROUTES = ['museum', 'registrations', 'stats', 'backup'];
 function render() {
   if (!ALLOWED_ROUTES.includes(S.route.name)) S.route = {name: 'museum', params: {}};
   updateChrome();
@@ -2369,6 +2415,7 @@ function render() {
   if (S.route.name === 'homecontent' && $('#hc-root')) { HC.draw(); return; }
   if (S.route.name === 'museum' && $('#mu-root')) { MU.draw(); return; }
   if (S.route.name === 'registrations' && $('#rg-root')) { RG.draw(); return; }
+  if (S.route.name === 'stats' && $('#st-root')) { ST.draw(); return; }
   const ae = document.activeElement; const focus = ae && ae.id && root.contains(ae) ? {id: ae.id, s: ae.selectionStart, e: ae.selectionEnd} : null;
   const fn = VIEWS[S.route.name] || (() => notFound());
   root.innerHTML = fn(S.route.params || {});
@@ -2376,6 +2423,7 @@ function render() {
   if (S.route.name === 'homecontent') HC.mount();
   if (S.route.name === 'museum') MU.mount();
   if (S.route.name === 'registrations') RG.mount();
+  if (S.route.name === 'stats') ST.mount();
   if (focus) { const el = document.getElementById(focus.id); if (el) { el.focus({preventScroll: true}); try { if (focus.s != null) el.setSelectionRange(focus.s, focus.e); } catch {} } }
 }
 Store.on(render);
