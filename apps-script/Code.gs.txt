@@ -111,15 +111,20 @@ function doPost(e) {
       names.forEach(function (k) { const had = k === 'VIDEO' ? root_().getFoldersByName('Video giới thiệu').hasNext() : root_().getFoldersByName(k).hasNext(); folder_(k); if (!had) made.push(k); });
       return out_({ok: true, total: names.length, created: made.length, root: root_().getName()});
     }
-    if (q.action === 'list') {
-      const it = folder_(q.k).getFiles(), files = [];
+    if (q.action === 'list') { // có phân trang: offset/limit để trang quản trị hiện được tiến trình
+      const it = folder_(q.k).getFiles(), all = [];
       while (it.hasNext()) {
         const f = it.next(); if (!/^(image|video)\//.test(f.getMimeType())) continue;
-        if (f.getSharingAccess() !== DriveApp.Access.ANYONE_WITH_LINK && f.getSharingAccess() !== DriveApp.Access.ANYONE) f.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-        files.push({id: f.getId(), name: f.getName(), mime: f.getMimeType(), t: f.getDateCreated().getTime()});
+        all.push({f: f, t: f.getDateCreated().getTime()});
       }
-      files.sort(function (a, b) { return a.t - b.t; });
-      return out_({ok: true, files: files});
+      all.sort(function (a, b) { return a.t - b.t; });
+      const off = Math.max(0, Number(q.offset) || 0), lim = q.limit ? Math.min(60, Math.max(1, Number(q.limit))) : all.length;
+      const files = all.slice(off, off + lim).map(function (x) {
+        const f = x.f;
+        try { if (f.getSharingAccess() !== DriveApp.Access.ANYONE_WITH_LINK && f.getSharingAccess() !== DriveApp.Access.ANYONE) f.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch (e) {}
+        return {id: f.getId(), name: f.getName(), mime: f.getMimeType(), t: x.t};
+      });
+      return out_({ok: true, files: files, total: all.length, next: off + files.length});
     }
     if (q.action === 'delete') {
       if (!/^[\w-]{10,100}$/.test(q.id || '')) return out_({ok: false, error: 'Mã tệp không hợp lệ.'});
