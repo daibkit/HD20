@@ -96,7 +96,7 @@
     sports: [{k: 'name', l: 'Tên giải', max: 80}, {k: 'format', l: 'Thể thức', max: 160}, {k: 'pic', l: 'Người phụ trách', max: 80}, {k: 'phone', l: 'Số điện thoại', max: 30}],
     activities: [{k: 'name', l: 'Tên hoạt động', max: 120}, {k: 'when', l: 'Thời gian', max: 80}, {k: 'photo', l: 'Gợi ý ảnh', max: 80}, {k: 'desc', l: 'Mô tả', max: 800, ta: 1}],
     radios: [{k: 'title', l: 'Tên số', max: 120}, {k: 'desc', l: 'Mô tả', max: 300}, {k: 'id', l: 'Link hoặc ID video YouTube', max: 300, yt: true}, {k: 'file', l: 'hoặc link tệp video/âm thanh (https://…, .mp4/.mp3) — nếu có sẽ dùng thay cho YouTube', max: 600, re: /^https?:\/\/[^\s"'<>]+$/, err: 'Link tệp phải bắt đầu bằng https://'}],
-    songs: [{k: 'title', l: 'Tên bài', max: 120}, {k: 'desc', l: 'Mô tả', max: 300}, {k: 'src', l: 'Link tệp âm thanh (.mp3)', max: 500, re: /^(https?:\/\/[^\s"'<>]+|[\w\-./]+\.(mp3|m4a|ogg|wav))$/i, err: 'Link âm thanh phải bắt đầu bằng https:// hoặc là tệp .mp3/.m4a/.ogg/.wav.'}, {k: 'yt', l: 'hoặc ID YouTube', max: 20, re: /^[\w-]{6,20}$/, err: 'ID YouTube không hợp lệ.'}],
+    songs: [{k: 'title', l: 'Tên bài', max: 120}, {k: 'desc', l: 'Mô tả', max: 300}, {k: 'src', l: 'Link nhạc: YouTube (watch, youtu.be…), Google Drive hoặc tệp .mp3/.m4a (https://…)', max: 600}],
     contacts: [{k: 'role', l: 'Vai trò / ban', max: 120}, {k: 'name', l: 'Họ tên', max: 80}, {k: 'k', l: 'Khóa (K…)', max: 20}, {k: 'phone', l: 'Số điện thoại', max: 30}],
     slides: [{k: 'text', l: 'Lời nhắn', max: 400, ta: 1}, {k: 'who', l: 'Người gửi', max: 80}, {k: 'k', l: 'Khóa (K…)', max: 20}]
   };
@@ -117,6 +117,13 @@
     }
     return out;
   }
+  const songLink = v => {
+    v = String(v || '').trim(); if (!v) return {src: '', yt: ''};
+    const y = ytId(v); if (y) return {src: '', yt: y};
+    const d = v.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:[^#]*&)?id=)([\w-]{10,100})/i); if (d) return {src: 'https://drive.google.com/uc?export=download&id=' + d[1], yt: ''};
+    if (v.length <= 500 && /^(https?:\/\/[^\s"'<>]+|[\w\-./]+\.(mp3|m4a|ogg|wav))$/i.test(v)) return {src: v, yt: ''};
+    return null;
+  };
   const ytId = v => { v = String(v || '').trim(); if (!v) return ''; const m = v.match(/(?:youtu\.be\/|youtube(?:-nocookie)?\.com\/(?:watch\?(?:[^#]*&)?v=|embed\/|shorts\/|live\/|v\/))([\w-]{6,20})/i); if (m) return m[1]; return /^[\w-]{6,20}$/.test(v) ? v : null; };
   const b64 = blob => new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(String(fr.result).split(',')[1] || ''); fr.onerror = () => rej({message: 'Không đọc được tệp.'}); fr.readAsDataURL(blob); });
   async function gas(action, extra) {
@@ -288,6 +295,7 @@
     const mn = target && target.closest && target.closest('[data-hdx-meaning]'); if (mn && !host.contains(target)) return {key: 'meaning', el: mn};
     const ct = target && target.closest && target.closest('[data-hdx-contact]'); if (ct && !host.contains(target)) { const n = parseInt(ct.getAttribute('data-hdx-contact'), 10) - 1; if (n >= 0) return {key: 'contacts', i: n, el: ct}; }
     const sp = target && target.closest && target.closest('[data-hdx-sponsor]'); if (sp && !host.contains(target)) return {key: 'sponsor', el: sp};
+    const sg = target && target.closest && target.closest('[data-hdx-song]'); if (sg && !host.contains(target)) { const n = parseInt(sg.getAttribute('data-hdx-song'), 10) - 1; if (n >= 0) return {key: 'songs', i: n, el: sg}; }
     const rd = target && target.closest && target.closest('[data-hdx-radio]'); if (rd && !host.contains(target)) { const n = parseInt(rd.getAttribute('data-hdx-radio'), 10) - 1; if (n >= 0) return {key: 'radios', i: n, el: rd}; }
     const pl = target && target.closest && target.closest('[data-hdx-pledge]'); if (pl && !host.contains(target)) return {key: 'pledge', el: pl};
     let el = target, d = 0;
@@ -327,7 +335,7 @@
     return `<div class="fld"><label for="${id}">${esc(f.l)}</label>${f.ta ? `<textarea id="${id}" data-k="${f.k}" maxlength="${f.max}">${esc(v || '')}</textarea>` : `<input id="${id}" data-k="${f.k}" type="text" maxlength="${f.max}" value="${esc(v || '')}">`}</div>`;
   }
   function openItem(key, i) {
-    const B = homeBlocks()[key], fields = FIELDS[key], isNew = i < 0, it = isNew ? B.clean({}) : B.clean(B.t[i]), canDel = !isNew && B.t.length > 1;
+    const B = homeBlocks()[key], fields = FIELDS[key], isNew = i < 0, it = isNew ? B.clean({}) : B.clean(B.t[i]); if (key === 'songs' && !it.src && it.yt) it.src = 'https://youtu.be/' + it.yt; const canDel = !isNew && B.t.length > 1;
     const rounds = key === 'sports' ? (it.rounds || []).map(r => ({...r})) : null;
     const drawRounds = () => `<div class="fld"><label>Lịch thi đấu</label>${rounds.map((r, j) => `<div class="rd"><input data-r="${j}" data-rk="when" maxlength="80" placeholder="Thời gian" value="${esc(r.when)}"><input data-r="${j}" data-rk="what" maxlength="160" placeholder="Nội dung" value="${esc(r.what)}"><button class="b d" data-rdel="${j}" style="margin:0;padding:8px 12px" aria-label="Xoá vòng">✕</button></div>`).join('')}${rounds.length < 10 ? '<button class="b" data-radd style="padding:7px 14px;font-size:13px">+ Thêm vòng</button>' : ''}</div>`;
     const draw = () => {
@@ -357,6 +365,7 @@
         sync();
         if (!norm(it[REQ[key]])) { setErr(`“${fields.find(f => f.k === REQ[key]).l}” không được để trống.`); return; }
         for (const f of fields) { const v = norm(it[f.k]); if (f.yt) { const y = ytId(v); if (y === null) { setErr('Link/ID YouTube không hợp lệ.'); return; } it[f.k] = y; } else if (v && f.re && !f.re.test(v)) { setErr(f.err); return; } }
+        if (key === 'songs') { const r = songLink(it.src); if (!r) { setErr('Link nhạc không hợp lệ. Dùng link YouTube, link chia sẻ Google Drive hoặc link tệp .mp3 (https://…).'); return; } it.src = r.src; it.yt = r.yt; }
         if (key === 'radios') it.ftype = /\.(mp4|m4v|webm|mov)(\?|#|$)/i.test(it.file || '') ? 'video' : 'audio';
         if (rounds) it.rounds = rounds.filter(r => norm(r.when) || norm(r.what));
         const arr = B.t.map(B.clean); if (isNew) arr.push(B.clean(it)); else arr[i] = B.clean(it);
@@ -449,7 +458,7 @@
   ui.addEventListener('mousedown', e => { if (e.target.closest('.tb')) e.preventDefault(); }); // giữ vùng chọn khi bấm nút định dạng
 
   // Nút “Thêm hoạt động” nằm ngay trong mục “Một ngày để trở về”, chỉ hiện khi đang bật chỉnh sửa.
-  const ADD_BTNS = [{key: 'agenda', sec: 'agenda', label: '＋ Thêm hoạt động lịch trình', inner: false}, {key: 'chain', sec: 'hoat-dong', label: '＋ Thêm hoạt động', inner: true}, {key: 'slides', sec: 'hen-uoc', label: '＋ Thêm lời hẹn ước', inner: true}, {key: 'radios', sec: 'hd-radio', label: '＋ Thêm số radio', inner: true}, {key: 'contacts', sec: 'tai-tro', label: '＋ Thêm đầu mối liên hệ', before: true}];
+  const ADD_BTNS = [{key: 'agenda', sec: 'agenda', label: '＋ Thêm hoạt động lịch trình', inner: false}, {key: 'chain', sec: 'hoat-dong', label: '＋ Thêm hoạt động', inner: true}, {key: 'slides', sec: 'hen-uoc', label: '＋ Thêm lời hẹn ước', inner: true}, {key: 'radios', sec: 'hd-radio', label: '＋ Thêm số radio', inner: true}, {key: 'songs', sec: 'tieng-goi', label: '＋ Thêm bài hát', inner: true}, {key: 'contacts', sec: 'tai-tro', label: '＋ Thêm đầu mối liên hệ', before: true}];
   function syncAddBtn() {
     ADD_BTNS.forEach(d => {
       const sec = document.getElementById(d.sec), cur = document.querySelector('[data-hdx-add="' + d.key + '"]');
