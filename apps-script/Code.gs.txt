@@ -8,6 +8,15 @@ const SUPABASE_URL = '__SUPABASE_URL__';
 const SUPABASE_KEY = '__SUPABASE_KEY__';
 const ROOT_NAME = 'HDX20 - Bảo tàng ký ức';
 
+// CHẠY HÀM NÀY MỘT LẦN trong trình soạn thảo (chọn "authorize" → ▶ Chạy → Cho phép) để cấp quyền Drive + kết nối ngoài.
+// Nếu không, website sẽ báo "Truy cập bị từ chối: DriveApp". Sau đó Triển khai → Phiên bản mới.
+function authorize() {
+  DriveApp.getRootFolder();
+  UrlFetchApp.fetch('https://www.googleapis.com/discovery/v1/apis', {muteHttpExceptions: true});
+  const f = root_();
+  Logger.log('OK — đã cấp quyền. Thư mục gốc: ' + f.getUrl());
+}
+
 // Trả về '' nếu token thuộc admin, ngược lại trả về lý do (hiện trong thông báo lỗi).
 function adminProblem_(token) {
   if (!SUPABASE_URL || SUPABASE_URL.indexOf('__') >= 0 || !SUPABASE_KEY || SUPABASE_KEY.indexOf('__') >= 0)
