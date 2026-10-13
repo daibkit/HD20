@@ -85,4 +85,4 @@ Mục "Một năm của Đội" lấy dữ liệu từ khóa `activities`. Ở c
 
 ## Thống kê truy cập & click
 
-Chạy `supabase/stats.sql` một lần. Website ghi lượt truy cập, lượt xem trang và lượt click từng mục (ẩn danh, qua hàm `hit()`); tổng lượt truy cập hiện ở chân trang. Admin xem chi tiết ở tab "Thống kê". Không đếm khi đang bật chế độ chỉnh sửa; muốn tắt đếm trên một trình duyệt: `localStorage.hdx_nostat='1'`.
+Chạy `supabase/stats.sql` một lần. Website ghi lượt truy cập, lượt xem trang và lượt click từng mục (ẩn danh, qua hàm `hit()`). Admin xem chi tiết ở tab "Thống kê". Không đếm khi đang bật chế độ chỉnh sửa; muốn tắt đếm trên một trình duyệt: `localStorage.hdx_nostat='1'`.

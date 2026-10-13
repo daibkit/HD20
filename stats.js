@@ -27,14 +27,4 @@
     var card = el.closest('[data-hdx-act],[data-hdx-song],[data-hdx-chain]'); if (card && card !== el) { var cl = (card.innerText || '').split('\n').map(function (x) { return x.trim(); }).filter(Boolean)[0] || ''; cl = cl.slice(0, 40); if (cl) label = cl + ' › ' + label; }
     hit('c:' + (slug(sid) || 'khac') + ':' + slug(label), (sid ? sid + ' › ' : '') + label);
   }, true);
-  // hiển thị tổng lượt truy cập ở chân trang
-  var total = null;
-  fetch(U + '/rest/v1/rpc/visit_total', {method: 'POST', headers: H, body: '{}'}).then(function (r) { return r.ok ? r.json() : null; }).then(function (n) { if (typeof n === 'number') { total = n; show(); } }).catch(function () {});
-  function show() {
-    if (total == null) return; var f = document.querySelector('footer'); if (!f) return;
-    var d = document.getElementById('hdx-visits');
-    if (!d || !f.contains(d)) { d = document.createElement('div'); d.id = 'hdx-visits'; d.style.cssText = 'text-align:center;padding:0 20px 22px;font-size:13px;color:#A9C3E6'; f.appendChild(d); }
-    d.textContent = 'Lượt truy cập: ' + total.toLocaleString('vi-VN');
-  }
-  setInterval(show, 1500);
 })();
