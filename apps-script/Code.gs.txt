@@ -94,7 +94,9 @@ function doPost(e) {
       if (code === 200 || code === 201) {
         const id = JSON.parse(r.getContentText()).id, f = DriveApp.getFileById(id);
         f.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-        return out_({ok: true, done: true, id: id, name: f.getName()});
+        let where = '', url = '';
+        try { const par = f.getParents().next(); where = par.getName(); url = par.getUrl(); } catch (e) {}
+        return out_({ok: true, done: true, id: id, name: f.getName(), folder: where, folderUrl: url});
       }
       return out_({ok: false, error: 'Google Drive báo lỗi ' + code + ': ' + String(r.getContentText()).slice(0, 160)});
     }
