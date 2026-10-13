@@ -73,3 +73,8 @@ Admin → Trang chủ → Cài đặt chung (hoặc “Sửa trang” → bấm 
 ### Thư mục Drive & xoá ảnh (Bảo tàng ký ức)
 - Admin → Bảo tàng ký ức → **Tạo thư mục Drive**: tạo sẵn đủ K48–K67 và “Video giới thiệu” trong thư mục gốc trên Google Drive (cần dán lại mã Apps Script mới và Triển khai → Phiên bản mới).
 - **Xoá** một ảnh chỉ gỡ nó khỏi website (cột `hidden`): dòng dữ liệu và tệp trên Drive được giữ nguyên, khôi phục ở mục “Ảnh đã gỡ”. Cần chạy lại `supabase/museum.sql` một lần để có cột `hidden`.
+
+## Bài viết chi tiết cho “Chuỗi hoạt động”
+- Mỗi thẻ trong “Chuỗi hoạt động” (trang chủ) có thể có bài viết chi tiết: khách bấm thẻ (hoặc “Đọc bài chi tiết →”) để mở trang bài viết (`#/hoat-dong/<số>`).
+- Admin bật “Chỉnh sửa trang”: bấm thẻ để sửa tên/mô tả hoặc xoá; “＋ Thêm hoạt động” để thêm; bấm **Viết bài chi tiết →** trên thẻ để soạn nội dung ngay trên trang (đậm, nghiêng, tiêu đề phụ, danh sách, trích dẫn, liên kết, chèn **ảnh** — lưu bucket `media` của Supabase — và **video**: YouTube, Google Drive hoặc tải lên Drive qua Apps Script). Bấm **Lưu bài**.
+- Nội dung bài được làm sạch (chỉ giữ thẻ an toàn, iframe chỉ YouTube/Google Drive) và lưu trong cột `body` của mục `chain` trong bảng `site_content`.

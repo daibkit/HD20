@@ -244,19 +244,20 @@
     modal.onkeydown = e => { if (e.key === 'Escape') modal.innerHTML = ''; };
   }
   // Thu nhỏ ảnh (tối đa 900px) rồi tải lên kho ảnh “media” của Supabase; trả về địa chỉ công khai.
-  async function uploadImage(file) {
+  async function uploadImage(file, maxDim, folder) {
+    maxDim = maxDim || 900; folder = folder || 'sponsors';
     if (!/^image\/(jpeg|png|webp|gif)$/.test(file.type)) throw {message: 'Chỉ nhận ảnh JPG, PNG, WebP hoặc GIF.'};
     let blob = file, ext = {'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/gif': 'gif'}[file.type];
     if (file.type !== 'image/gif') {
       try {
-        const bmp = await createImageBitmap(file), sc = Math.min(1, 900 / Math.max(bmp.width, bmp.height)), cv = document.createElement('canvas');
+        const bmp = await createImageBitmap(file), sc = Math.min(1, maxDim / Math.max(bmp.width, bmp.height)), cv = document.createElement('canvas');
         cv.width = Math.max(1, Math.round(bmp.width * sc)); cv.height = Math.max(1, Math.round(bmp.height * sc)); cv.getContext('2d').drawImage(bmp, 0, 0, cv.width, cv.height);
         const keepPng = file.type === 'image/png', out = await new Promise(res => cv.toBlob(res, keepPng ? 'image/png' : 'image/webp', 0.9));
         if (out) { blob = out; ext = keepPng ? 'png' : 'webp'; }
       } catch (e) {}
     }
     if (blob.size > 5 * 1024 * 1024) throw {message: 'Ảnh quá lớn (tối đa 5 MB).'};
-    const path = 'sponsors/' + new Date().toISOString().slice(0, 7) + '/' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7) + '.' + ext;
+    const path = folder + '/' + new Date().toISOString().slice(0, 7) + '/' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7) + '.' + ext;
     await req('/storage/v1/object/media/' + path, {method: 'POST', blob, headers: {'Content-Type': blob.type, 'x-upsert': 'false', 'cache-control': '31536000'}});
     return URL_ + '/storage/v1/object/public/media/' + path;
   }
@@ -320,10 +321,12 @@
 
   let editing = false, hot = null, mounted = false;
   function setHot(el) { if (hot === el) return; if (hot) hot.removeAttribute('data-hdx-hot'); hot = el; if (hot) hot.setAttribute('data-hdx-hot', ''); }
-  const onMove = e => { if (!homeBlocks() || modal.firstChild) return; const f = findItem(e.target); setHot(f ? f.el : null); };
+  const inPost = t => !!(t && t.closest && t.closest('#post-body'));
+  const onMove = e => { if (!homeBlocks() || modal.firstChild || inPost(e.target)) return; const f = findItem(e.target); setHot(f ? f.el : null); };
   const onClick = e => {
     if (!editing || host.contains(e.target) || e.composedPath().includes(host)) return;
-    if (!homeBlocks()) return;
+    if (!homeBlocks() || inPost(e.target)) return;
+    if (e.target.closest && e.target.closest('[data-hdx-open]')) return;
     const ab = e.target.closest && e.target.closest('[data-hdx-add]'); if (ab) { e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); openItem(ab.dataset.hdxAdd, -1); return; }
     const f = findItem(e.target); if (!f) return;
     e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
@@ -393,6 +396,91 @@
     modal.innerHTML = ''; setHot(null); H.rerender(); toast(okMsg); return true;
   }
 
+  /* ---------- Bài viết chi tiết của mục “Hoạt động” ---------- */
+  const postIdx = () => (window.HDX_HOME && window.HDX_HOME.post) ? window.HDX_HOME.post() : -1;
+  const postEl = () => document.getElementById('post-body');
+  let lastRange = null, lastPost = -2;
+  document.addEventListener('selectionchange', () => { const el = postEl(), s = window.getSelection(); if (el && s && s.rangeCount && el.contains(s.anchorNode)) lastRange = s.getRangeAt(0).cloneRange(); });
+  function insertInPost(html) {
+    const el = postEl(); if (!el) return; el.focus();
+    const s = window.getSelection(); s.removeAllRanges();
+    if (lastRange && el.contains(lastRange.startContainer)) s.addRange(lastRange); else { const r = document.createRange(); r.selectNodeContents(el); r.collapse(false); s.addRange(r); }
+    if (!document.execCommand('insertHTML', false, html)) el.insertAdjacentHTML('beforeend', html);
+    try { lastRange = s.getRangeAt(0).cloneRange(); } catch (e) {}
+  }
+  function startPost() {
+    const el = postEl(); if (!el || el.getAttribute('contenteditable') === 'true') return;
+    el.setAttribute('contenteditable', 'true');
+    if (el.firstElementChild && !el.querySelector('img,iframe,video') && /đang được cập nhật/.test(el.textContent) && el.children.length === 1) el.innerHTML = '';
+    try { document.execCommand('defaultParagraphSeparator', false, 'p'); } catch (e) {}
+    draw();
+  }
+  function stopPost() {
+    const el = postEl(); if (el) { el.removeAttribute('contenteditable'); el.removeAttribute('data-rk'); }
+    if (window.HDX_HOME && window.HDX_HOME.syncPostBody) window.HDX_HOME.syncPostBody();
+  }
+  setInterval(() => {
+    if (!isAdmin || !mounted) return;
+    const pi = postIdx(); if (pi !== lastPost) { lastPost = pi; draw(); }
+    const el = postEl();
+    if (editing && pi >= 0 && el) startPost(); else if (el && el.getAttribute('contenteditable') === 'true') stopPost();
+  }, 400);
+  function pickPostImages() {
+    const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/jpeg,image/png,image/webp,image/gif'; inp.multiple = true;
+    inp.onchange = async () => {
+      const fs = [...inp.files]; let n = 0, ok = 0;
+      for (const f of fs) {
+        toast('Đang tải ảnh ' + (++n) + '/' + fs.length + '…');
+        try { const u = await uploadImage(f, 1600, 'posts'); insertInPost('<p><img src="' + u + '" alt=""></p>'); ok++; } catch (e) { toast(errMsg(e), true); }
+      }
+      if (ok) toast('Đã chèn ' + ok + ' ảnh. Nhớ bấm “Lưu bài”.');
+    };
+    inp.click();
+  }
+  function openPostVideo() {
+    const S = (window.HDX_HOME && window.HDX_HOME.settings) || {};
+    modal.innerHTML = `<div class="ov" role="dialog" aria-modal="true" aria-label="Chèn video"><div class="md"><h2>Chèn video vào bài</h2><p class="sub">Dán link YouTube, link chia sẻ Google Drive hoặc link tệp .mp4/.webm — hoặc tải video từ máy lên (lưu Google Drive).</p><p class="err" id="err"></p>
+      <div class="fld"><label for="pv">Link video</label><input id="pv" type="text" maxlength="600" placeholder="https://www.youtube.com/watch?v=…"></div>
+      <div class="fld"><label>Hoặc tải video lên</label><div id="vinfo" style="font-size:13px;color:#5b6b92"></div><div class="row" style="justify-content:flex-start;margin:0"><label class="b" style="cursor:pointer" id="vlab">Chọn video từ máy<input type="file" id="vfile" accept="video/*,.mp4,.mov,.webm,.m4v" hidden></label></div></div>
+      <div class="row"><button class="b" data-cancel>Huỷ</button><button class="b p" data-ins>Chèn video</button></div></div></div>`;
+    const q = s => modal.querySelector(s); q('#pv').focus();
+    const put = html => { modal.innerHTML = ''; insertInPost(html); toast('Đã chèn video. Nhớ bấm “Lưu bài”.'); };
+    const frame = src => '<p><iframe src="' + src + '"></iframe></p>';
+    q('#vfile').onchange = async ev => {
+      const f = ev.target.files[0]; ev.target.value = ''; if (!f) return;
+      if (!(/^video\//.test(f.type) || /\.(mp4|mov|webm|m4v)$/i.test(f.name))) { q('#err').textContent = 'Chỉ nhận tệp video (MP4, MOV, WebM).'; return; }
+      if (!/^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec$/.test(S.driveUrl || '')) { q('#err').textContent = 'Chưa kết nối Google Drive: vào Admin → Bảo tàng ký ức dán địa chỉ Apps Script trước.'; return; }
+      q('#err').textContent = ''; q('#vlab').style.opacity = '.55'; q('#vfile').disabled = true;
+      try { const id = await driveUpload(f, 'VIDEO', pct => { q('#vinfo').textContent = 'Đang tải lên Google Drive… ' + pct + '%'; }); put(frame('https://drive.google.com/file/d/' + id + '/preview')); }
+      catch (er) { q('#err').textContent = errMsg(er); q('#vlab').style.opacity = ''; q('#vfile').disabled = false; q('#vinfo').textContent = ''; }
+    };
+    modal.onclick = e => {
+      const t = e.target;
+      if (t.matches('.ov') || t.hasAttribute('data-cancel')) { modal.innerHTML = ''; return; }
+      if (!t.hasAttribute('data-ins')) return;
+      const v = (q('#pv').value || '').trim(); if (!v) { q('#err').textContent = 'Dán link video hoặc tải video lên.'; return; }
+      const y = ytId(v), d = v.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:[^#]*&)?id=)([\w-]{10,100})/i);
+      if (y && /youtu|^[\w-]{6,20}$/.test(v)) put(frame('https://www.youtube.com/embed/' + y));
+      else if (d) put(frame('https://drive.google.com/file/d/' + d[1] + '/preview'));
+      else if (/^https:\/\/[^\s"'<>]+\.(mp4|webm|m4v|mov)(\?[^\s"'<>]*)?$/i.test(v)) put('<p><video src="' + v + '" controls></video></p>');
+      else q('#err').textContent = 'Link không nhận dạng được. Dùng link YouTube, Google Drive hoặc tệp .mp4/.webm (https://…).';
+    };
+    modal.onkeydown = e => { if (e.key === 'Escape') modal.innerHTML = ''; };
+  }
+  async function savePost() {
+    const el = postEl(), i = postIdx(), H = window.HDX_HOME; if (!el || i < 0) return;
+    const c = el.cloneNode(true); c.querySelectorAll('div').forEach(d => { const p = document.createElement('p'); p.innerHTML = d.innerHTML; d.replaceWith(p); });
+    Array.from(c.childNodes).forEach(n => { if (n.nodeType === 3 && n.textContent.trim()) { const p = document.createElement('p'); p.textContent = n.textContent; n.replaceWith(p); } });
+    c.querySelectorAll('p').forEach(p => { if (!p.textContent.trim() && !p.querySelector('img,iframe,video')) p.remove(); });
+    const body = H.cleanHtml(c.innerHTML).replace(/<p>(?:<br>|\s)*<\/p>/g, '').trim();
+    if (body.length > 150000) { toast('Nội dung quá dài (tối đa khoảng 150.000 ký tự).', true); return; }
+    const B = H.blocks.chain, arr = B.t.map(B.clean); if (!arr[i]) { toast('Không tìm thấy hoạt động này.', true); return; }
+    arr[i] = Object.assign({}, arr[i], {body});
+    const btn = ui.querySelector('[data-psave]'); if (btn) { btn.disabled = true; btn.textContent = 'Đang lưu…'; }
+    const ok = await commit('chain', arr, 'Đã lưu bài viết. Website đã cập nhật.');
+    if (ok) stopPost(); else if (btn) { btn.disabled = false; btn.textContent = 'Lưu bài'; }
+  }
+
   /* ---------- Bài viết trên trang Tin tức ---------- */
   let art = null, artUndo = null;
   function afterRoute(info) {
@@ -442,13 +530,23 @@
     const articleTb = editing && art ? `<div class="tb" role="toolbar" aria-label="Định dạng bài viết">
       <button data-fmt="bold" title="In đậm"><b>B</b></button><button data-fmt="italic" title="In nghiêng"><i>I</i></button><button data-fmt="h2" title="Tiêu đề phụ">H2</button><button data-fmt="ul" title="Danh sách">• Ds</button><button data-fmt="quote" title="Trích dẫn">“ ”</button><button data-fmt="link" title="Chèn liên kết">Link</button><button data-fmt="undo" title="Hoàn tác">↶</button>
       <span class="sep"></span><button class="save" data-asave>Lưu bài</button><button data-acancel>Bỏ thay đổi</button></div>` : '';
-    ui.innerHTML = `${articleTb}<div class="fab" role="region" aria-label="Chế độ chỉnh sửa">
-      ${editing ? `<span>${art ? 'Sửa trực tiếp tiêu đề, mô tả, nội dung' : homeBlocks() ? 'Bấm vào chữ có viền cam để sửa' : 'Mở một bài viết để sửa'}</span>` : `<span>${em}</span>`}
+    const pi = postIdx();
+    const postTb = editing && pi >= 0 ? `<div class="tb" role="toolbar" aria-label="Soạn bài viết hoạt động">
+      <button data-fmt="bold" title="In đậm"><b>B</b></button><button data-fmt="italic" title="In nghiêng"><i>I</i></button><button data-fmt="h2" title="Tiêu đề phụ">H2</button><button data-fmt="ul" title="Danh sách">• Ds</button><button data-fmt="quote" title="Trích dẫn">“ ”</button><button data-fmt="link" title="Liên kết">🔗</button>
+      <span class="sep"></span><button data-pimg title="Chèn ảnh">🖼 Ảnh</button><button data-pvid title="Chèn video">🎬 Video</button><button data-ptitle title="Sửa tiêu đề, mô tả hoặc xoá bài">✎ Tiêu đề</button>
+      <span class="sep"></span><button class="save" data-psave>Lưu bài</button><button data-pcancel>Bỏ thay đổi</button></div>` : '';
+    ui.innerHTML = `${articleTb}${postTb}<div class="fab" role="region" aria-label="Chế độ chỉnh sửa">
+      ${editing ? `<span>${pi >= 0 ? 'Viết nội dung bài ngay trong khung viền cam' : art ? 'Sửa trực tiếp tiêu đề, mô tả, nội dung' : homeBlocks() ? 'Bấm vào chữ có viền cam để sửa' : 'Mở một bài viết để sửa'}</span>` : `<span>${em}</span>`}
       <button class="${editing ? 'on' : ''}" data-toggle>${editing ? '✓ Thoát chỉnh sửa' : '✎ Chỉnh sửa trang'}</button><a href="admin.html">Quản trị</a></div>`;
   }
   ui.addEventListener('click', e => {
     const t = e.target.closest('button'); if (!t) return;
     if (t.hasAttribute('data-toggle')) { setEditing(!editing); return; }
+    if (t.hasAttribute('data-psave')) { savePost(); return; }
+    if (t.hasAttribute('data-pcancel')) { stopPost(); toast('Đã bỏ các thay đổi chưa lưu.'); return; }
+    if (t.hasAttribute('data-ptitle')) { openItem('chain', postIdx()); return; }
+    if (t.hasAttribute('data-pimg')) { pickPostImages(); return; }
+    if (t.hasAttribute('data-pvid')) { openPostVideo(); return; }
     if (t.hasAttribute('data-asave')) { saveArticle(); return; }
     if (t.hasAttribute('data-acancel')) { if (window.route) window.route(); toast('Đã bỏ các thay đổi chưa lưu.'); return; }
     const f = t.dataset.fmt; if (!f) return;
