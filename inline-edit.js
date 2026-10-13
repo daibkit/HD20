@@ -94,7 +94,7 @@
     agenda: [{k: 'when', l: 'Thời gian', max: 40}, {k: 'title', l: 'Tên hoạt động', max: 160}, {k: 'desc', l: 'Mô tả', max: 400, ta: 1}, {k: 'main', l: 'Đánh dấu “Điểm hẹn chính” (nổi bật)', chk: true}],
     history: [{k: 'year', l: 'Mốc thời gian', max: 40}, {k: 'title', l: 'Tiêu đề', max: 160}, {k: 'text', l: 'Nội dung', max: 1200, ta: 1}],
     sports: [{k: 'name', l: 'Tên giải', max: 80}, {k: 'format', l: 'Thể thức', max: 160}, {k: 'pic', l: 'Người phụ trách', max: 80}, {k: 'phone', l: 'Số điện thoại', max: 30}],
-    activities: [{k: 'name', l: 'Tên hoạt động', max: 120}, {k: 'when', l: 'Thời gian', max: 80}, {k: 'photo', l: 'Gợi ý ảnh', max: 80}, {k: 'desc', l: 'Mô tả', max: 800, ta: 1}],
+    activities: [{k: 'group', l: 'Nhóm (gõ tên nhóm đã có hoặc tên mới)', max: 80}, {k: 'name', l: 'Tên hoạt động', max: 120}, {k: 'desc', l: 'Mô tả ngắn (hiện trên thẻ)', max: 1200, ta: 1}, {k: 'img', l: 'Ảnh đại diện', max: 500, img: true, re: /^(https?:\/\/[^\s"'<>]+|img\/[\w.\-]+)$/, err: 'Link ảnh phải bắt đầu bằng https:// (hoặc tải ảnh lên).'}],
     radios: [{k: 'title', l: 'Tên số', max: 120}, {k: 'desc', l: 'Mô tả', max: 300}, {k: 'id', l: 'Link hoặc ID video YouTube', max: 300, yt: true}, {k: 'file', l: 'hoặc link tệp video/âm thanh (https://…, .mp4/.mp3) — nếu có sẽ dùng thay cho YouTube', max: 600, re: /^https?:\/\/[^\s"'<>]+$/, err: 'Link tệp phải bắt đầu bằng https://'}],
     songs: [{k: 'title', l: 'Tên bài', max: 120}, {k: 'desc', l: 'Mô tả', max: 300}, {k: 'src', l: 'Link nhạc: Spotify, YouTube, Google Drive hoặc tệp .mp3/.m4a (https://…)', max: 600}],
     contacts: [{k: 'role', l: 'Vai trò / ban', max: 120}, {k: 'name', l: 'Họ tên', max: 80}, {k: 'k', l: 'Khóa (K…)', max: 20}, {k: 'phone', l: 'Số điện thoại', max: 30}],
@@ -297,6 +297,7 @@
     const mn = target && target.closest && target.closest('[data-hdx-meaning]'); if (mn && !host.contains(target)) return {key: 'meaning', el: mn};
     const ct = target && target.closest && target.closest('[data-hdx-contact]'); if (ct && !host.contains(target)) { const n = parseInt(ct.getAttribute('data-hdx-contact'), 10) - 1; if (n >= 0) return {key: 'contacts', i: n, el: ct}; }
     const sp = target && target.closest && target.closest('[data-hdx-sponsor]'); if (sp && !host.contains(target)) return {key: 'sponsor', el: sp};
+    const ac = target && target.closest && target.closest('[data-hdx-act]'); if (ac && !host.contains(target)) { const n = parseInt(ac.getAttribute('data-hdx-act'), 10) - 1; if (n >= 0) return {key: 'activities', i: n, el: ac}; }
     const sg = target && target.closest && target.closest('[data-hdx-song]'); if (sg && !host.contains(target)) { const n = parseInt(sg.getAttribute('data-hdx-song'), 10) - 1; if (n >= 0) return {key: 'songs', i: n, el: sg}; }
     const rd = target && target.closest && target.closest('[data-hdx-radio]'); if (rd && !host.contains(target)) { const n = parseInt(rd.getAttribute('data-hdx-radio'), 10) - 1; if (n >= 0) return {key: 'radios', i: n, el: rd}; }
     const pl = target && target.closest && target.closest('[data-hdx-pledge]'); if (pl && !host.contains(target)) return {key: 'pledge', el: pl};
@@ -335,6 +336,7 @@
 
   function fieldHtml(f, v, idx, extra) {
     const id = 'f' + idx;
+    if (f.img) return `<div class="fld"><label for="${id}">${esc(f.l)}</label><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><div id="imgprev" style="width:120px;height:90px;border-radius:12px;background:#EAF1F8 center/cover no-repeat ${v ? 'url(&quot;' + esc(v) + '&quot;)' : ''}"></div><div style="flex:1 1 200px;display:flex;flex-direction:column;gap:6px"><input id="${id}" data-k="${f.k}" type="text" maxlength="${f.max}" value="${esc(v || '')}" placeholder="https://… hoặc tải ảnh lên"><label class="b" style="cursor:pointer;align-self:flex-start;margin:0" id="imglab">Tải ảnh từ máy<input type="file" id="imgup" accept="image/jpeg,image/png,image/webp,image/gif" hidden></label><span id="imginfo" style="font-size:12.5px;color:#5b6b92"></span></div></div></div>`;
     if (f.chk) return `<div class="fld"><label style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" id="${id}" data-k="${f.k}" ${v === '1' || v === true ? 'checked' : ''} style="width:auto"> ${esc(f.l)}</label></div>`;
     return `<div class="fld"><label for="${id}">${esc(f.l)}</label>${f.ta ? `<textarea id="${id}" data-k="${f.k}" maxlength="${f.max}">${esc(v || '')}</textarea>` : `<input id="${id}" data-k="${f.k}" type="text" maxlength="${f.max}" value="${esc(v || '')}">`}</div>`;
   }
@@ -347,8 +349,16 @@
         ${fields.map((f, n) => fieldHtml(f, it[f.k], n)).join('')}${rounds ? `<div id="rounds">${drawRounds()}</div>` : ''}
         <div class="row">${canDel ? '<button class="b d" data-del>Xoá mục này</button>' : ''}${!isNew && B.t.length > 1 ? `<button class="b" data-mv="-1" ${i === 0 ? 'disabled' : ''} title="Đưa lên trước">▲ Lên</button><button class="b" data-mv="1" ${i === B.t.length - 1 ? 'disabled' : ''} title="Đưa xuống sau">▼ Xuống</button>` : ''}<button class="b" data-cancel>Huỷ</button><button class="b p" data-save>Lưu thay đổi</button></div></div></div>`;
     };
+    if (key === 'activities' && isNew) { const L = B.t[B.t.length - 1]; it.group = (L && L.group) || ''; }
     draw();
     const q = s => modal.querySelector(s), setErr = m => { q('#err').textContent = m || ''; };
+    const imgUp = modal.querySelector('#imgup');
+    if (imgUp) imgUp.onchange = async ev => {
+      const f = ev.target.files[0]; ev.target.value = ''; if (!f) return;
+      q('#imginfo').textContent = 'Đang tải ảnh lên…'; setErr('');
+      try { const u = await uploadImage(f, 1200, 'activities'); modal.querySelector('#imgup').closest('.fld').querySelector('input[data-k]').value = u; q('#imgprev').style.backgroundImage = 'url("' + u + '")'; q('#imginfo').textContent = 'Đã tải ảnh. Bấm “Lưu thay đổi”.'; }
+      catch (er) { q('#imginfo').textContent = ''; setErr(errMsg(er)); }
+    };
     const first = modal.querySelector('input,textarea'); if (first) first.focus();
     const sync = () => { modal.querySelectorAll('[data-k]').forEach(el => { it[el.dataset.k] = el.type === 'checkbox' ? (el.checked ? '1' : '') : el.value; }); if (rounds) modal.querySelectorAll('[data-r]').forEach(el => { rounds[+el.dataset.r][el.dataset.rk] = el.value; }); };
     modal.onclick = async e => {
@@ -397,6 +407,7 @@
   }
 
   /* ---------- Bài viết chi tiết của mục “Hoạt động” ---------- */
+  const postKey = () => (window.HDX_HOME && window.HDX_HOME.postKey && window.HDX_HOME.postKey()) || 'chain';
   const postIdx = () => (window.HDX_HOME && window.HDX_HOME.post) ? window.HDX_HOME.post() : -1;
   const postEl = () => document.getElementById('post-body');
   let lastRange = null, lastPost = -2;
@@ -474,10 +485,10 @@
     c.querySelectorAll('p').forEach(p => { if (!p.textContent.trim() && !p.querySelector('img,iframe,video')) p.remove(); });
     const body = H.cleanHtml(c.innerHTML).replace(/<p>(?:<br>|\s)*<\/p>/g, '').trim();
     if (body.length > 150000) { toast('Nội dung quá dài (tối đa khoảng 150.000 ký tự).', true); return; }
-    const B = H.blocks.chain, arr = B.t.map(B.clean); if (!arr[i]) { toast('Không tìm thấy hoạt động này.', true); return; }
+    const pk = postKey(), B = H.blocks[pk], arr = B.t.map(B.clean); if (!arr[i]) { toast('Không tìm thấy hoạt động này.', true); return; }
     arr[i] = Object.assign({}, arr[i], {body});
     const btn = ui.querySelector('[data-psave]'); if (btn) { btn.disabled = true; btn.textContent = 'Đang lưu…'; }
-    const ok = await commit('chain', arr, 'Đã lưu bài viết. Website đã cập nhật.');
+    const ok = await commit(pk, arr, 'Đã lưu bài viết. Website đã cập nhật.');
     if (ok) stopPost(); else if (btn) { btn.disabled = false; btn.textContent = 'Lưu bài'; }
   }
 
@@ -544,7 +555,7 @@
     if (t.hasAttribute('data-toggle')) { setEditing(!editing); return; }
     if (t.hasAttribute('data-psave')) { savePost(); return; }
     if (t.hasAttribute('data-pcancel')) { stopPost(); toast('Đã bỏ các thay đổi chưa lưu.'); return; }
-    if (t.hasAttribute('data-ptitle')) { openItem('chain', postIdx()); return; }
+    if (t.hasAttribute('data-ptitle')) { openItem(postKey(), postIdx()); return; }
     if (t.hasAttribute('data-pimg')) { pickPostImages(); return; }
     if (t.hasAttribute('data-pvid')) { openPostVideo(); return; }
     if (t.hasAttribute('data-asave')) { saveArticle(); return; }
@@ -557,7 +568,7 @@
   ui.addEventListener('mousedown', e => { if (e.target.closest('.tb')) e.preventDefault(); }); // giữ vùng chọn khi bấm nút định dạng
 
   // Nút “Thêm hoạt động” nằm ngay trong mục “Một ngày để trở về”, chỉ hiện khi đang bật chỉnh sửa.
-  const ADD_BTNS = [{key: 'agenda', sec: 'agenda', label: '＋ Thêm hoạt động lịch trình', inner: false}, {key: 'chain', sec: 'hoat-dong', label: '＋ Thêm hoạt động', inner: true}, {key: 'slides', sec: 'hen-uoc', label: '＋ Thêm lời hẹn ước', inner: true}, {key: 'radios', sec: 'hd-radio', label: '＋ Thêm số radio', inner: true}, {key: 'songs', sec: 'tieng-goi', label: '＋ Thêm bài hát', inner: true}, {key: 'contacts', sec: 'tai-tro', label: '＋ Thêm đầu mối liên hệ', before: true}];
+  const ADD_BTNS = [{key: 'agenda', sec: 'agenda', label: '＋ Thêm hoạt động lịch trình', inner: false}, {key: 'chain', sec: 'hoat-dong', label: '＋ Thêm hoạt động', inner: true}, {key: 'activities', sec: 'hd-nam', label: '＋ Thêm hoạt động trong năm', inner: false}, {key: 'slides', sec: 'hen-uoc', label: '＋ Thêm lời hẹn ước', inner: true}, {key: 'radios', sec: 'hd-radio', label: '＋ Thêm số radio', inner: true}, {key: 'songs', sec: 'tieng-goi', label: '＋ Thêm bài hát', inner: true}, {key: 'contacts', sec: 'tai-tro', label: '＋ Thêm đầu mối liên hệ', before: true}];
   function syncAddBtn() {
     ADD_BTNS.forEach(d => {
       const sec = document.getElementById(d.sec), cur = document.querySelector('[data-hdx-add="' + d.key + '"]');

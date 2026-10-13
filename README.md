@@ -78,3 +78,7 @@ Admin → Trang chủ → Cài đặt chung (hoặc “Sửa trang” → bấm 
 - Mỗi thẻ trong “Chuỗi hoạt động” (trang chủ) có thể có bài viết chi tiết: khách bấm thẻ (hoặc “Đọc bài chi tiết →”) để mở trang bài viết (`#/hoat-dong/<số>`).
 - Admin bật “Chỉnh sửa trang”: bấm thẻ để sửa tên/mô tả hoặc xoá; “＋ Thêm hoạt động” để thêm; bấm **Viết bài chi tiết →** trên thẻ để soạn nội dung ngay trên trang (đậm, nghiêng, tiêu đề phụ, danh sách, trích dẫn, liên kết, chèn **ảnh** — lưu bucket `media` của Supabase — và **video**: YouTube, Google Drive hoặc tải lên Drive qua Apps Script). Bấm **Lưu bài**.
 - Nội dung bài được làm sạch (chỉ giữ thẻ an toàn, iframe chỉ YouTube/Google Drive) và lưu trong cột `body` của mục `chain` trong bảng `site_content`.
+
+## Hoạt động trong năm (trang Giới thiệu Đội)
+
+Mục "Một năm của Đội" lấy dữ liệu từ khóa `activities`. Ở chế độ chỉnh sửa: bấm thẻ để sửa nhóm/tên/mô tả/ảnh, "＋ Thêm hoạt động trong năm" để thêm; "Viết bài chi tiết →" để soạn bài (ảnh, video, liên kết) tại `#/ngay-hoi/N`. Không cần chạy thêm SQL.
