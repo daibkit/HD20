@@ -2381,7 +2381,7 @@ document.addEventListener('input', e => { if (e.target.id === 'rg-q') { RG.q = e
    Thống kê — lượt truy cập & lượt click từng mục (bảng site_hits)
    ========================================================================= */
 const ST = {
-  rows: [], loaded: false, loading: false, err: '', range: '30', q: '',
+  rows: [], loaded: false, loading: false, err: '', range: '30', q: '', pg: {c: 1, p: 1, d: 1}, per: 15,
   async load() {
     if (this.loading) return; this.loading = true; this.err = ''; this.draw();
     try { this.rows = await SB.req('/rest/v1/site_hits?select=k,day,label,n&order=day.desc&limit=50000') || []; this.loaded = true; }
@@ -2396,7 +2396,7 @@ const ST = {
     const r = m.match(/^(hoat-dong|ngay-hoi)\/(\d+)$/); if (r) return (r[1] === 'hoat-dong' ? 'Bài viết Chuỗi hoạt động #' : 'Bài viết Hoạt động trong năm #') + r[2];
     return N[m] || m;
   },
-  group(rows, pre) { const m = new Map(); rows.filter(r => r.k.startsWith(pre)).forEach(r => { const g = m.get(r.k) || {k: r.k, label: r.label || r.k, n: 0}; g.n += +r.n || 0; if (r.label) g.label = r.label; if (pre === 'p:') g.label = this.pname(g.label); m.set(r.k, g); }); return [...m.values()].sort((a, b) => b.n - a.n); },
+  group(rows, pre) { const m = new Map(); rows.filter(r => r.k.startsWith(pre)).forEach(r => { const g = m.get(r.k) || {k: r.k, label: r.label || r.k, n: 0}; g.n += +r.n || 0; if (r.label) g.label = r.label; g.label = pre === 'p:' ? this.pname(g.label) : String(g.label).replace(/^dc-root › /, ''); m.set(r.k, g); }); return [...m.values()].sort((a, b) => b.n - a.n); },
   draw() {
     const root = $('#st-root'); if (!root) return;
     if (!W()) { root.innerHTML = `<div class="notice">${icon('warn')}<div>Bạn cần đăng nhập bằng tài khoản admin.</div></div>`; return; }
@@ -2407,9 +2407,9 @@ const ST = {
     const visits = this.sum(r.filter(x => x.k === 'visit')), uniq = this.sum(r.filter(x => x.k === 'uniq')), clicks = this.sum(r.filter(x => x.k.startsWith('c:')));
     const total = this.sum(all.filter(x => x.k === 'visit'));
     const days = new Map(); r.filter(x => x.k === 'visit').forEach(x => days.set(x.day, (days.get(x.day) || 0) + (+x.n || 0)));
-    const dl = [...days.entries()].sort((a, b) => a[0] < b[0] ? 1 : -1).slice(0, 14), mx = Math.max(1, ...dl.map(d => d[1]));
-    const bars = dl.length ? dl.map(([d, n]) => `<div class="st-row" style="grid-template-columns:90px minmax(0,1fr) 50px"><span class="muted tnum">${esc(d.split('-').reverse().join('/'))}</span><span style="background:var(--line,#e3e8f2);border-radius:6px;height:12px;overflow:hidden"><i style="display:block;height:100%;width:${Math.max(2, Math.round(n / mx * 100))}%;background:linear-gradient(90deg,#0E4C9C,#2BB3C0)"></i></span><b class="tnum" style="text-align:right">${n}</b></div>`).join('') : '<p class="muted">Chưa có dữ liệu trong khoảng này.</p>';
-    const tbl = (title, list) => { list = list.filter(x => !q || (x.label + x.k).toLowerCase().includes(q)); const m = Math.max(1, ...list.map(x => x.n)); return `<div class="card card-pad"><h3 style="margin:0 0 10px">${title}</h3>${list.length ? `<div style="display:grid;gap:7px">${list.slice(0, 60).map(x => `<div class="st-row"><span class="lb" title="${esc(x.label)}">${esc(x.label)}</span><span class="bar" style="background:var(--line,#e3e8f2);border-radius:6px;height:10px;overflow:hidden"><i style="display:block;height:100%;width:${Math.max(2, Math.round(x.n / m * 100))}%;background:#F28A55"></i></span><b class="tnum" style="text-align:right">${x.n}</b></div>`).join('')}</div>` : '<p class="muted">Chưa có dữ liệu.</p>'}</div>`; };
+    const dl = [...days.entries()].sort((a, b) => a[0] < b[0] ? 1 : -1); const dpages = Math.max(1, Math.ceil(dl.length / 10)), dcur = Math.min(this.pg.d || 1, dpages), mx = Math.max(1, ...dl.map(d => d[1])); const dshow = dl.slice((dcur - 1) * 10, dcur * 10);
+    const bars = dl.length ? dshow.map(([d, n]) => `<div class="st-row" style="grid-template-columns:90px minmax(0,1fr) 50px"><span class="muted tnum">${esc(d.split('-').reverse().join('/'))}</span><span style="background:var(--line,#e3e8f2);border-radius:6px;height:12px;overflow:hidden"><i style="display:block;height:100%;width:${Math.max(2, Math.round(n / mx * 100))}%;background:linear-gradient(90deg,#0E4C9C,#2BB3C0)"></i></span><b class="tnum" style="text-align:right">${n}</b></div>`).join('') : '<p class="muted">Chưa có dữ liệu trong khoảng này.</p>';
+    const tbl = (title, list, key) => { list = list.filter(x => !q || (x.label + x.k).toLowerCase().includes(q)); const per = this.per, pages = Math.max(1, Math.ceil(list.length / per)), cur = Math.min(this.pg[key] || 1, pages), from = (cur - 1) * per, m = Math.max(1, ...list.map(x => x.n)); const pager = pages > 1 ? `<div class="qa" style="justify-content:space-between;align-items:center;margin-top:14px"><span class="small muted">${from + 1}–${Math.min(list.length, from + per)} / ${list.length} mục</span><div class="qa"><button class="btn btn-line btn-sm" data-st="pg" data-t="${key}" data-to="${cur - 1}" ${cur <= 1 ? 'disabled' : ''}>‹ Trước</button><span class="small tnum">Trang ${cur}/${pages}</span><button class="btn btn-line btn-sm" data-st="pg" data-t="${key}" data-to="${cur + 1}" ${cur >= pages ? 'disabled' : ''}>Sau ›</button></div></div>` : ''; return `<div class="card card-pad"><h3 style="margin:0 0 10px">${title} <span class="muted small">(${list.length})</span></h3>${list.length ? `<div style="display:grid;gap:7px">${list.slice(from, from + per).map(x => `<div class="st-row"><span class="lb" title="${esc(x.label)}">${esc(x.label)}</span><span class="bar" style="background:var(--line,#e3e8f2);border-radius:6px;height:10px;overflow:hidden"><i style="display:block;height:100%;width:${Math.max(2, Math.round(x.n / m * 100))}%;background:#F28A55"></i></span><b class="tnum" style="text-align:right">${x.n}</b></div>`).join('')}</div>${pager}` : '<p class="muted">Chưa có dữ liệu.</p>'}</div>`; };
     root.innerHTML = `<div class="stats"><div class="stat" style="cursor:default"><span class="n n-brand tnum">${visits}</span><span class="l">Lượt truy cập</span><span class="s">Tổng từ đầu: ${total}</span></div>
       <div class="stat" style="cursor:default"><span class="n n-green tnum">${uniq}</span><span class="l">Người truy cập mới</span><span class="s">Mỗi trình duyệt tính một lần</span></div>
       <div class="stat" style="cursor:default"><span class="n n-gold tnum">${clicks}</span><span class="l">Lượt click mục</span><span class="s">Menu, nút, thẻ, bài viết…</span></div></div>
@@ -2417,16 +2417,16 @@ const ST = {
         <div class="fld"><label for="st-r">Khoảng thời gian</label>${sel('st-r', [['1', 'Hôm nay'], ['7', '7 ngày'], ['30', '30 ngày'], ['all', 'Từ đầu']], this.range)}</div>
         <div class="fld"><label for="st-q">Lọc theo tên mục</label><input id="st-q" class="inp" type="search" value="${esc(this.q)}" placeholder="VD: radio, đăng ký, tiếng gọi…"></div>
         <div class="qa"><button class="btn btn-line" data-st="reload">${icon('refresh', 16)} Tải lại</button></div></div></div>
-      <div class="card card-pad"><h3 style="margin:0 0 10px">Lượt truy cập theo ngày</h3><div style="display:grid;gap:7px">${bars}</div></div>
-      ${tbl('Click từng mục', this.group(r, 'c:'))}${tbl('Lượt xem trang / bài viết', this.group(r, 'p:'))}`;
+      <div class="card card-pad"><h3 style="margin:0 0 10px">Lượt truy cập theo ngày</h3><div style="display:grid;gap:7px">${bars}</div>${dpages > 1 ? `<div class="qa" style="justify-content:flex-end;align-items:center;margin-top:14px"><button class="btn btn-line btn-sm" data-st="pg" data-t="d" data-to="${dcur - 1}" ${dcur <= 1 ? 'disabled' : ''}>‹ Mới hơn</button><span class="small tnum">Trang ${dcur}/${dpages}</span><button class="btn btn-line btn-sm" data-st="pg" data-t="d" data-to="${dcur + 1}" ${dcur >= dpages ? 'disabled' : ''}>Cũ hơn ›</button></div>` : ''}</div>
+      ${tbl('Click từng mục', this.group(r, 'c:'), 'c')}${tbl('Lượt xem trang / bài viết', this.group(r, 'p:'), 'p')}`;
   },
-  onClick(el) { if (el.dataset.st === 'reload') { this.loaded = false; this.load(); } }
+  onClick(el) { if (el.dataset.st === 'reload') { this.loaded = false; this.load(); } else if (el.dataset.st === 'pg') { this.pg[el.dataset.t] = Math.max(1, +el.dataset.to || 1); this.draw(); } }
 };
 VIEWS.stats = () => band({crumbs: [...crumbsHome, ['Thống kê']], title: 'Thống kê truy cập', sub: 'Số lượt truy cập website và lượt click từng mục. Chỉ admin xem được.'})
   + `<main class="view"><div class="wrap stack"><div id="st-root"></div></div></main>`;
 document.addEventListener('click', e => { const el = e.target.closest('#st-root [data-st]'); if (el) ST.onClick(el); });
-document.addEventListener('change', e => { if (e.target.id === 'st-r') { ST.range = e.target.value; ST.draw(); } });
-document.addEventListener('input', e => { if (e.target.id === 'st-q') { ST.q = e.target.value; clearTimeout(ST.qt); ST.qt = setTimeout(() => { ST.draw(); const i = $('#st-q'); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }, 250); } });
+document.addEventListener('change', e => { if (e.target.id === 'st-r') { ST.range = e.target.value; ST.pg = {c: 1, p: 1, d: 1}; ST.draw(); } });
+document.addEventListener('input', e => { if (e.target.id === 'st-q') { ST.q = e.target.value; ST.pg = {c: 1, p: 1, d: 1}; clearTimeout(ST.qt); ST.qt = setTimeout(() => { ST.draw(); const i = $('#st-q'); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }, 250); } });
 
 /* =========================================================================
    Render loop
