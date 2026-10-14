@@ -90,3 +90,7 @@ Chạy `supabase/stats.sql` một lần. Website ghi lượt truy cập, lượt
 ## Sửa chữ khối Hero
 
 Ở chế độ chỉnh sửa, bấm vào tiêu đề/mô tả/ngày/địa điểm ở đầu trang chủ để sửa (lưu trong `settings`: heroAccent, heroTitle, heroDesc, heroDate, heroPlace). Favicon: `img/favicon.png`.
+
+## Bảo tàng ký ức & form đăng ký (trang chủ)
+
+Mục "Bảo tàng ký ức" nằm cuối trang chủ (sau form đăng ký). Ở chế độ chỉnh sửa, bấm vào tiêu đề của nó, hoặc vào chữ bên cạnh form đăng ký, để sửa (lưu trong `settings`: kyLabel, kyTitle, regLabel, regTitle, regText, regInfo).

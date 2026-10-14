@@ -193,6 +193,29 @@
     };
     modal.onkeydown = e => { if (e.key === 'Escape') modal.innerHTML = ''; };
   }
+  function openSet(title, F0) {
+    const H = window.HDX_HOME, S = H.settings || {};
+    const F = F0.map(f => Object.assign({}, f, {v: S[f.k] || f.d}));
+    modal.innerHTML = `<div class="ov" role="dialog" aria-modal="true" aria-label="${title}"><div class="md"><h2>${title}</h2><p class="err" id="err"></p>${F.map((f, n) => fieldHtml(f, f.v, n)).join('')}<div class="row"><button class="b" data-cancel>Huỷ</button><button class="b p" data-save>Lưu thay đổi</button></div></div></div>`;
+    const q = s => modal.querySelector(s), first = modal.querySelector('input,textarea'); if (first) first.focus();
+    modal.onclick = async e => {
+      const t = e.target;
+      if (t.matches('.ov') || t.hasAttribute('data-cancel')) { modal.innerHTML = ''; return; }
+      if (!t.hasAttribute('data-save')) return;
+      const add = {}; modal.querySelectorAll('[data-k]').forEach(el => { add[el.dataset.k] = el.value.trim(); });
+      t.disabled = true; t.textContent = 'Đang lưu…';
+      try {
+        const cur = await req('/rest/v1/site_content?select=data&key=eq.settings').catch(() => []);
+        const b0 = cur && cur[0] && cur[0].data && !Array.isArray(cur[0].data) ? cur[0].data : {};
+        const data = Object.assign({}, b0, add);
+        await req('/rest/v1/site_content?on_conflict=key', {method: 'POST', headers: {Prefer: 'resolution=merge-duplicates,return=minimal'}, body: {key: 'settings', data, updated_at: new Date().toISOString()}});
+        Object.assign(S, add);
+        try { const rows = (lsGet(H.cacheKey) || []).filter(r => r && r.key !== 'settings'); rows.push({key: 'settings', data}); lsSet(H.cacheKey, rows); } catch (er) {}
+        modal.innerHTML = ''; setHot(null); H.rerender(); toast('Đã lưu. Website đã cập nhật.');
+      } catch (er) { const msg = er && er.status === 404 ? 'Chưa có bảng site_content: hãy chạy supabase/site_content.sql trong Supabase.' : errMsg(er); q('#err').textContent = msg; toast(msg, true); t.disabled = false; t.textContent = 'Lưu thay đổi'; }
+    };
+    modal.onkeydown = e => { if (e.key === 'Escape') modal.innerHTML = ''; };
+  }
   function openHero() {
     const H = window.HDX_HOME, S = H.settings || {};
     const F = [{k: 'heroAccent', l: 'Tiêu đề — phần nhấn màu (VD: 20 năm)', max: 40, v: S.heroAccent || '20 năm'}, {k: 'heroTitle', l: 'Tiêu đề — phần còn lại (xuống dòng để ngắt dòng)', max: 120, ta: 1, v: S.heroTitle || 'chung\nmột mái nhà'}, {k: 'heroDesc', l: 'Mô tả ngắn', max: 300, ta: 1, v: S.heroDesc || 'Tự hào một hành trình - Gắn kết những thế hệ.'}, {k: 'heroDate', l: 'Thời gian', max: 80, v: S.heroDate || 'Thứ Bảy 24.10.2026'}, {k: 'heroPlace', l: 'Địa điểm tổ chức', max: 200, v: S.heroPlace || 'Đại học Kinh tế Quốc dân, 207 Giải Phóng, Bạch Mai, Hà Nội'}];
@@ -326,6 +349,8 @@
     const rd = target && target.closest && target.closest('[data-hdx-radio]'); if (rd && !host.contains(target)) { const n = parseInt(rd.getAttribute('data-hdx-radio'), 10) - 1; if (n >= 0) return {key: 'radios', i: n, el: rd}; }
     const pl = target && target.closest && target.closest('[data-hdx-pledge]'); if (pl && !host.contains(target)) return {key: 'pledge', el: pl};
     const hr = target && target.closest && target.closest('[data-hdx-hero]'); if (hr && !host.contains(target)) return {key: 'hero', el: hr};
+    const ky = target && target.closest && target.closest('[data-hdx-ky]'); if (ky && !host.contains(target)) return {key: 'ky', el: ky};
+    const rg = target && target.closest && target.closest('[data-hdx-reg]'); if (rg && !host.contains(target)) return {key: 'reg', el: rg};
     let el = target, d = 0;
     while (el && el !== document.body && el !== document.documentElement && d < 6) {
       if (host.contains(el)) return null;
@@ -356,7 +381,7 @@
     const ab = e.target.closest && e.target.closest('[data-hdx-add]'); if (ab) { e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); openItem(ab.dataset.hdxAdd, -1); return; }
     const f = findItem(e.target); if (!f) return;
     e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
-    if (f.key === 'video') openVideo(); else if (f.key === 'pledge') openPledge(); else if (f.key === 'hero') openHero(); else if (f.key === 'meaning') openMeaning(); else if (f.key === 'sponsor') openSponsor(); else openItem(f.key, f.i);
+    if (f.key === 'video') openVideo(); else if (f.key === 'pledge') openPledge(); else if (f.key === 'hero') openHero(); else if (f.key === 'ky') openSet('Sửa mục Bảo tàng ký ức', [{k: 'kyLabel', l: 'Nhãn nhỏ phía trên', max: 60, d: 'Bảo tàng ký ức'}, {k: 'kyTitle', l: 'Tiêu đề', max: 160, d: 'Tìm lại một thời của bạn'}]); else if (f.key === 'reg') openSet('Sửa chữ bên cạnh form đăng ký', [{k: 'regLabel', l: 'Nhãn nhỏ phía trên', max: 60, d: 'Đăng ký tham dự'}, {k: 'regTitle', l: 'Tiêu đề', max: 160, d: 'Vậy thì về thôi.'}, {k: 'regText', l: 'Đoạn mô tả (kể cả hạn đăng ký)', max: 600, ta: 1, d: 'Đăng ký giúp Ban tổ chức chuẩn bị chỗ ngồi, suất tiệc tri ân và đón anh em chu đáo nhất. Hạn đăng ký: 23.10.2026.'}, {k: 'regInfo', l: 'Khung thông tin (mỗi dòng một ý)', max: 600, ta: 1, d: 'Hội trường chính: 450 chỗ · Dự kiến 500 khách tại lễ kỷ niệm\nDự kiến đón 1.000 lượt anh em trong 2 ngày'}]); else if (f.key === 'meaning') openMeaning(); else if (f.key === 'sponsor') openSponsor(); else openItem(f.key, f.i);
   };
 
   function fieldHtml(f, v, idx, extra) {
