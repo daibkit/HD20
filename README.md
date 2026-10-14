@@ -98,3 +98,5 @@ Mục "Bảo tàng ký ức" nằm cuối trang chủ (sau form đăng ký). Ở
 ## Chữ ở trang Bảo tàng ký ức và chân trang
 
 Chế độ chỉnh sửa: bấm vào đoạn đầu trang Bảo tàng, vào tagline/tiêu đề/mô tả của từng mục 01 · 02 · 03, hoặc vào 2 cột chữ ở chân trang để sửa (lưu trong `settings`). Tên 3 nút ở đầu trang Bảo tàng lấy theo tiêu đề từng mục.
+
+Trang Giới thiệu Đội: bấm vào tagline/tiêu đề/mô tả đầu trang để sửa. Ba nhóm "Một năm của Đội" luôn theo thứ tự: Sự kiện nội bộ → Tình nguyện thường kỳ → Chương trình lớn trong năm.
