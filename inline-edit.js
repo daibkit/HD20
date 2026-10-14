@@ -193,6 +193,13 @@
     };
     modal.onkeydown = e => { if (e.key === 'Escape') modal.innerHTML = ''; };
   }
+  const SETS = {
+    mz: ['Sửa phần đầu trang Bảo tàng ký ức', [{k: 'mzTag', l: 'Tagline', max: 60, d: 'Ký ức 20 năm'}, {k: 'mzTitle', l: 'Tiêu đề', max: 160, d: 'Bảo tàng ký ức'}, {k: 'mzText', l: 'Đoạn mô tả', max: 700, ta: 1, d: 'Là phiên bản online của triển lãm đa giác quan “Giao lộ thời gian”, được mở cửa trong ngày 24/10/2026.  Bảo tàng bao gồm hơn 5000 bức ảnh chụp, được chia thành 20 thư mục theo từng K trong đội.'}]],
+    gx: ['Sửa mục 01 (Triển lãm ảnh online)', [{k: 'gxTag', l: 'Tagline', max: 80, d: '01 · Triển lãm ảnh online'}, {k: 'gxTitle', l: 'Tiêu đề (cũng là tên nút ở đầu trang)', max: 120, d: 'Giao lộ thời gian'}, {k: 'gxText', l: 'Đoạn mô tả ngắn', max: 400, ta: 1, d: 'Chọn thư mục K của bạn để xem lại những khoảnh khắc năm ấy.'}]],
+    rd: ['Sửa mục 02 (HD Radioshow)', [{k: 'rdTag', l: 'Tagline', max: 80, d: '02 · Thư viện'}, {k: 'rdTitle', l: 'Tiêu đề (cũng là tên nút ở đầu trang)', max: 120, d: 'HD Radioshow'}, {k: 'rdText', l: 'Đoạn mô tả ngắn ({n} = số radio tự đếm)', max: 400, ta: 1, d: '{n} số radio của Đội — những câu chuyện, giọng nói và lời nhắn của anh em qua các thế hệ.'}]],
+    tg: ['Sửa mục 03 (Tiếng gọi HDX)', [{k: 'tgTag', l: 'Tagline', max: 80, d: '03 · Playlist'}, {k: 'tgTitle', l: 'Tiêu đề (cũng là tên nút ở đầu trang)', max: 120, d: 'Tiếng gọi HDX'}, {k: 'tgText', l: 'Đoạn mô tả ngắn', max: 400, ta: 1, d: 'Những bài hát anh em đã hát cùng nhau qua bao mùa tình nguyện. Bật lên, nghe lại, hát theo.'}]],
+    ft: ['Sửa chân trang', [{k: 'ftDesc', l: 'Cột trái: giới thiệu ngắn (xuống dòng được)', max: 300, ta: 1, d: '20 năm chung một mái nhà. Tự hào một hành trình - Gắn kết những thế hệ.'}, {k: 'ftInfoTitle', l: 'Cột giữa: tiêu đề', max: 60, d: 'Thông tin Đội'}, {k: 'ftInfo', l: 'Cột giữa: nội dung (mỗi dòng một ý, dòng đầu in đậm)', max: 500, ta: 1, d: 'Đội Sinh viên Tình nguyện Đồng hương Hải Dương\nHội Sinh viên Trường Đại học Kinh tế Quốc dân\nPhát triển – Thành công – Vững mạnh'}]]
+  };
   function openSet(title, F0) {
     const H = window.HDX_HOME, S = H.settings || {};
     const F = F0.map(f => Object.assign({}, f, {v: S[f.k] || f.d}));
@@ -349,6 +356,7 @@
     const rd = target && target.closest && target.closest('[data-hdx-radio]'); if (rd && !host.contains(target)) { const n = parseInt(rd.getAttribute('data-hdx-radio'), 10) - 1; if (n >= 0) return {key: 'radios', i: n, el: rd}; }
     const pl = target && target.closest && target.closest('[data-hdx-pledge]'); if (pl && !host.contains(target)) return {key: 'pledge', el: pl};
     const hr = target && target.closest && target.closest('[data-hdx-hero]'); if (hr && !host.contains(target)) return {key: 'hero', el: hr};
+    const st = target && target.closest && target.closest('[data-hdx-set]'); if (st && !host.contains(target) && SETS[st.getAttribute('data-hdx-set')]) return {key: 'set:' + st.getAttribute('data-hdx-set'), el: st};
     const ky = target && target.closest && target.closest('[data-hdx-ky]'); if (ky && !host.contains(target)) return {key: 'ky', el: ky};
     const rg = target && target.closest && target.closest('[data-hdx-reg]'); if (rg && !host.contains(target)) return {key: 'reg', el: rg};
     let el = target, d = 0;
@@ -381,7 +389,7 @@
     const ab = e.target.closest && e.target.closest('[data-hdx-add]'); if (ab) { e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); openItem(ab.dataset.hdxAdd, -1); return; }
     const f = findItem(e.target); if (!f) return;
     e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
-    if (f.key === 'video') openVideo(); else if (f.key === 'pledge') openPledge(); else if (f.key === 'hero') openHero(); else if (f.key === 'ky') openSet('Sửa mục Bảo tàng ký ức', [{k: 'kyLabel', l: 'Nhãn nhỏ phía trên', max: 60, d: 'Bảo tàng ký ức'}, {k: 'kyTitle', l: 'Tiêu đề', max: 160, d: 'Tìm lại một thời của bạn'}]); else if (f.key === 'reg') openSet('Sửa chữ bên cạnh form đăng ký', [{k: 'regLabel', l: 'Nhãn nhỏ phía trên', max: 60, d: 'Đăng ký tham dự'}, {k: 'regTitle', l: 'Tiêu đề', max: 160, d: 'Vậy thì về thôi.'}, {k: 'regText', l: 'Đoạn mô tả (kể cả hạn đăng ký)', max: 600, ta: 1, d: 'Đăng ký giúp Ban tổ chức chuẩn bị chỗ ngồi, suất tiệc tri ân và đón anh em chu đáo nhất. Hạn đăng ký: 23.10.2026.'}, {k: 'regInfo', l: 'Khung thông tin (mỗi dòng một ý)', max: 600, ta: 1, d: 'Hội trường chính: 450 chỗ · Dự kiến 500 khách tại lễ kỷ niệm\nDự kiến đón 1.000 lượt anh em trong 2 ngày'}]); else if (f.key === 'meaning') openMeaning(); else if (f.key === 'sponsor') openSponsor(); else openItem(f.key, f.i);
+    if (f.key === 'video') openVideo(); else if (f.key === 'pledge') openPledge(); else if (/^set:/.test(f.key)) { const D = SETS[f.key.slice(4)]; openSet(D[0], D[1]); } else if (f.key === 'hero') openHero(); else if (f.key === 'ky') openSet('Sửa mục Bảo tàng ký ức', [{k: 'kyLabel', l: 'Nhãn nhỏ phía trên', max: 60, d: 'Bảo tàng ký ức'}, {k: 'kyTitle', l: 'Tiêu đề', max: 160, d: 'Tìm lại một thời của bạn'}]); else if (f.key === 'reg') openSet('Sửa chữ bên cạnh form đăng ký', [{k: 'regLabel', l: 'Nhãn nhỏ phía trên', max: 60, d: 'Đăng ký tham dự'}, {k: 'regTitle', l: 'Tiêu đề', max: 160, d: 'Vậy thì về thôi.'}, {k: 'regText', l: 'Đoạn mô tả (kể cả hạn đăng ký)', max: 600, ta: 1, d: 'Đăng ký giúp Ban tổ chức chuẩn bị chỗ ngồi, suất tiệc tri ân và đón anh em chu đáo nhất. Hạn đăng ký: 23.10.2026.'}, {k: 'regInfo', l: 'Khung thông tin (mỗi dòng một ý)', max: 600, ta: 1, d: 'Hội trường chính: 450 chỗ · Dự kiến 500 khách tại lễ kỷ niệm\nDự kiến đón 1.000 lượt anh em trong 2 ngày'}]); else if (f.key === 'meaning') openMeaning(); else if (f.key === 'sponsor') openSponsor(); else openItem(f.key, f.i);
   };
 
   function fieldHtml(f, v, idx, extra) {

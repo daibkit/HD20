@@ -94,3 +94,7 @@ Chạy `supabase/stats.sql` một lần. Website ghi lượt truy cập, lượt
 ## Bảo tàng ký ức & form đăng ký (trang chủ)
 
 Mục "Bảo tàng ký ức" nằm cuối trang chủ (sau form đăng ký). Ở chế độ chỉnh sửa, bấm vào tiêu đề của nó, hoặc vào chữ bên cạnh form đăng ký, để sửa (lưu trong `settings`: kyLabel, kyTitle, regLabel, regTitle, regText, regInfo).
+
+## Chữ ở trang Bảo tàng ký ức và chân trang
+
+Chế độ chỉnh sửa: bấm vào đoạn đầu trang Bảo tàng, vào tagline/tiêu đề/mô tả của từng mục 01 · 02 · 03, hoặc vào 2 cột chữ ở chân trang để sửa (lưu trong `settings`). Tên 3 nút ở đầu trang Bảo tàng lấy theo tiêu đề từng mục.
