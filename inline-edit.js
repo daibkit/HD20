@@ -193,6 +193,30 @@
     };
     modal.onkeydown = e => { if (e.key === 'Escape') modal.innerHTML = ''; };
   }
+  function openHero() {
+    const H = window.HDX_HOME, S = H.settings || {};
+    const F = [{k: 'heroAccent', l: 'Tiêu đề — phần nhấn màu (VD: 20 năm)', max: 40, v: S.heroAccent || '20 năm'}, {k: 'heroTitle', l: 'Tiêu đề — phần còn lại (xuống dòng để ngắt dòng)', max: 120, ta: 1, v: S.heroTitle || 'chung\nmột mái nhà'}, {k: 'heroDesc', l: 'Mô tả ngắn', max: 300, ta: 1, v: S.heroDesc || 'Tự hào một hành trình - Gắn kết những thế hệ.'}, {k: 'heroDate', l: 'Thời gian', max: 80, v: S.heroDate || 'Thứ Bảy 24.10.2026'}, {k: 'heroPlace', l: 'Địa điểm tổ chức', max: 200, v: S.heroPlace || 'Đại học Kinh tế Quốc dân, 207 Giải Phóng, Bạch Mai, Hà Nội'}];
+    modal.innerHTML = `<div class="ov" role="dialog" aria-modal="true" aria-label="Sửa phần đầu trang"><div class="md"><h2>Sửa phần đầu trang (Hero)</h2><p class="err" id="err"></p>${F.map((f, n) => fieldHtml(f, f.v, n)).join('')}<div class="row"><button class="b" data-cancel>Huỷ</button><button class="b p" data-save>Lưu thay đổi</button></div></div></div>`;
+    const q = s => modal.querySelector(s), first = modal.querySelector('input,textarea'); if (first) first.focus();
+    modal.onclick = async e => {
+      const t = e.target;
+      if (t.matches('.ov') || t.hasAttribute('data-cancel')) { modal.innerHTML = ''; return; }
+      if (!t.hasAttribute('data-save')) return;
+      const val = {}; modal.querySelectorAll('[data-k]').forEach(el => { val[el.dataset.k] = el.value.trim(); });
+      t.disabled = true; t.textContent = 'Đang lưu…';
+      try {
+        const cur = await req('/rest/v1/site_content?select=data&key=eq.settings').catch(() => []);
+        const b0 = cur && cur[0] && cur[0].data && !Array.isArray(cur[0].data) ? cur[0].data : {};
+        const add = {heroAccent: val.heroAccent, heroTitle: val.heroTitle, heroDesc: val.heroDesc, heroDate: val.heroDate, heroPlace: val.heroPlace};
+        const data = Object.assign({}, b0, add);
+        await req('/rest/v1/site_content?on_conflict=key', {method: 'POST', headers: {Prefer: 'resolution=merge-duplicates,return=minimal'}, body: {key: 'settings', data, updated_at: new Date().toISOString()}});
+        Object.assign(S, add);
+        try { const rows = (lsGet(H.cacheKey) || []).filter(r => r && r.key !== 'settings'); rows.push({key: 'settings', data}); lsSet(H.cacheKey, rows); } catch (er) {}
+        modal.innerHTML = ''; setHot(null); H.rerender(); toast('Đã lưu. Website đã cập nhật.');
+      } catch (er) { const msg = er && er.status === 404 ? 'Chưa có bảng site_content: hãy chạy supabase/site_content.sql trong Supabase.' : errMsg(er); q('#err').textContent = msg; toast(msg, true); t.disabled = false; t.textContent = 'Lưu thay đổi'; }
+    };
+    modal.onkeydown = e => { if (e.key === 'Escape') modal.innerHTML = ''; };
+  }
   function openPledge() {
     const H = window.HDX_HOME, S = H.settings || {};
     const dom = n => { const e = document.querySelector('#hen-uoc ' + n); return e ? e.textContent.trim() : ''; };
@@ -301,6 +325,7 @@
     const sg = target && target.closest && target.closest('[data-hdx-song]'); if (sg && !host.contains(target)) { const n = parseInt(sg.getAttribute('data-hdx-song'), 10) - 1; if (n >= 0) return {key: 'songs', i: n, el: sg}; }
     const rd = target && target.closest && target.closest('[data-hdx-radio]'); if (rd && !host.contains(target)) { const n = parseInt(rd.getAttribute('data-hdx-radio'), 10) - 1; if (n >= 0) return {key: 'radios', i: n, el: rd}; }
     const pl = target && target.closest && target.closest('[data-hdx-pledge]'); if (pl && !host.contains(target)) return {key: 'pledge', el: pl};
+    const hr = target && target.closest && target.closest('[data-hdx-hero]'); if (hr && !host.contains(target)) return {key: 'hero', el: hr};
     let el = target, d = 0;
     while (el && el !== document.body && el !== document.documentElement && d < 6) {
       if (host.contains(el)) return null;
@@ -331,7 +356,7 @@
     const ab = e.target.closest && e.target.closest('[data-hdx-add]'); if (ab) { e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); openItem(ab.dataset.hdxAdd, -1); return; }
     const f = findItem(e.target); if (!f) return;
     e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
-    if (f.key === 'video') openVideo(); else if (f.key === 'pledge') openPledge(); else if (f.key === 'meaning') openMeaning(); else if (f.key === 'sponsor') openSponsor(); else openItem(f.key, f.i);
+    if (f.key === 'video') openVideo(); else if (f.key === 'pledge') openPledge(); else if (f.key === 'hero') openHero(); else if (f.key === 'meaning') openMeaning(); else if (f.key === 'sponsor') openSponsor(); else openItem(f.key, f.i);
   };
 
   function fieldHtml(f, v, idx, extra) {

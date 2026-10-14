@@ -86,3 +86,7 @@ Mục "Một năm của Đội" lấy dữ liệu từ khóa `activities`. Ở c
 ## Thống kê truy cập & click
 
 Chạy `supabase/stats.sql` một lần. Website ghi lượt truy cập, lượt xem trang và lượt click từng mục (ẩn danh, qua hàm `hit()`). Admin xem chi tiết ở tab "Thống kê". Không đếm khi đang bật chế độ chỉnh sửa; muốn tắt đếm trên một trình duyệt: `localStorage.hdx_nostat='1'`.
+
+## Sửa chữ khối Hero
+
+Ở chế độ chỉnh sửa, bấm vào tiêu đề/mô tả/ngày/địa điểm ở đầu trang chủ để sửa (lưu trong `settings`: heroAccent, heroTitle, heroDesc, heroDate, heroPlace). Favicon: `img/favicon.png`.
