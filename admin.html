@@ -2271,6 +2271,18 @@ const RG = {
     return this.rows.filter(r => (!this.fk || r.k === this.fk) && (!this.fd || (r.dinner || '') === this.fd) && (!this.fh || (this.fh === 'done' ? r.handled : !r.handled))
       && (!q || r.name.toLowerCase().includes(q) || r.k.toLowerCase() === q || (digits.length >= 3 && r.phone.replace(/[^0-9]/g, '').includes(digits)) || (r.note || '').toLowerCase().includes(q)));
   },
+  async pushSheet() {
+    if (this.syncing) return;
+    try {
+      if (!MU_URL_RE.test(MU.driveUrl || '')) { const st = await SB.req('/rest/v1/site_content?select=data&key=eq.settings').catch(() => []); MU.driveUrl = String(st && st[0] && st[0].data && st[0].data.driveUrl || ''); }
+      if (!MU_URL_RE.test(MU.driveUrl || '')) { toast('Chưa kết nối Google Drive: dán địa chỉ Apps Script ở tab “Bảo tàng ký ức” trước.', 'err', 7000); return; }
+      this.syncing = true; this.draw();
+      const rows = this.rows.slice().reverse().map(r => [fmtDate(r.created_at), r.name, r.k, r.phone, r.dinner || '', r.note || '', r.handled ? 'x' : '', r.admin_note || '']);
+      const j = await MU.gas('sheetsync', {rows});
+      this.sheetUrl = j.url || this.sheetUrl; toast(`Đã đẩy ${j.count} lượt đăng ký sang Google Sheet.`, 'ok', 6000);
+    } catch (e) { toast((e && e.message) || 'Không đẩy được sang Google Sheet.', 'err', 9000); }
+    this.syncing = false; this.draw();
+  },
   csv(rows) {
     const c = v => { v = String(v == null ? '' : v); if (/^[=+\-@]/.test(v)) v = "'" + v; return '"' + v.replace(/"/g, '""') + '"'; };
     const head = ['Thời gian', 'Họ và tên', 'Khóa', 'Số điện thoại', 'Tham gia tiệc tối', 'Lời nhắn', 'Đã liên hệ', 'Ghi chú BTC'];
@@ -2310,7 +2322,7 @@ const RG = {
       <div class="fld"><label for="rg-k">Khóa</label>${sel('rg-k', [['', 'Tất cả'], ...ks.map(k => [k, k])], this.fk)}</div>
       <div class="fld"><label for="rg-d">Tham gia tiệc tối</label>${sel('rg-d', [['', 'Tất cả'], ...ds.map(d => [d, d])], this.fd)}</div>
       <div class="fld"><label for="rg-h">Liên hệ</label>${sel('rg-h', [['', 'Tất cả'], ['todo', 'Chưa liên hệ'], ['done', 'Đã liên hệ']], this.fh)}</div>
-      <div class="qa rg-btns"><button class="btn btn-line" data-rg="reload">${icon('refresh', 16)} Tải lại</button><button class="btn btn-grad" data-rg="csv" ${list.length ? '' : 'disabled'}>${icon('download', 16)} Xuất CSV (${list.length})</button></div></div></div>`;
+      <div class="qa rg-btns"><button class="btn btn-line" data-rg="reload">${icon('refresh', 16)} Tải lại</button><button class="btn btn-line" data-rg="sheet" ${this.syncing || !all.length ? 'disabled' : ''}>${icon('refresh', 16)} ${this.syncing ? 'Đang đẩy…' : 'Đẩy tất cả sang Google Sheet'}</button>${this.sheetUrl ? `<a class="btn btn-line" href="${esc(this.sheetUrl)}" target="_blank" rel="noopener">Mở Google Sheet ↗</a>` : ''}<button class="btn btn-grad" data-rg="csv" ${list.length ? '' : 'disabled'}>${icon('download', 16)} Xuất CSV (${list.length})</button></div></div></div>`;
     const tbl = list.length ? `<div class="card"><div class="tblwrap"><table class="tbl"><caption class="sr">Danh sách đăng ký tham dự</caption><thead><tr><th>Thời gian</th><th>Họ và tên</th><th>Khóa</th><th>Điện thoại</th><th>Tiệc tối</th><th>Lời nhắn</th><th>Liên hệ</th><th class="actions"><span class="sr">Thao tác</span></th></tr></thead><tbody>${shown.map(r => `<tr>
         <td data-label="Thời gian" class="small muted tnum">${fmtDate(r.created_at)}</td><td data-label="Họ và tên"><b>${esc(r.name)}</b>${r.admin_note ? `<div class="small muted">📝 ${esc(r.admin_note)}</div>` : ''}</td><td data-label="Khóa">${esc(r.k)}</td>
         <td data-label="Điện thoại" class="tnum"><a href="tel:${esc(r.phone.replace(/[^0-9+]/g, ''))}">${esc(r.phone)}</a></td><td data-label="Tiệc tối">${r.dinner ? `<span class="chip">${esc(r.dinner)}</span>` : '—'}</td><td data-label="Lời nhắn" class="small" style="max-width:260px">${esc(r.note || '')}</td>
@@ -2325,6 +2337,7 @@ const RG = {
     const a = el.dataset.rg, id = el.dataset.id;
     if (a === 'reload') { this.loaded = false; this.load(); }
     else if (a === 'more') { this.lim += 50; this.draw(); }
+    else if (a === 'sheet') this.pushSheet();
     else if (a === 'csv') { const rows = this.filtered(); saveFile(`dang-ky-tham-du-${new Date().toISOString().slice(0, 10)}.csv`, this.csv(rows), 'text/csv;charset=utf-8'); }
     else if (a === 'note') this.note(id);
     else if (a === 'del') this.del(id);

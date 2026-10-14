@@ -100,3 +100,7 @@ Mục "Bảo tàng ký ức" nằm cuối trang chủ (sau form đăng ký). Ở
 Chế độ chỉnh sửa: bấm vào đoạn đầu trang Bảo tàng, vào tagline/tiêu đề/mô tả của từng mục 01 · 02 · 03, hoặc vào 2 cột chữ ở chân trang để sửa (lưu trong `settings`). Tên 3 nút ở đầu trang Bảo tàng lấy theo tiêu đề từng mục.
 
 Trang Giới thiệu Đội: bấm vào tagline/tiêu đề/mô tả đầu trang để sửa. Ba nhóm "Một năm của Đội" luôn theo thứ tự: Sự kiện nội bộ → Tình nguyện thường kỳ → Chương trình lớn trong năm.
+
+## Đăng ký → Google Sheet
+
+Mỗi lượt đăng ký vẫn lưu vào Supabase (bản chính) và đồng thời tự thêm một dòng vào Google Sheet "HDX20 - Đăng ký tham dự" ở Drive của bạn (qua Apps Script, cần đã dán mã mới + chạy `authorize()` + "Phiên bản mới"). Sheet nằm riêng, không nằm trong thư mục ảnh chia sẻ công khai. Admin → Đăng ký → "Đẩy tất cả sang Google Sheet" để ghi lại toàn bộ danh sách (chạy lại không bị trùng, kèm trạng thái "Đã liên hệ" và ghi chú BTC).

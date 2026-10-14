@@ -14,9 +14,10 @@ function authorize() {
   DriveApp.getRootFolder();
   UrlFetchApp.fetch('https://www.googleapis.com/discovery/v1/apis', {muteHttpExceptions: true});
   const f = root_();
+  sheet_(); // tạo sẵn Google Sheet đăng ký (cấp quyền Google Sheets)
   try { f.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); Logger.log('Đã bật chia sẻ “bất kỳ ai có liên kết” cho thư mục gốc.'); }
   catch (e) { Logger.log('KHÔNG bật được chia sẻ công khai: ' + e.message + ' — có thể quản trị viên Google Workspace chặn chia sẻ ra ngoài.'); }
-  Logger.log('OK — đã cấp quyền. Thư mục gốc: ' + f.getUrl());
+  Logger.log('OK — đã cấp quyền. Thư mục gốc: ' + f.getUrl() + ' · Sheet đăng ký: ' + sheet_().getUrl());
 }
 
 // Trả về '' nếu token thuộc admin, ngược lại trả về lý do (hiện trong thông báo lỗi).
@@ -64,14 +65,63 @@ function folder_(k) {
 }
 function out_(o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }
 
+
+// ---------- Đăng ký tham dự: ghi vào Google Sheet (nằm riêng ở Drive của bạn, KHÔNG nằm trong thư mục chia sẻ công khai) ----------
+const SHEET_NAME = 'HDX20 - Đăng ký tham dự';
+const SHEET_HEAD = ['Thời gian', 'Họ và tên', 'Khóa', 'Số điện thoại', 'Tiệc tối', 'Lời nhắn', 'Đã liên hệ', 'Ghi chú BTC'];
+function sheet_() {
+  const p = PropertiesService.getScriptProperties(), id = p.getProperty('SHEET_ID');
+  if (id) { try { return SpreadsheetApp.openById(id); } catch (e) {} }
+  const ss = SpreadsheetApp.create(SHEET_NAME), sh = ss.getSheets()[0];
+  sh.setName('Đăng ký'); sh.getRange('A:H').setNumberFormat('@'); // định dạng văn bản: số điện thoại không mất số 0, không bị hiểu thành công thức
+  sh.appendRow(SHEET_HEAD); sh.getRange(1, 1, 1, SHEET_HEAD.length).setFontWeight('bold').setBackground('#E6F3FB'); sh.setFrozenRows(1);
+  sh.setColumnWidths(1, 1, 140); sh.setColumnWidths(2, 1, 190); sh.setColumnWidths(4, 1, 120); sh.setColumnWidths(6, 1, 320);
+  p.setProperty('SHEET_ID', ss.getId()); return ss;
+}
+function cell_(v, n) { return String(v == null ? '' : v).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').trim().slice(0, n); }
+function now_() { return Utilities.formatDate(new Date(), 'Asia/Ho_Chi_Minh', 'dd/MM/yyyy HH:mm:ss'); }
+// Công khai: form trên website gọi để thêm một dòng (bản chính vẫn nằm trong Supabase).
+function register_(q) {
+  const name = cell_(q.name, 80), phone = cell_(q.phone, 20);
+  if (!name) return {ok: false, error: 'Thiếu họ và tên.'};
+  if (!/^[0-9+\s.]{9,20}$/.test(phone)) return {ok: false, error: 'Số điện thoại chưa hợp lệ.'};
+  const cache = CacheService.getScriptCache(), dk = 'reg' + Utilities.base64EncodeWebSafe(Utilities.computeDigest(Utilities.DigestAlgorithm.MD5, name + '|' + phone));
+  if (cache.get(dk)) return {ok: true, duplicate: true};
+  const lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    const minute = 'rl' + Math.floor(Date.now() / 60000), n = Number(cache.get(minute) || 0);
+    if (n >= 40) return {ok: false, error: 'Quá nhiều đăng ký trong một phút.'};
+    cache.put(minute, String(n + 1), 120);
+    sheet_().getSheets()[0].appendRow([now_(), name, cell_(q.k, 20), phone, cell_(q.dinner, 20), cell_(q.note, 600), '', '']);
+    cache.put(dk, '1', 3600);
+  } finally { lock.releaseLock(); }
+  return {ok: true};
+}
+// Admin: ghi lại TOÀN BỘ danh sách (lấy từ Supabase) vào sheet — chạy lại bao nhiêu lần cũng không bị trùng.
+function sheetSync_(q) {
+  const rows = (Array.isArray(q.rows) ? q.rows : []).slice(0, 20000).map(function (r) {
+    r = Array.isArray(r) ? r : []; const lim = [30, 80, 20, 20, 20, 600, 10, 600];
+    return lim.map(function (n, i) { return cell_(r[i], n); });
+  });
+  const lock = LockService.getScriptLock(); lock.waitLock(30000);
+  try {
+    const ss = sheet_(), sh = ss.getSheets()[0], last = sh.getLastRow();
+    if (last > 1) sh.getRange(2, 1, last - 1, SHEET_HEAD.length).clearContent();
+    if (rows.length) sh.getRange(2, 1, rows.length, SHEET_HEAD.length).setNumberFormat('@').setValues(rows);
+    return {ok: true, count: rows.length, url: ss.getUrl()};
+  } finally { lock.releaseLock(); }
+}
+
 function doGet() { return out_({ok: true, name: 'HDX20 Drive', note: 'Dùng POST từ trang quản trị.'}); }
 
 function doPost(e) {
   try {
     const q = JSON.parse(e.postData.contents);
+    if (q.action === 'register') return out_(register_(q)); // công khai: ai cũng gửi được form đăng ký
     const why = adminCached_(q.token);
     if (why) return out_({ok: false, error: 'Không có quyền: ' + why + '.'});
-    if (q.action === 'ping') return out_({ok: true, folder: root_().getName()});
+    if (q.action === 'ping') { const sid = PropertiesService.getScriptProperties().getProperty('SHEET_ID'); let su = ''; if (sid) { try { su = SpreadsheetApp.openById(sid).getUrl(); } catch (e) {} } return out_({ok: true, folder: root_().getName(), sheet: su}); }
+    if (q.action === 'sheetsync') return out_(sheetSync_(q));
     if (q.action === 'start') { // mở phiên tải lên theo từng phần (cho ảnh/video dung lượng lớn)
       if (!OK_MIME_.test(q.mime || '')) return out_({ok: false, error: 'Chỉ nhận ảnh (JPG/PNG/WebP/GIF/HEIC) và video (MP4/MOV/WebM…).'});
       const size = Number(q.size); if (!(size > 0)) return out_({ok: false, error: 'Tệp rỗng.'});
