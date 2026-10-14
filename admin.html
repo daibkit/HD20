@@ -2278,7 +2278,7 @@ document.addEventListener('drop', e => { const d = e.target.closest && e.target.
    Đăng ký tham dự — danh sách người đăng ký từ form trên website (bảng registrations)
    ========================================================================= */
 const RG = {
-  rows: [], loaded: false, loading: false, err: '', missing: false, q: '', fk: '', fd: '', fh: '', lim: 50,
+  rows: [], loaded: false, loading: false, err: '', missing: false, q: '', fk: '', fd: '', fh: '', pg: 1, per: 20,
   async load() {
     if (this.loading) return; this.loading = true; this.err = ''; this.draw();
     try { this.rows = await SB.req('/rest/v1/registrations?select=*&order=created_at.desc&limit=5000') || []; this.loaded = true; this.missing = false; }
@@ -2334,7 +2334,7 @@ const RG = {
     if (Store.mode !== 'supabase') { root.innerHTML = `<div class="notice">${icon('warn')}<div><b>Cần kết nối Supabase.</b> Điền <code>config.js</code> để dùng mục này.</div></div>`; return; }
     if (this.loading) { root.innerHTML = '<p class="muted" style="padding:20px">Đang tải danh sách đăng ký…</p>'; return; }
     if (!this.loaded) { root.innerHTML = `<div class="notice danger">${icon('warn')}<div><b>Không tải được.</b> ${esc(this.err)}</div></div><div class="qa" style="margin-top:12px"><button class="btn btn-line" data-rg="reload">${icon('refresh', 16)} Thử lại</button></div>`; return; }
-    const sy = window.scrollY, all = this.rows, list = this.filtered(), shown = list.slice(0, this.lim);
+    const sy = window.scrollY, all = this.rows, list = this.filtered(), pages = Math.max(1, Math.ceil(list.length / this.per)); this.pg = Math.min(Math.max(1, this.pg), pages); const shown = list.slice((this.pg - 1) * this.per, this.pg * this.per);
     const todo = all.filter(r => !r.handled).length, DN = ['Có', 'Không', 'Chưa chắc chắn'], ds = DN;
     const ks = [...new Set(all.map(r => r.k))].sort((a, b) => a.localeCompare(b, 'vi', {numeric: true}));
     const cls = {'Có': 'n-green', 'Không': 'n-gold', 'Chưa chắc chắn': 'n-sky'};
@@ -2348,10 +2348,10 @@ const RG = {
       <div class="qa rg-btns"><button class="btn btn-line" data-rg="reload">${icon('refresh', 16)} Tải lại</button><button class="btn btn-line" data-rg="sheet" ${this.syncing || !all.length ? 'disabled' : ''}>${icon('refresh', 16)} ${this.syncing ? 'Đang đẩy…' : 'Đẩy tất cả sang Google Sheet'}</button>${this.sheetUrl ? `<a class="btn btn-line" href="${esc(this.sheetUrl)}" target="_blank" rel="noopener">Mở Google Sheet ↗</a>` : ''}<button class="btn btn-grad" data-rg="csv" ${list.length ? '' : 'disabled'}>${icon('download', 16)} Xuất CSV (${list.length})</button></div></div></div>`;
     const tbl = list.length ? `<div class="card"><div class="tblwrap"><table class="tbl"><caption class="sr">Danh sách đăng ký tham dự</caption><thead><tr><th>Thời gian</th><th>Họ và tên</th><th>Khóa</th><th>Điện thoại</th><th>Tiệc tối</th><th>Lời nhắn</th><th>Liên hệ</th><th class="actions"><span class="sr">Thao tác</span></th></tr></thead><tbody>${shown.map(r => `<tr>
         <td data-label="Thời gian" class="small muted tnum">${fmtDate(r.created_at)}</td><td data-label="Họ và tên"><b>${esc(r.name)}</b>${r.admin_note ? `<div class="small muted">📝 ${esc(r.admin_note)}</div>` : ''}</td><td data-label="Khóa">${esc(r.k)}</td>
-        <td data-label="Điện thoại" class="tnum"><a href="tel:${esc(r.phone.replace(/[^0-9+]/g, ''))}">${esc(r.phone)}</a></td><td data-label="Tiệc tối">${r.dinner ? `<span class="chip">${esc(r.dinner)}</span>` : '—'}</td><td data-label="Lời nhắn" class="small" style="max-width:260px">${esc(r.note || '')}</td>
+        <td data-label="Điện thoại" class="tnum"><a href="tel:${esc(r.phone.replace(/[^0-9+]/g, ''))}">${esc(r.phone)}</a></td><td data-label="Tiệc tối">${r.dinner ? `<span class="chip">${esc(r.dinner)}</span>` : '—'}</td><td data-label="Lời nhắn" class="small" style="max-width:260px"><div title="${esc(r.note || '')}" style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word">${esc(r.note || '')}</div></td>
         <td data-label="Liên hệ"><label class="hc-chk"><input type="checkbox" data-rg="toggle" data-id="${esc(r.id)}" ${r.handled ? 'checked' : ''} aria-label="Đã liên hệ ${esc(r.name)}"> ${r.handled ? 'Đã' : 'Chưa'}</label></td>
         <td class="actions" data-label=""><button class="ibtn" data-rg="note" data-id="${esc(r.id)}" aria-label="Ghi chú">${icon('edit', 16)}</button><button class="ibtn" data-rg="del" data-id="${esc(r.id)}" aria-label="Xoá">${icon('trash', 16)}</button></td></tr>`).join('')}</tbody></table></div></div>
-      ${list.length > shown.length ? `<div class="qa" style="justify-content:center"><button class="btn btn-line" data-rg="more">Xem thêm ${Math.min(50, list.length - shown.length)} / còn ${list.length - shown.length}</button></div>` : ''}`
+      ${pages > 1 ? `<div class="qa" style="justify-content:space-between;align-items:center;padding:14px 18px;border-top:1px solid var(--line,#e3e8f2)"><span class="small muted">${(this.pg - 1) * this.per + 1}–${Math.min(list.length, this.pg * this.per)} / ${list.length} lượt đăng ký</span><div class="qa" style="align-items:center"><button class="btn btn-line btn-sm" data-rg="pg" data-to="1" ${this.pg <= 1 ? 'disabled' : ''} aria-label="Trang đầu">«</button><button class="btn btn-line btn-sm" data-rg="pg" data-to="${this.pg - 1}" ${this.pg <= 1 ? 'disabled' : ''}>‹ Trước</button><span class="small tnum">Trang ${this.pg}/${pages}</span><button class="btn btn-line btn-sm" data-rg="pg" data-to="${this.pg + 1}" ${this.pg >= pages ? 'disabled' : ''}>Sau ›</button><button class="btn btn-line btn-sm" data-rg="pg" data-to="${pages}" ${this.pg >= pages ? 'disabled' : ''} aria-label="Trang cuối">»</button><select id="rg-per" class="inp" style="width:auto;padding:6px 10px" aria-label="Số dòng mỗi trang">${[20, 50, 100].map(n => `<option value="${n}" ${n === this.per ? 'selected' : ''}>${n} dòng/trang</option>`).join('')}</select></div></div>` : ''}`
       : emptyBox({ic: 'doc', title: all.length ? 'Không có kết quả phù hợp' : 'Chưa có ai đăng ký', text: all.length ? 'Thử bỏ bớt bộ lọc.' : 'Khi có người điền form “Đăng ký tham dự” trên website, danh sách sẽ hiện ở đây.'});
     root.innerHTML = stats + filters + tbl;
     window.scrollTo(0, sy);
@@ -2359,7 +2359,7 @@ const RG = {
   onClick(el) {
     const a = el.dataset.rg, id = el.dataset.id;
     if (a === 'reload') { this.loaded = false; this.load(); }
-    else if (a === 'more') { this.lim += 50; this.draw(); }
+    else if (a === 'pg') { this.pg = +el.dataset.to || 1; this.draw(); const t = $('#rg-root .tblwrap'); if (t) t.scrollIntoView({block: 'start', behavior: 'smooth'}); }
     else if (a === 'sheet') this.pushSheet();
     else if (a === 'csv') { const rows = this.filtered(); saveFile(`dang-ky-tham-du-${new Date().toISOString().slice(0, 10)}.csv`, this.csv(rows), 'text/csv;charset=utf-8'); }
     else if (a === 'note') this.note(id);
@@ -2373,9 +2373,9 @@ document.addEventListener('click', e => { const el = e.target.closest('#rg-root 
 document.addEventListener('change', e => {
   const t = e.target; if (!t.closest || !t.closest('#rg-root')) return;
   if (t.dataset.rg === 'toggle') { RG.onClick(t); return; }
-  const m = {'rg-k': 'fk', 'rg-d': 'fd', 'rg-h': 'fh'}[t.id]; if (m) { RG[m] = t.value; RG.lim = 50; RG.draw(); }
+  const m = {'rg-k': 'fk', 'rg-d': 'fd', 'rg-h': 'fh'}[t.id]; if (t.id === 'rg-per') { RG.per = +t.value || 20; RG.pg = 1; RG.draw(); return; } if (m) { RG[m] = t.value; RG.pg = 1; RG.draw(); }
 });
-document.addEventListener('input', e => { if (e.target.id === 'rg-q') { RG.q = e.target.value; RG.lim = 50; clearTimeout(RG.qt); RG.qt = setTimeout(() => { RG.draw(); const i = $('#rg-q'); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }, 250); } });
+document.addEventListener('input', e => { if (e.target.id === 'rg-q') { RG.q = e.target.value; RG.pg = 1; clearTimeout(RG.qt); RG.qt = setTimeout(() => { RG.draw(); const i = $('#rg-q'); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }, 250); } });
 
 /* =========================================================================
    Thống kê — lượt truy cập & lượt click từng mục (bảng site_hits)
