@@ -104,3 +104,5 @@ Trang Giới thiệu Đội: bấm vào tagline/tiêu đề/mô tả đầu tran
 ## Đăng ký → Google Sheet
 
 Mỗi lượt đăng ký vẫn lưu vào Supabase (bản chính) và đồng thời tự thêm một dòng vào Google Sheet "HDX20 - Đăng ký tham dự" ở Drive của bạn (qua Apps Script, cần đã dán mã mới + chạy `authorize()` + "Phiên bản mới"). Sheet nằm riêng, không nằm trong thư mục ảnh chia sẻ công khai. Admin → Đăng ký → "Đẩy tất cả sang Google Sheet" để ghi lại toàn bộ danh sách (chạy lại không bị trùng, kèm trạng thái "Đã liên hệ" và ghi chú BTC).
+
+Báo lỗi quyền Drive: lỗi từ Apps Script giờ ghi rõ bước + thư mục nào (kèm ID) bị chặn, và có nút "Kiểm tra quyền thư mục" (Admin → Bảo tàng ký ức) liệt kê từng thư mục gốc/K48–K67/Video/Sheet đăng ký: ✅ có quyền, ❌ lỗi gì. Cần dán lại mã Apps Script mới + "Phiên bản mới".

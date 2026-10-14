@@ -48,9 +48,13 @@ function adminCached_(token) {
   return why;
 }
 const OK_MIME_ = /^(image\/(jpeg|png|webp|gif|heic|heif|avif)|video\/(mp4|quicktime|webm|x-m4v|3gpp|x-matroska|mpeg|ogg))$/;
+// CTX_: ghi lại đang làm gì / với thư mục nào, để khi lỗi quyền thì báo rõ ràng.
+var CTX_ = {step: '', folder: '', id: ''};
+function ctx_(step, folder, id) { CTX_.step = step || ''; if (folder !== undefined) CTX_.folder = folder; if (id !== undefined) CTX_.id = id || ''; }
 function root_() {
+  ctx_('mở thư mục gốc “' + ROOT_NAME + '”', ROOT_NAME, '');
   const p = PropertiesService.getScriptProperties(); let id = p.getProperty('ROOT_ID');
-  if (id) { try { return DriveApp.getFolderById(id); } catch (e) {} }
+  if (id) { try { const f0 = DriveApp.getFolderById(id); CTX_.id = id; return f0; } catch (e) { Logger.log('Không mở được thư mục gốc theo ID đã lưu (' + id + '): ' + e.message); } }
   const it = DriveApp.getFoldersByName(ROOT_NAME);
   const f = it.hasNext() ? it.next() : DriveApp.createFolder(ROOT_NAME);
   p.setProperty('ROOT_ID', f.getId());
@@ -60,8 +64,9 @@ function root_() {
 function folder_(k) {
   if (k === 'VIDEO') k = 'Video giới thiệu'; // video ở trang chủ
   else if (!/^K[0-9]{1,3}$/.test(k)) throw new Error('Tên thư mục không hợp lệ');
-  const r = root_(), it = r.getFoldersByName(k);
-  return it.hasNext() ? it.next() : r.createFolder(k);
+  const r = root_(); ctx_('mở/tạo thư mục con “' + k + '” trong “' + ROOT_NAME + '”', k, '');
+  const it = r.getFoldersByName(k), f = it.hasNext() ? it.next() : r.createFolder(k);
+  CTX_.id = f.getId(); return f;
 }
 function out_(o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }
 
@@ -120,6 +125,20 @@ function doPost(e) {
     if (q.action === 'register') return out_(register_(q)); // công khai: ai cũng gửi được form đăng ký
     const why = adminCached_(q.token);
     if (why) return out_({ok: false, error: 'Không có quyền: ' + why + '.'});
+    if (q.action === 'check') { // kiểm tra quyền từng thư mục, báo rõ thư mục nào lỗi
+      const res = [];
+      const test = function (label, fn) { try { const v = fn(); res.push({name: label, ok: true, info: v || ''}); } catch (e) { res.push({name: label, ok: false, info: String(e && e.message || e)}); } };
+      let r = null; test('Thư mục gốc “' + ROOT_NAME + '”', function () { r = root_(); return r.getUrl() + ' · chủ sở hữu: ' + (function () { try { return r.getOwner().getEmail(); } catch (e) { return '?'; } })(); });
+      if (r) {
+        const names = []; for (let n = 48; n <= 67; n++) names.push('K' + n); names.push('Video giới thiệu');
+        names.forEach(function (k) { test('Thư mục “' + k + '”', function () { const it = r.getFoldersByName(k); if (!it.hasNext()) return 'chưa có (sẽ tự tạo khi tải lên)'; const f = it.next(); f.getFiles().hasNext(); return 'đọc được; ID ' + f.getId(); }); });
+        test('Ghi thử vào thư mục gốc', function () { const t = r.createFile('_kiem-tra-quyen.txt', 'ok'); t.setTrashed(true); return 'ghi + xoá thử được'; });
+      }
+      test('Google Sheet đăng ký', function () { const ss = sheet_(); return ss.getUrl(); });
+      const bad = res.filter(function (x) { return !x.ok; });
+      Logger.log(JSON.stringify(res));
+      return out_({ok: true, results: res, failed: bad.length});
+    }
     if (q.action === 'ping') { const sid = PropertiesService.getScriptProperties().getProperty('SHEET_ID'); let su = ''; if (sid) { try { su = SpreadsheetApp.openById(sid).getUrl(); } catch (e) {} } return out_({ok: true, folder: root_().getName(), sheet: su}); }
     if (q.action === 'sheetsync') return out_(sheetSync_(q));
     if (q.action === 'start') { // mở phiên tải lên theo từng phần (cho ảnh/video dung lượng lớn)
@@ -184,5 +203,11 @@ function doPost(e) {
       f.setTrashed(true); return out_({ok: true});
     }
     return out_({ok: false, error: 'Thao tác không hợp lệ.'});
-  } catch (err) { return out_({ok: false, error: String(err && err.message || err)}); }
+  } catch (err) {
+    const msg = String(err && err.message || err);
+    const where = (CTX_.step ? 'Bước: ' + CTX_.step : '') + (CTX_.folder ? ' · Thư mục: “' + CTX_.folder + '”' : '') + (CTX_.id ? ' (ID ' + CTX_.id + ')' : '');
+    const perm = /access|denied|permission|quyền|authoriz|scope|not have/i.test(msg);
+    Logger.log('LỖI ' + (perm ? '[QUYỀN] ' : '') + msg + ' — ' + where);
+    return out_({ok: false, error: msg + (where ? ' — ' + where : '') + (perm ? ' — Tài khoản chạy Apps Script chưa có quyền với thư mục/tệp trên. Hãy mở Drive bằng ĐÚNG tài khoản đã triển khai Apps Script, kiểm tra thư mục này có nằm trong Drive của tài khoản đó không (hoặc được chia sẻ quyền “Người chỉnh sửa”), rồi chạy lại authorize().' : '')});
+  }
 }
