@@ -15,8 +15,8 @@ function authorize() {
   UrlFetchApp.fetch('https://www.googleapis.com/discovery/v1/apis', {muteHttpExceptions: true});
   const f = root_();
   sheet_(); // tạo sẵn Google Sheet đăng ký (cấp quyền Google Sheets)
-  try { f.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); Logger.log('Đã bật chia sẻ “bất kỳ ai có liên kết” cho thư mục gốc.'); }
-  catch (e) { Logger.log('KHÔNG bật được chia sẻ công khai: ' + e.message + ' — có thể quản trị viên Google Workspace chặn chia sẻ ra ngoài.'); }
+  const why = share_(f);
+  Logger.log(why ? 'KHÔNG bật được chia sẻ công khai: ' + why + ' — có thể quản trị viên Google Workspace chặn chia sẻ ra ngoài, hoặc thư mục không thuộc tài khoản này (ảnh vẫn tải lên được, chỉ có thể không hiện công khai).' : 'Thư mục gốc đã mở “bất kỳ ai có liên kết” (giữ nguyên quyền hiện có).');
   Logger.log('OK — đã cấp quyền. Thư mục gốc: ' + f.getUrl() + ' · Sheet đăng ký: ' + sheet_().getUrl());
 }
 
@@ -50,6 +50,13 @@ function adminCached_(token) {
 const OK_MIME_ = /^(image\/(jpeg|png|webp|gif|heic|heif|avif)|video\/(mp4|quicktime|webm|x-m4v|3gpp|x-matroska|mpeg|ogg))$/;
 // CTX_: ghi lại đang làm gì / với thư mục nào, để khi lỗi quyền thì báo rõ ràng.
 var CTX_ = {step: '', folder: '', id: ''};
+// Bật “ai có liên kết đều xem được” NẾU CẦN. Đã mở sẵn (kể cả cho phép sửa) thì giữ nguyên, không đụng vào; không bao giờ ném lỗi.
+// Trả về '' nếu ổn, hoặc lý do nếu không bật được.
+function share_(item) {
+  try { const a = item.getSharingAccess(); if (a === DriveApp.Access.ANYONE || a === DriveApp.Access.ANYONE_WITH_LINK) return ''; } catch (e) {}
+  try { item.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); return ''; }
+  catch (e) { return String(e && e.message || e); }
+}
 function ctx_(step, folder, id) { CTX_.step = step || ''; if (folder !== undefined) CTX_.folder = folder; if (id !== undefined) CTX_.id = id || ''; }
 function root_() {
   ctx_('mở thư mục gốc “' + ROOT_NAME + '”', ROOT_NAME, '');
@@ -58,7 +65,7 @@ function root_() {
   const it = DriveApp.getFoldersByName(ROOT_NAME);
   const f = it.hasNext() ? it.next() : DriveApp.createFolder(ROOT_NAME);
   p.setProperty('ROOT_ID', f.getId());
-  try { f.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch (e) {}
+  share_(f);
   return f;
 }
 function folder_(k) {
@@ -168,7 +175,7 @@ function doPost(e) {
         const id = JSON.parse(r.getContentText()).id;
         let where = '', url = '', name = '', shared = true, why = '';
         try { const f = DriveApp.getFileById(id); name = f.getName(); const par = f.getParents().next(); where = par.getName(); url = par.getUrl(); } catch (e) { why = String(e && e.message || e); }
-        try { DriveApp.getFileById(id).setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch (e) { shared = false; why = String(e && e.message || e); }
+        const sw = share_(DriveApp.getFileById(id)); if (sw) { shared = false; why = sw; }
         return out_({ok: true, done: true, id: id, name: name, folder: where, folderUrl: url, shared: shared, warn: why});
       }
       return out_({ok: false, error: 'Google Drive báo lỗi ' + code + ': ' + String(r.getContentText()).slice(0, 160)});
@@ -190,7 +197,7 @@ function doPost(e) {
       const off = Math.max(0, Number(q.offset) || 0), lim = q.limit ? Math.min(60, Math.max(1, Number(q.limit))) : all.length;
       const files = all.slice(off, off + lim).map(function (x) {
         const f = x.f;
-        try { if (f.getSharingAccess() !== DriveApp.Access.ANYONE_WITH_LINK && f.getSharingAccess() !== DriveApp.Access.ANYONE) f.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch (e) {}
+        share_(f);
         return {id: f.getId(), name: f.getName(), mime: f.getMimeType(), t: x.t};
       });
       return out_({ok: true, files: files, total: all.length, next: off + files.length});
