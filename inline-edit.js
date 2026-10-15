@@ -250,7 +250,7 @@
   }
   function openPledge() {
     const H = window.HDX_HOME, S = H.settings || {};
-    const dom = n => { const e = document.querySelector('#hen-uoc ' + n); return e ? e.textContent.trim() : ''; };
+    const dom = n => { const e = document.querySelector('#hen-uoc ' + n); return e ? e.textContent.replace(/\u00a0/g, ' ').trim() : ''; };
     const F = [{k: 'pledgeLabel', l: 'Tiêu đề mục', max: 60, v: S.pledgeLabel || dom('span[data-hdx-pledge]')}, {k: 'pledgeQuote', l: 'Câu hẹn ước (xuống dòng để ngắt dòng)', max: 400, ta: 1, v: S.pledgeQuote || dom('blockquote')}, {k: 'pledgeBy', l: 'Chữ ký', max: 120, v: S.pledgeBy || (e => e[1] ? e[1].textContent.trim() : '')(document.querySelectorAll('#hen-uoc span[data-hdx-pledge]'))}];
     modal.innerHTML = `<div class="ov" role="dialog" aria-modal="true" aria-label="Sửa lời hẹn ước"><div class="md"><h2>Sửa “Lời hẹn ước”</h2>${F.map((f, n) => fieldHtml(f, f.v, n)).join('')}<div class="row"><button class="b" data-cancel>Huỷ</button><button class="b p" data-save>Lưu thay đổi</button></div></div></div>`;
     const q = s => modal.querySelector(s), first = modal.querySelector('input,textarea'); if (first) first.focus();
@@ -274,7 +274,7 @@
   }
   function openMeaning() {
     const H = window.HDX_HOME, S = H.settings || {}, sec = document.getElementById('y-nghia');
-    const dom = (n, i) => { const e = sec && sec.querySelectorAll('[data-hdx-meaning]')[i]; return e ? e.textContent.trim() : ''; };
+    const dom = (n, i) => { const e = sec && sec.querySelectorAll('[data-hdx-meaning]')[i]; return e ? e.textContent.replace(/\u00a0/g, ' ').trim() : ''; };
     const F = [{k: 'meaningTitle', l: 'Tiêu đề', max: 160, v: S.meaningTitle || dom('', 0)}, {k: 'meaningText', l: 'Đoạn giới thiệu (xuống dòng để tách đoạn)', max: 1500, ta: 1, v: S.meaningText || dom('', 1)},
       {k: 'meaningC1', l: 'Thẻ “01 · Tiếng gọi”', max: 600, ta: 1, v: S.meaningC1 || (S.meaningHide1 ? '' : dom('', 2))}, {k: 'meaningHide1', l: 'Ẩn (xoá) thẻ 01 khỏi trang chủ', chk: true, v: S.meaningHide1 ? '1' : ''},
       {k: 'meaningC2', l: 'Thẻ “02 · Lời hẹn”', max: 600, ta: 1, v: S.meaningC2 || (S.meaningHide2 ? '' : dom('', S.meaningHide1 ? 2 : 3))}, {k: 'meaningHide2', l: 'Ẩn (xoá) thẻ 02 khỏi trang chủ', chk: true, v: S.meaningHide2 ? '1' : ''}];
