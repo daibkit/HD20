@@ -112,6 +112,6 @@ Thống kê: log click ghi theo dạng "Trang › Khu vực › Thẻ › Nút" 
 ## Nhiều bộ sưu tập Bảo tàng ký ức (nhiều thư mục Drive)
 
 - Trang quản trị → Bảo tàng ký ức → **Bộ sưu tập**: “Thêm bộ sưu tập” để *tạo thư mục Drive mới* (“HDX20 - …”) hoặc *gắn thư mục có sẵn* (dán link). Mỗi bộ có các thư mục con K48–K67 riêng; tải ảnh / đồng bộ / tạo thư mục / kiểm tra quyền đều làm trên bộ đang chọn.
-- “Quản lý”: đổi tên, bật/tắt **Hiện trên website**, gỡ bộ khỏi danh sách (ảnh và thư mục Drive giữ nguyên). Danh sách lưu ở `settings.albums`.
-- Trang Bảo tàng ký ức: nếu có từ 2 bộ đang bật, khách thấy nút chọn bộ phía trên lưới thư mục.
+- “Quản lý”: đổi tên, chọn **một** bộ “Hiện trên website”, gỡ bộ khỏi danh sách (ảnh và thư mục Drive giữ nguyên). Danh sách lưu ở `settings.albums`.
+- Trang Bảo tàng ký ức chỉ hiển thị MỘT bộ (bộ được chọn ở “Quản lý”), không có nút chọn bộ cho khách.
 - Khi nâng cấp: chạy lại `supabase/museum.sql` (thêm cột `album`), dán lại mã Apps Script, **Triển khai → Phiên bản mới**.
