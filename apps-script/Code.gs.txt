@@ -58,7 +58,12 @@ function share_(item) {
   catch (e) { return String(e && e.message || e); }
 }
 function ctx_(step, folder, id) { CTX_.step = step || ''; if (folder !== undefined) CTX_.folder = folder; if (id !== undefined) CTX_.id = id || ''; }
+var ROOT_OVR_ = ''; // ID thư mục gốc của “bộ sưu tập” đang thao tác (rỗng = thư mục gốc mặc định)
 function root_() {
+  if (ROOT_OVR_) {
+    ctx_('mở thư mục bộ sưu tập', 'bộ sưu tập', ROOT_OVR_);
+    const fo = DriveApp.getFolderById(ROOT_OVR_); share_(fo); return fo;
+  }
   ctx_('mở thư mục gốc “' + ROOT_NAME + '”', ROOT_NAME, '');
   const p = PropertiesService.getScriptProperties(); let id = p.getProperty('ROOT_ID');
   if (id) { try { const f0 = DriveApp.getFolderById(id); CTX_.id = id; return f0; } catch (e) { Logger.log('Không mở được thư mục gốc theo ID đã lưu (' + id + '): ' + e.message); } }
@@ -130,6 +135,7 @@ function doPost(e) {
   try {
     const q = JSON.parse(e.postData.contents);
     if (q.action === 'register') return out_(register_(q)); // công khai: ai cũng gửi được form đăng ký
+    ROOT_OVR_ = (typeof q.root === 'string' && /^[\w-]{10,100}$/.test(q.root)) ? q.root : '';
     const why = adminCached_(q.token);
     if (why) return out_({ok: false, error: 'Không có quyền: ' + why + '.'});
     if (q.action === 'check') { // kiểm tra quyền từng thư mục, báo rõ thư mục nào lỗi
@@ -147,6 +153,17 @@ function doPost(e) {
       return out_({ok: true, results: res, failed: bad.length});
     }
     if (q.action === 'ping') { const sid = PropertiesService.getScriptProperties().getProperty('SHEET_ID'); let su = ''; if (sid) { try { su = SpreadsheetApp.openById(sid).getUrl(); } catch (e) {} } return out_({ok: true, folder: root_().getName(), sheet: su}); }
+    if (q.action === 'album_create') { // tạo thêm một thư mục “Bảo tàng ký ức” khác (một bộ sưu tập mới) ở Drive của bạn
+      const nm = cell_(q.name, 80) || 'Bảo tàng ký ức 2';
+      ctx_('tạo thư mục bộ sưu tập “' + nm + '”', nm, '');
+      const nf = DriveApp.createFolder('HDX20 - ' + nm); CTX_.id = nf.getId(); const why = share_(nf);
+      ROOT_OVR_ = nf.getId();
+      return out_({ok: true, id: nf.getId(), name: nf.getName(), url: nf.getUrl(), shared: !why, warn: why});
+    }
+    if (q.action === 'album_info') { // kiểm tra một thư mục có sẵn (dán link/ID) dùng được làm bộ sưu tập
+      if (!ROOT_OVR_) return out_({ok: false, error: 'Mã thư mục không hợp lệ.'});
+      const fo = root_(); return out_({ok: true, id: fo.getId(), name: fo.getName(), url: fo.getUrl()});
+    }
     if (q.action === 'sheetsync') return out_(sheetSync_(q));
     if (q.action === 'start') { // mở phiên tải lên theo từng phần (cho ảnh/video dung lượng lớn)
       if (!OK_MIME_.test(q.mime || '')) return out_({ok: false, error: 'Chỉ nhận ảnh (JPG/PNG/WebP/GIF/HEIC) và video (MP4/MOV/WebM…).'});

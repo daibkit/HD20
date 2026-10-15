@@ -108,3 +108,10 @@ Mỗi lượt đăng ký vẫn lưu vào Supabase (bản chính) và đồng th�
 Báo lỗi quyền Drive: lỗi từ Apps Script giờ ghi rõ bước + thư mục nào (kèm ID) bị chặn, và có nút "Kiểm tra quyền thư mục" (Admin → Bảo tàng ký ức) liệt kê từng thư mục gốc/K48–K67/Video/Sheet đăng ký: ✅ có quyền, ❌ lỗi gì. Cần dán lại mã Apps Script mới + "Phiên bản mới".
 
 Thống kê: log click ghi theo dạng "Trang › Khu vực › Thẻ › Nút" (VD: Bảo tàng ký ức › Tiếng gọi HDX › Bài trước); các bảng và biểu đồ ngày có phân trang (15 mục/trang, 10 ngày/trang).
+
+## Nhiều bộ sưu tập Bảo tàng ký ức (nhiều thư mục Drive)
+
+- Trang quản trị → Bảo tàng ký ức → **Bộ sưu tập**: “Thêm bộ sưu tập” để *tạo thư mục Drive mới* (“HDX20 - …”) hoặc *gắn thư mục có sẵn* (dán link). Mỗi bộ có các thư mục con K48–K67 riêng; tải ảnh / đồng bộ / tạo thư mục / kiểm tra quyền đều làm trên bộ đang chọn.
+- “Quản lý”: đổi tên, bật/tắt **Hiện trên website**, gỡ bộ khỏi danh sách (ảnh và thư mục Drive giữ nguyên). Danh sách lưu ở `settings.albums`.
+- Trang Bảo tàng ký ức: nếu có từ 2 bộ đang bật, khách thấy nút chọn bộ phía trên lưới thư mục.
+- Khi nâng cấp: chạy lại `supabase/museum.sql` (thêm cột `album`), dán lại mã Apps Script, **Triển khai → Phiên bản mới**.

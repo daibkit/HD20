@@ -2080,15 +2080,68 @@ const muThumb = (id, w, kind) => kind === 'video' ? `https://drive.google.com/th
 const muSleep = ms => new Promise(r => setTimeout(r, ms));
 const muB64 = blob => new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(String(fr.result).split(',')[1]); fr.onerror = rej; fr.readAsDataURL(blob); });
 const MU = {
-  rows: [], loaded: false, loading: false, err: '', cur: 'K48', driveUrl: '', prog: [], busy: false, missing: false, test: '',
-  inK(k) { return this.rows.filter(r => r.k === (k || this.cur) && !r.hidden); },
-  hiddenK(k) { return this.rows.filter(r => r.k === (k || this.cur) && r.hidden); },
+  rows: [], loaded: false, loading: false, err: '', cur: 'K48', alb: '', albums: [], driveUrl: '', prog: [], busy: false, missing: false, test: '',
+  inK(k) { return this.rows.filter(r => r.k === (k || this.cur) && (r.album || '') === this.alb && !r.hidden); },
+  hiddenK(k) { return this.rows.filter(r => r.k === (k || this.cur) && (r.album || '') === this.alb && r.hidden); },
+  // Bộ sưu tập = mỗi bộ một thư mục gốc trên Drive. Bộ chính (id '') dùng thư mục mặc định “HDX20 - Bảo tàng ký ức”.
+  normAlbums(a) {
+    const out = [], seen = new Set();
+    (Array.isArray(a) ? a : []).forEach(x => { if (!x || typeof x !== 'object') return; const id = String(x.id || '').slice(0, 30); if (seen.has(id) || (id && !/^[A-Za-z0-9_-]+$/.test(id))) return; seen.add(id);
+      out.push({id, name: String(x.name || (id ? 'Bộ sưu tập' : 'Bộ chính')).slice(0, 60), folder: /^[\w-]{10,100}$/.test(String(x.folder || '')) ? String(x.folder) : '', show: x.show !== false}); });
+    if (!seen.has('')) out.unshift({id: '', name: 'Bộ chính', folder: '', show: true});
+    out.sort((a, b) => (a.id === '' ? -1 : 0) - (b.id === '' ? -1 : 0));
+    return out;
+  },
+  curAlbum() { return this.albums.find(a => a.id === this.alb) || this.albums[0] || {id: '', name: 'Bộ chính', folder: '', show: true}; },
+  async saveAlbums(list) {
+    list = this.normAlbums(list);
+    if (!list.some(a => a.show)) list[0].show = true;
+    const cur = await SB.req('/rest/v1/site_content?select=data&key=eq.settings'), base = cur && cur[0] && cur[0].data && !Array.isArray(cur[0].data) ? cur[0].data : {};
+    await SB.req('/rest/v1/site_content?on_conflict=key', {method: 'POST', headers: {Prefer: 'resolution=merge-duplicates,return=minimal'}, body: {key: 'settings', data: {...base, albums: list}, updated_at: new Date().toISOString()}});
+    this.albums = list; if (!list.some(a => a.id === this.alb)) this.alb = '';
+  },
+  async addAlbum() {
+    if (!MU_URL_RE.test(this.driveUrl)) { toast('Chưa kết nối Google Drive: hãy dán địa chỉ Apps Script trước.', 'err', 6000); return; }
+    Modal.open({title: 'Thêm bộ sưu tập (thư mục Drive khác)', body: `<div style="display:grid;gap:12px">
+      <div class="fld"><label for="al-n">Tên bộ sưu tập</label><input id="al-n" class="inp" maxlength="60" placeholder="VD: Bảo tàng ký ức 2" required></div>
+      <label class="small" style="display:flex;gap:8px;align-items:flex-start"><input type="radio" name="al-m" value="new" checked style="margin-top:3px"><span><b>Tạo thư mục mới</b> trên Google Drive của bạn (tên “HDX20 - …”), tự bật chia sẻ công khai.</span></label>
+      <label class="small" style="display:flex;gap:8px;align-items:flex-start"><input type="radio" name="al-m" value="link" style="margin-top:3px"><span><b>Dùng thư mục có sẵn</b> — dán link thư mục Drive (bên trong nên có các thư mục con K48, K49…).</span></label>
+      <div class="fld"><label for="al-l">Link thư mục Drive (chỉ khi chọn “thư mục có sẵn”)</label><input id="al-l" class="inp" placeholder="https://drive.google.com/drive/folders/…"></div></div>`,
+      foot: '<button type="button" class="btn btn-line" data-mclose>Huỷ</button><button type="submit" class="btn btn-grad">Thêm</button>',
+      onSubmit: async (form, entry) => {
+        const name = $('#al-n', form).value.trim(); if (!name) { toast('Hãy nhập tên bộ sưu tập.', 'err'); return; }
+        const mode = (form.querySelector('input[name=al-m]:checked') || {}).value;
+        try {
+          let folder = '';
+          if (mode === 'link') {
+            const m = String($('#al-l', form).value).trim().match(/folders\/([\w-]{10,100})|[?&]id=([\w-]{10,100})|^([\w-]{10,100})$/); folder = m ? (m[1] || m[2] || m[3]) : '';
+            if (!folder) { toast('Link thư mục Drive chưa đúng (dạng drive.google.com/drive/folders/…).', 'err', 6000); return; }
+            await this.gas('album_info', {root: folder});
+          } else { const j = await this.gas('album_create', {name, root: ''}); folder = j.id; if (j.shared === false) toast('Đã tạo thư mục nhưng chưa bật được chia sẻ công khai: ' + (j.warn || ''), 'err', 8000); }
+          const id = 'a' + Math.random().toString(36).slice(2, 8);
+          await this.saveAlbums([...this.albums, {id, name, folder, show: true}]); this.alb = id;
+          Modal.close(entry, true); this.draw(); toast('Đã thêm bộ sưu tập “' + name + '”. Bấm “Tạo thư mục Drive” để tạo sẵn K48–K67 trong bộ này.', 'ok', 7000);
+        } catch (e) { toast((e && e.message) || 'Không thêm được.', 'err', 7000); }
+      }});
+  },
+  manageAlbums() {
+    const rows = this.albums.map((a, i) => `<div style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:10px 0;border-top:${i ? '1px solid var(--line)' : '0'}">
+      <div class="fld"><input class="inp" data-an="${i}" maxlength="60" value="${esc(a.name)}" aria-label="Tên bộ sưu tập"><span class="small muted">${a.folder ? `<a href="https://drive.google.com/drive/folders/${esc(a.folder)}" target="_blank" rel="noopener">Mở thư mục trên Drive ↗</a>` : 'Thư mục mặc định “HDX20 - Bảo tàng ký ức”'}</span></div>
+      <div style="display:grid;gap:6px;justify-items:start"><label class="small" style="display:flex;gap:6px;align-items:center"><input type="checkbox" data-as="${i}" ${a.show ? 'checked' : ''}> Hiện trên website</label>${a.id ? `<label class="small" style="display:flex;gap:6px;align-items:center;color:var(--danger,#b42318)"><input type="checkbox" data-ad="${i}"> Gỡ bộ này</label>` : ''}</div></div>`).join('');
+    Modal.open({title: 'Quản lý bộ sưu tập', body: `<p class="small muted" style="margin:0 0 6px">Khách chọn được bộ nào đang bật “Hiện trên website”. “Gỡ bộ này” chỉ bỏ khỏi danh sách — thư mục và ảnh trên Drive được giữ nguyên.</p>${rows}`,
+      foot: '<button type="button" class="btn btn-line" data-mclose>Huỷ</button><button type="submit" class="btn btn-grad">Lưu</button>',
+      onSubmit: async (form, entry) => {
+        const next = this.albums.map((a, i) => ({...a, name: ($('[data-an="' + i + '"]', form).value.trim() || a.name).slice(0, 60), show: $('[data-as="' + i + '"]', form).checked, del: !!($('[data-ad="' + i + '"]', form) || {}).checked})).filter(a => !a.del);
+        try { await this.saveAlbums(next); Modal.close(entry, true); this.draw(); toast('Đã lưu bộ sưu tập.'); } catch (e) { toast((e && e.message) || 'Không lưu được.', 'err'); }
+      }});
+  },
   async load() {
     if (this.loading) return; this.loading = true; this.err = ''; this.draw();
     try {
       this.rows = await SB.req('/rest/v1/museum_photos?select=*&order=sort_order.asc,created_at.asc&limit=5000') || [];
       const st = await SB.req('/rest/v1/site_content?select=data&key=eq.settings').catch(() => []);
       this.driveUrl = String(st && st[0] && st[0].data && st[0].data.driveUrl || '');
+      this.albums = this.normAlbums(st && st[0] && st[0].data && st[0].data.albums); if (!this.albums.some(a => a.id === this.alb)) this.alb = '';
       this.loaded = true; this.missing = false;
     } catch (e) {
       this.missing = e && (e.status === 404 || /PGRST205|42P01/.test(String(e.code)));
@@ -2101,7 +2154,7 @@ const MU = {
     if (!MU_URL_RE.test(this.driveUrl)) throw {message: 'Chưa kết nối Google Drive. Dán địa chỉ Apps Script ở phần “Kết nối Google Drive”.'};
     await SB.ensureFresh();
     let res, j;
-    try { res = await fetch(this.driveUrl, {method: 'POST', headers: {'Content-Type': 'text/plain;charset=utf-8'}, body: JSON.stringify({action, token: SB.session && SB.session.access_token, ...extra})}); j = await res.json(); }
+    try { res = await fetch(this.driveUrl, {method: 'POST', headers: {'Content-Type': 'text/plain;charset=utf-8'}, body: JSON.stringify({action, token: SB.session && SB.session.access_token, root: this.curAlbum().folder || '', ...extra})}); j = await res.json(); }
     catch { throw {message: 'Không kết nối được Google Apps Script. Kiểm tra địa chỉ và quyền truy cập “Bất kỳ ai” khi triển khai.'}; }
     if (!j || !j.ok) throw {message: j && /Tên thư mục không hợp lệ|Thao tác không hợp lệ/.test(j.error || '') ? 'Apps Script trên Google đang là BẢN CŨ. Hãy dán lại mã mới (nút “Sao chép mã” ở tab Bảo tàng ký ức), Lưu, rồi Triển khai → Quản lý bản triển khai → Chỉnh sửa → Phiên bản mới → Triển khai.' : j && /DriveApp|Access denied/i.test(j.error || '') ? 'Chi tiết lỗi: ' + j.error + ' → Nếu chưa cấp quyền: trong Apps Script chọn hàm “authorize” → ▶ Chạy → Xem lại quyền → Cho phép; rồi Triển khai → Quản lý bản triển khai → Chỉnh sửa → Phiên bản mới → Triển khai. Bấm “Kiểm tra quyền thư mục” để xem thư mục nào bị chặn.' : (j && j.error) || 'Google Drive báo lỗi.'};
     return j;
@@ -2132,11 +2185,12 @@ const MU = {
         let last = 0;
         const j = await this.driveUpload(files[i], k, pct => { this.prog[i].pct = pct; if (pct - last >= 5 || pct === 100) { last = pct; this.draw(); } });
         const row = {id: uid('mp'), k, drive_id: j.id, title: '', year: '', caption: '', sort_order: ++base};
+        if (this.alb) row.album = this.alb;
         if (j.kind === 'video') row.kind = 'video';
         await SB.req('/rest/v1/museum_photos', {method: 'POST', headers: {Prefer: 'return=minimal'}, body: row});
         this.rows.push({kind: 'image', ...row, created_at: new Date().toISOString()}); this.prog[i].st = 'ok'; if (j.shared === false) toast('Ảnh đã lên Drive nhưng chưa bật được chia sẻ công khai (' + (j.warn || '') + '). Khách có thể chưa xem được ảnh.', 'err', 9000); this.prog[i].msg = j.folder ? 'Drive › …/' + j.folder : ''; if (j.folder && j.folder !== (k === 'VIDEO' ? 'Video giới thiệu' : k)) { this.prog[i].st = 'err'; this.prog[i].msg = 'Tệp nằm trong thư mục “' + j.folder + '” trên Drive, không phải ' + k + '. Mở Drive để kiểm tra.'; ok--; } ok++;
       } catch (e) {
-        this.prog[i].st = 'err'; this.prog[i].msg = e && e.status === 400 && /kind/.test(String(e.message)) ? 'chưa chạy lại supabase/museum.sql (thiếu cột kind) để lưu video' : (e && e.message) || 'Lỗi';
+        this.prog[i].st = 'err'; this.prog[i].msg = e && e.status === 400 && /album/.test(String(e.message)) ? 'chưa chạy lại supabase/museum.sql (thiếu cột album) để lưu bộ sưu tập' : e && e.status === 400 && /kind/.test(String(e.message)) ? 'chưa chạy lại supabase/museum.sql (thiếu cột kind) để lưu video' : (e && e.message) || 'Lỗi';
         if (e && e.code === 'session_expired') break;
       }
       this.draw();
@@ -2156,7 +2210,7 @@ const MU = {
         total = typeof j.total === 'number' ? j.total : fs.length; seen += fs.length;
         const add = fs.filter(f => /^[\w-]{10,100}$/.test(f.id) && !have.has(f.id));
         if (add.length) {
-          const rows = add.map(f => { const o = {id: uid('mp'), k, drive_id: f.id, title: '', year: '', caption: '', sort_order: ++base}; if (/^video\//.test(f.mime || '')) o.kind = 'video'; return o; });
+          const rows = add.map(f => { const o = {id: uid('mp'), k, drive_id: f.id, title: '', year: '', caption: '', sort_order: ++base}; if (this.alb) o.album = this.alb; if (/^video\//.test(f.mime || '')) o.kind = 'video'; return o; });
           await SB.req('/rest/v1/museum_photos', {method: 'POST', headers: {Prefer: 'return=minimal'}, body: rows});
           rows.forEach(r => { have.add(r.drive_id); this.rows.push({kind: 'image', ...r, created_at: new Date().toISOString()}); }); added += rows.length;
         }
@@ -2243,7 +2297,10 @@ const MU = {
     const grid = list.length ? `<div class="mu-grid">${list.map((r, i) => `<figure class="mu-card ${r.kind === 'video' ? 'vid' : ''}"><img loading="lazy" src="${esc(muThumb(r.drive_id, 360, r.kind))}" alt="${esc(r.title || r.caption || 'Ảnh ' + (i + 1))}" data-mu="edit" data-id="${esc(r.id)}">
         <figcaption><span class="small">${esc(r.title || '—')}${r.year ? ' · ' + esc(r.year) : ''}</span><span class="mu-act"><button class="ibtn" data-mu="left" data-id="${esc(r.id)}" ${i === 0 ? 'disabled' : ''} aria-label="Đưa lên trước">${icon('back', 16)}</button><button class="ibtn" data-mu="right" data-id="${esc(r.id)}" ${i === list.length - 1 ? 'disabled' : ''} aria-label="Đưa ra sau">${icon('chev', 16)}</button><button class="ibtn" data-mu="edit" data-id="${esc(r.id)}" aria-label="Sửa">${icon('edit', 16)}</button><button class="ibtn" data-mu="del" data-id="${esc(r.id)}" aria-label="Xoá">${icon('trash', 16)}</button></span></figcaption></figure>`).join('')}</div>`
       : emptyBox({ic: 'image', title: `Thư mục ${this.cur} chưa có ảnh`, text: conn ? 'Tải ảnh lên ở trên.' : 'Hãy kết nối Google Drive trước.'});
-    root.innerHTML = `${conn ? '' : setup}<div class="hc-tabs mu-ks" role="tablist">${chips}</div>${up}<section class="card card-pad"><div class="card-h"><h2>${this.cur} · ${list.length} tệp</h2><a class="btn btn-line btn-sm" href="./#/museum" target="_blank" rel="noopener">Xem trên website ↗</a></div>${grid}</section>${this.hiddenK().length ? `<details class="card card-pad"><summary class="small muted" style="cursor:pointer">Ảnh đã gỡ khỏi website (${this.hiddenK().length}) — vẫn lưu trong dữ liệu và Drive</summary><div class="mu-grid" style="margin-top:12px">${this.hiddenK().map(r => `<figure class="mu-card ${r.kind === 'video' ? 'vid' : ''}" style="opacity:.75"><img loading="lazy" src="${esc(muThumb(r.drive_id, 360, r.kind))}" alt=""><figcaption><span class="small">${esc(r.title || '—')}</span><span class="mu-act"><button class="btn btn-line btn-sm" data-mu="restore" data-id="${esc(r.id)}">Khôi phục</button></span></figcaption></figure>`).join('')}</div></details>` : ''}${conn ? setup : ''}`;
+    const albBar = `<section class="card card-pad"><div class="card-h"><h2>Bộ sưu tập (thư mục Drive)</h2><div class="qa"><button class="btn btn-line btn-sm" data-mu="addalb" ${conn ? '' : 'disabled'} title="Tạo thêm một thư mục “Bảo tàng ký ức” khác trên Drive hoặc gắn thư mục có sẵn">${icon('plus', 16)} Thêm bộ sưu tập</button><button class="btn btn-line btn-sm" data-mu="mgalb">${icon('edit', 16)} Quản lý</button></div></div>
+      <div class="hc-tabs" role="tablist">${this.albums.map(a => `<button class="navpill hc-tab" data-mu="alb" data-id="${esc(a.id)}" ${a.id === this.alb ? 'aria-current="page"' : ''}>${esc(a.name)}${a.show ? '' : ' <span class="muted small">(ẩn)</span>'}</button>`).join('')}</div>
+      <p class="small muted" style="margin:10px 0 0">Đang chọn: <b>${esc(this.curAlbum().name)}</b>. Mỗi bộ là một thư mục gốc riêng trên Drive (bên trong chia theo khóa K48–K67). Khách xem trên website có thể chọn bộ nào đang bật “Hiện trên website”.</p></section>`;
+    root.innerHTML = `${conn ? '' : setup}${albBar}<div class="hc-tabs mu-ks" role="tablist">${chips}</div>${up}<section class="card card-pad"><div class="card-h"><h2>${this.cur} · ${list.length} tệp</h2><a class="btn btn-line btn-sm" href="./#/museum" target="_blank" rel="noopener">Xem trên website ↗</a></div>${grid}</section>${this.hiddenK().length ? `<details class="card card-pad"><summary class="small muted" style="cursor:pointer">Ảnh đã gỡ khỏi website (${this.hiddenK().length}) — vẫn lưu trong dữ liệu và Drive</summary><div class="mu-grid" style="margin-top:12px">${this.hiddenK().map(r => `<figure class="mu-card ${r.kind === 'video' ? 'vid' : ''}" style="opacity:.75"><img loading="lazy" src="${esc(muThumb(r.drive_id, 360, r.kind))}" alt=""><figcaption><span class="small">${esc(r.title || '—')}</span><span class="mu-act"><button class="btn btn-line btn-sm" data-mu="restore" data-id="${esc(r.id)}">Khôi phục</button></span></figcaption></figure>`).join('')}</div></details>` : ''}${conn ? setup : ''}`;
     window.scrollTo(0, sy);
   },
   async checkPerm() {
@@ -2254,6 +2311,9 @@ const MU = {
   onClick(el) {
     const a = el.dataset.mu, id = el.dataset.id;
     if (a === 'k') { this.cur = el.dataset.k; this.prog = []; this.draw(); }
+    else if (a === 'alb') { this.alb = id || ''; this.prog = []; this.chk = null; this.test = ''; this.draw(); }
+    else if (a === 'addalb') this.addAlbum();
+    else if (a === 'mgalb') this.manageAlbums();
     else if (a === 'reload') { this.loaded = false; this.load(); }
     else if (a === 'saveurl') this.saveUrl($('#mu-url').value);
     else if (a === 'copycode') this.copyCode();

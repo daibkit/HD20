@@ -17,6 +17,8 @@ create table if not exists public.museum_photos (
 alter table public.museum_photos add column if not exists kind text not null default 'image' check (kind in ('image','video'));
 -- “Xoá” ảnh trong admin chỉ gỡ khỏi website (hidden = true): dòng dữ liệu và tệp trên Drive được giữ nguyên, có thể khôi phục.
 alter table public.museum_photos add column if not exists hidden boolean not null default false;
+-- Bộ sưu tập (thư mục Drive khác nhau): '' = bộ chính; còn lại là mã bộ lưu ở cài đặt (settings.albums).
+alter table public.museum_photos add column if not exists album text not null default '' check (length(album) <= 30);
 create index if not exists museum_photos_k_idx on public.museum_photos(k, sort_order);
 alter table public.museum_photos enable row level security;
 drop policy if exists "doc_cong_khai" on public.museum_photos;
