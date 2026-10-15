@@ -2202,13 +2202,13 @@ const MU = {
   async sync() {
     if (this.busy) return; const k = this.cur, PG = 25;
     this.busy = true; this.prog = [{name: 'Đồng bộ thư mục ' + k + ' từ Drive', st: 'run', pct: 0, txt: 'Đang quét thư mục…'}]; this.draw();
-    const P = this.prog[0]; let added = 0, seen = 0, total = 0;
+    const P = this.prog[0]; let added = 0, seen = 0, total = 0; const seenIds = new Set();
     try {
       const have = new Set(this.rows.filter(r => r.k === k).map(r => r.drive_id));
       let off = 0, base = Math.max(0, ...this.inK(k).map(r => r.sort_order || 0));
       for (;;) {
         const j = await this.gas('list', {k, offset: off, limit: PG}), fs = j.files || [];
-        total = typeof j.total === 'number' ? j.total : fs.length; seen += fs.length;
+        total = typeof j.total === 'number' ? j.total : fs.length; seen += fs.length; fs.forEach(f => seenIds.add(f.id));
         const add = fs.filter(f => /^[\w-]{10,100}$/.test(f.id) && !have.has(f.id));
         if (add.length) {
           const rows = add.map(f => { const o = {id: uid('mp'), k, drive_id: f.id, title: '', year: '', caption: '', sort_order: ++base}; if (this.alb) o.album = this.alb; if (/^video\//.test(f.mime || '')) o.kind = 'video'; return o; });
@@ -2219,8 +2219,22 @@ const MU = {
         if (!fs.length || typeof j.next !== 'number' || j.next >= total) break;
         off = j.next;
       }
-      P.st = 'ok'; P.pct = 100; P.txt = `Xong: kiểm tra ${total} tệp, thêm mới ${added}`; this.draw();
-      toast(added ? `Đã thêm ${added} tệp từ Drive vào ${k}.` : `Thư mục ${k} trên Drive không có tệp mới.`);
+      // Ảnh còn trong website nhưng không còn trong thư mục Drive (đã xoá / chuyển đi) → xoá khỏi website cho khớp.
+      const gone = this.rows.filter(r => r.k === k && (r.album || '') === this.alb && !seenIds.has(r.drive_id));
+      let removed = 0;
+      if (gone.length) {
+        P.txt = `Phát hiện ${gone.length} ảnh không còn trên Drive…`; this.draw();
+        const ok = await confirmDialog({title: `Xoá ${gone.length} ảnh không còn trên Drive?`, message: `Thư mục ${k} trên Drive hiện có ${total} tệp. Có ${gone.length} ảnh trên website không còn nằm trong thư mục này (đã xoá hoặc chuyển đi). Xoá chúng khỏi website để khớp với Drive?`, confirmLabel: 'Xoá khỏi website', danger: true});
+        if (ok) {
+          for (let i = 0; i < gone.length; i += 40) {
+            const ids = gone.slice(i, i + 40).map(r => r.id);
+            await SB.req('/rest/v1/museum_photos?id=in.(' + ids.map(encodeURIComponent).join(',') + ')', {method: 'DELETE', headers: {Prefer: 'return=minimal'}});
+            this.rows = this.rows.filter(r => !ids.includes(r.id)); removed += ids.length;
+          }
+        }
+      }
+      P.st = 'ok'; P.pct = 100; P.txt = `Xong: kiểm tra ${total} tệp, thêm mới ${added}, xoá ${removed} ảnh không còn trên Drive`; this.draw();
+      toast(added || removed ? `Đã đồng bộ ${k}: thêm ${added}, xoá ${removed}.` : `Thư mục ${k} đã khớp với Drive.`);
     } catch (e) { P.st = 'err'; P.msg = (e && e.message) || 'Không đồng bộ được.'; this.draw(); toast(P.msg, 'err', 6000); }
     finally { this.busy = false; this.draw(); }
   },
@@ -2291,7 +2305,7 @@ const MU = {
     const setup = `<${conn ? 'details' : 'section'} class="card card-pad">${conn ? '<summary class="small muted" style="cursor:pointer">Cài đặt kết nối Google Drive</summary>' : '<div class="card-h"><h2>Kết nối Google Drive</h2><span class="chip">Chưa kết nối</span></div>'}
       ${conn ? `<p class="small muted" style="margin:10px 0">Ảnh được lưu trong thư mục <b>HDX20 - Bảo tàng ký ức</b> (mỗi khóa một thư mục con) trên Google Drive của bạn. ${esc(this.test)}</p>` : `<ol class="small" style="margin:0 0 12px;padding-left:18px;color:var(--body);display:grid;gap:4px"><li>Mở <b>script.google.com</b> → <b>Dự án mới</b>, xoá mã mẫu trong tệp <code>Code.gs</code>.</li><li>Bấm <button class="btn btn-line btn-sm" data-mu="copycode">Sao chép mã Apps Script</button> rồi dán vào, bấm Lưu.</li><li><b>Triển khai → Triển khai mới → Ứng dụng web</b>: “Thực thi với tư cách: <b>Tôi</b>”, “Ai có quyền truy cập: <b>Bất kỳ ai</b>” → Triển khai, cấp quyền khi Google hỏi (Drive, kết nối ngoài).</li><li>Sao chép <b>URL ứng dụng web</b> (đuôi <code>/exec</code>) dán vào ô bên dưới.</li></ol>`}
       <div class="qa" style="align-items:flex-end"><div class="fld" style="flex:1 1 320px"><label for="mu-url">Địa chỉ Apps Script (…/exec)</label><input id="mu-url" class="inp" type="url" placeholder="https://script.google.com/macros/s/…/exec" value="${esc(this.driveUrl)}"></div><button class="btn btn-grad" data-mu="saveurl">Lưu & kiểm tra</button>${conn ? '<button class="btn btn-line" data-mu="copycode">Sao chép mã</button>' : ''}</div></${conn ? 'details' : 'section'}>`;
-    const up = `<section class="card card-pad"><div class="card-h"><h2>Tải ảnh / video lên thư mục ${this.cur}</h2><div class="qa"><button class="btn btn-line btn-sm" data-mu="check" ${conn && !this.busy ? '' : 'disabled'} title="Kiểm tra Apps Script có quyền với thư mục nào trên Drive">${icon('search', 16)} Kiểm tra quyền thư mục</button><button class="btn btn-line btn-sm" data-mu="init" ${conn && !this.busy ? '' : 'disabled'} title="Tạo sẵn đủ thư mục K48–K67 và “Video giới thiệu” trên Google Drive">${icon('plus', 16)} Tạo thư mục Drive</button><button class="btn btn-line btn-sm" data-mu="sync" ${conn && !this.busy ? '' : 'disabled'} title="Thêm các ảnh bạn đã bỏ vào thư mục này trên Drive">${icon('refresh', 16)} Đồng bộ từ Drive</button></div></div>
+    const up = `<section class="card card-pad"><div class="card-h"><h2>Tải ảnh / video lên thư mục ${this.cur}</h2><div class="qa"><button class="btn btn-line btn-sm" data-mu="check" ${conn && !this.busy ? '' : 'disabled'} title="Kiểm tra Apps Script có quyền với thư mục nào trên Drive">${icon('search', 16)} Kiểm tra quyền thư mục</button><button class="btn btn-line btn-sm" data-mu="init" ${conn && !this.busy ? '' : 'disabled'} title="Tạo sẵn đủ thư mục K48–K67 và “Video giới thiệu” trên Google Drive">${icon('plus', 16)} Tạo thư mục Drive</button><button class="btn btn-line btn-sm" data-mu="sync" ${conn && !this.busy ? '' : 'disabled'} title="Khớp thư mục này với Drive: thêm ảnh mới, xoá ảnh không còn trên Drive">${icon('refresh', 16)} Đồng bộ từ Drive</button></div></div>
       <label class="mu-drop ${conn ? '' : 'off'}" id="mu-drop"><input id="mu-file" type="file" accept="image/*,video/*,.heic,.heif,.mov,.mp4,.webm" multiple hidden ${conn && !this.busy ? '' : 'disabled'}><b>${this.busy ? 'Đang tải lên…' : 'Chọn ảnh / video hoặc kéo thả vào đây'}</b><span class="small muted">Chọn nhiều ảnh cùng lúc. Cả ảnh và video, không giới hạn dung lượng (chỉ phụ thuộc chỗ trống Google Drive của bạn). Tệp lớn được gửi từng phần nên có thể mất vài phút.</span></label>
       ${this.chk ? `<div class="notice ${this.chk.failed ? 'danger' : ''}" style="margin-top:12px"><div><b>${this.chk.failed ? this.chk.failed + ' mục KHÔNG có quyền / lỗi' : 'Có quyền với tất cả thư mục'}</b><ul class="small" style="margin:6px 0 0;padding-left:18px">${this.chk.results.map(x => `<li>${x.ok ? '✅' : '❌'} ${esc(x.name)} — ${esc(x.info)}</li>`).join('')}</ul></div></div>` : ''}
       ${this.prog.length ? `<ul class="mu-prog">${this.prog.map(p => `<li class="${p.st}"><span>${esc(p.name)}</span><span class="small">${{wait: 'Chờ…', run: p.txt ? esc(p.txt) : 'Đang tải… ' + (p.pct || 0) + '%', ok: p.txt ? esc(p.txt) : 'Xong', err: 'Lỗi: ' + esc(p.msg || '')}[p.st]}</span></li>`).join('')}</ul>` : ''}</section>`;

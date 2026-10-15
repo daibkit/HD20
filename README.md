@@ -115,3 +115,5 @@ Thống kê: log click ghi theo dạng "Trang › Khu vực › Thẻ › Nút" 
 - “Quản lý”: đổi tên, chọn **một** bộ “Hiện trên website”, gỡ bộ khỏi danh sách (ảnh và thư mục Drive giữ nguyên). Danh sách lưu ở `settings.albums`.
 - Trang Bảo tàng ký ức chỉ hiển thị MỘT bộ (bộ được chọn ở “Quản lý”), không có nút chọn bộ cho khách.
 - Khi nâng cấp: chạy lại `supabase/museum.sql` (thêm cột `album`), dán lại mã Apps Script, **Triển khai → Phiên bản mới**.
+
+- **Đồng bộ từ Drive** (tab Bảo tàng ký ức) giờ khớp hai chiều: thêm ảnh mới trong thư mục Drive, và hỏi xác nhận để **xoá khỏi website** những ảnh không còn nằm trong thư mục đó (đã xoá/chuyển đi). Chỉ ảnh của khóa + bộ sưu tập đang chọn bị ảnh hưởng.
