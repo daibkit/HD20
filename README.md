@@ -117,3 +117,4 @@ Thống kê: log click ghi theo dạng "Trang › Khu vực › Thẻ › Nút" 
 - Khi nâng cấp: chạy lại `supabase/museum.sql` (thêm cột `album`), dán lại mã Apps Script, **Triển khai → Phiên bản mới**.
 
 - **Đồng bộ từ Drive** (tab Bảo tàng ký ức) giờ khớp hai chiều: thêm ảnh mới trong thư mục Drive, và hỏi xác nhận để **xoá khỏi website** những ảnh không còn nằm trong thư mục đó (đã xoá/chuyển đi). Chỉ ảnh của khóa + bộ sưu tập đang chọn bị ảnh hưởng.
+- Nút **Đồng bộ cả bộ sưu tập** đồng bộ lần lượt tất cả K48–K67 của bộ đang chọn (thêm ảnh mới), rồi hỏi **một lần** để xoá các ảnh không còn trên Drive. Thư mục nào lỗi (VD thiếu quyền) thì bỏ qua, không xoá gì ở thư mục đó.
