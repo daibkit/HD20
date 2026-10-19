@@ -11,7 +11,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Montserrat:wght@500;600;700;800&family=Playfair+Display:ital,wght@1,700;1,800&family=Dancing+Script:wght@700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Montserrat:wght@500;600;700;800&family=Playfair+Display:ital,wght@1,700;1,800&display=swap">
 <style>
 html{-webkit-text-size-adjust:100%}body{margin:0}[hidden]{display:none!important}img{max-width:100%}
 /* Layout: top bar with site nav (Trang chủ · Thư mời), then a two-column workbench — form on the left, live invitation on the right; stacks on phones. */
@@ -173,9 +173,8 @@ e) { .paper { transition: transform .3s ease; } .paper.bump { transform: scale(1
       <div class="field">
         <label for="style">Kiểu chữ tên</label>
         <select id="style">
-          <option value="elegant">Thanh lịch (khuyên dùng)</option>
-          <option value="script">Thư pháp mềm mại</option>
           <option value="modern">Hiện đại, rõ nét</option>
+          <option value="elegant">Thanh lịch, chữ nghiêng</option>
         </select>
       </div>
       <label class="check"><input type="checkbox" id="upper"> Viết hoa toàn bộ tên</label>
@@ -213,9 +212,8 @@ e) { .paper { transition: transform .3s ease; } .paper.bump { transform: scale(1
   const NAME_COLOR = "#1b78d0";
   const ROLE_COLOR = "#2a4677";
   const STYLES = {
-    elegant: { font: s => `italic 800 ${s}px "Playfair Display", Georgia, "Times New Roman", serif`, start: 66, min: 40 },
-    script: { font: s => `700 ${s}px "Dancing Script", "Be Vietnam Pro", cursive`, start: 84, min: 48 },
-    modern: { font: s => `600 ${s}px Montserrat, "Be Vietnam Pro", sans-serif`, start: 54, min: 36 },
+    elegant: { font: s => `italic 800 ${s}px "Playfair Display", Georgia, "Times New Roman", serif`, start: 72, min: 44 },
+    modern: { font: s => `700 ${s}px Montserrat, "Be Vietnam Pro", sans-serif`, start: 64, min: 40 },
   };
   const ROLE_FONT = s => `500 ${s}px Montserrat, "Be Vietnam Pro", sans-serif`;
 
@@ -225,8 +223,8 @@ e) { .paper { transition: transform .3s ease; } .paper.bump { transform: scale(1
   const status = $("status");
 
   try {
-    const saved = JSON.parse(localStorage.getItem("thumoi-draft-v2") || "null");
-    if (saved) { for (const k of ["title","name","role","style"]) if (typeof saved[k] === "string") els[k].value = saved[k]; if (!els.style.value) els.style.value = "elegant"; els.upper.checked = !!saved.upper; }
+    const saved = JSON.parse(localStorage.getItem("thumoi-draft-v3") || "null");
+    if (saved) { for (const k of ["title","name","role","style"]) if (typeof saved[k] === "string") els[k].value = saved[k]; if (!els.style.value) els.style.value = "modern"; els.upper.checked = !!saved.upper; }
   } catch (e) {}
 
   const img = new Image();
@@ -271,7 +269,7 @@ e) { .paper { transition: transform .3s ease; } .paper.bump { transform: scale(1
 
   function layout(full, role, st) {
     const band = BOTTOM - TOP;
-    let roleSize = 32, roleM = null;
+    let roleSize = 37, roleM = null;
     if (role) {
       while (roleSize > 24 && metrics(role, ROLE_FONT(roleSize)).w > MAXW) roleSize -= 1;
       roleM = metrics(role, ROLE_FONT(roleSize));
@@ -298,7 +296,7 @@ e) { .paper { transition: transform .3s ease; } .paper.bump { transform: scale(1
   async function draw() {
     const ticket = ++drawing;
     const { full, role } = values();
-    const st = STYLES[els.style.value] || STYLES.elegant;
+    const st = STYLES[els.style.value] || STYLES.modern;
     const sample = full + role + "ÂăêôơưĐđẠạỹỄỵ";
     try {
       await Promise.all([
@@ -340,7 +338,7 @@ e) { .paper { transition: transform .3s ease; } .paper.bump { transform: scale(1
   function schedule() {
     cancelAnimationFrame(raf);
     raf = requestAnimationFrame(draw);
-    try { localStorage.setItem("thumoi-draft-v2", JSON.stringify({ title: els.title.value, name: els.name.value, role: els.role.value, style: els.style.value, upper: els.upper.checked })); } catch (e) {}
+    try { localStorage.setItem("thumoi-draft-v3", JSON.stringify({ title: els.title.value, name: els.name.value, role: els.role.value, style: els.style.value, upper: els.upper.checked })); } catch (e) {}
     status.textContent = ""; status.className = "status";
   }
   for (const el of Object.values(els)) { el.addEventListener("input", schedule); el.addEventListener("change", schedule); }
