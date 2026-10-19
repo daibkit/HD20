@@ -112,6 +112,17 @@ button {
 .btn-ghost:hover { background: var(--accent-soft); }
 button:disabled { opacity: .5; cursor: not-allowed; }
 button svg { width: 18px; height: 18px; flex: none; }
+.share { display: flex; flex-direction: column; gap: 8px; padding-top: 14px; border-top: 1px dashed var(--line); }
+.share-label { font-weight: 600; font-size: 14px; }
+.share-btns { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.btn-app { justify-content: center; color: #fff; border: 0; padding: 11px 10px; font-size: 14.5px; }
+.btn-app svg { width: 18px; height: 18px; }
+.btn-app:hover { filter: brightness(1.08); }
+.btn-app.zalo { background: #0068ff; }
+.btn-app.msgr { background: linear-gradient(135deg, #0099ff 0%, #a033ff 60%, #ff5280 100%); }
+.btn-app.other { background: var(--accent-soft); color: var(--accent); }
+.app-dot { width: 20px; height: 20px; border-radius: 6px; background: #fff; color: #0068ff; display: grid; place-items: center; font-weight: 800; font-size: 13px; font-family: var(--card); }
+.share .hint { font-size: 12.5px; color: var(--muted); }
 .status { min-height: 1.4em; font-size: 13.5px; color: var(--muted); margin: 0; }
 .status.ok { color: var(--ok); } .status.err { color: var(--err); }
 
@@ -184,7 +195,15 @@ e) { .paper { transition: transform .3s ease; } .paper.bump { transform: scale(1
           Tải ảnh thư mời (JPG)
         </button>
         <button type="button" class="btn-ghost" id="dlpng">PNG chất lượng cao</button>
-        <button type="button" class="btn-ghost" id="share" hidden>Chia sẻ</button>
+      </div>
+      <div class="share">
+        <span class="share-label">Gửi thư mời</span>
+        <div class="share-btns">
+          <button type="button" class="btn-app zalo" id="shZalo"><span class="app-dot" aria-hidden="true">Z</span>Zalo</button>
+          <button type="button" class="btn-app msgr" id="shMsgr"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2C6.4 2 2 6.1 2 11.6c0 2.9 1.2 5.4 3.2 7.1V22l3-1.7c1.2.3 2.4.5 3.8.5 5.6 0 10-4.1 10-9.6S17.6 2 12 2Zm1 12.9-2.6-2.7-4.9 2.7 5.4-5.7 2.6 2.7 4.8-2.7-5.3 5.7Z"/></svg>Messenger</button>
+          <button type="button" class="btn-app other" id="shOther"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg><span id="shOtherLabel">Khác</span></button>
+        </div>
+        <span class="hint" id="shareHint">Trên điện thoại: chọn ứng dụng trong bảng chia sẻ. Trên máy tính: ảnh được sao chép, bạn dán (Ctrl+V) vào khung chat.</span>
       </div>
       <p class="status" id="status" role="status"></p>
     </form>
@@ -355,9 +374,9 @@ e) { .paper { transition: transform .3s ease; } .paper.bump { transform: scale(1
   // Inside a Claude artifact the page must ask the viewer to save; on a normal website, a plain download works.
   let downloadsP = null;
   if (window.claude && typeof window.claude.use === "function") downloadsP = window.claude.use("downloads").catch(() => null);
-  else if (navigator.canShare) {
-    try { if (navigator.canShare({ files: [new File([new Blob(["x"], { type: "image/png" })], "x.png", { type: "image/png" })] })) $("share").hidden = false; } catch (e) {}
-  }
+  let canShareFiles = false;
+  try { canShareFiles = !downloadsP && !!navigator.canShare && navigator.canShare({ files: [new File([new Blob(["x"], { type: "image/jpeg" })], "x.jpg", { type: "image/jpeg" })] }); } catch (e) {}
+  const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent));
 
   async function exportImage(kind) {
     const { full } = values();
@@ -388,15 +407,60 @@ e) { .paper { transition: transform .3s ease; } .paper.bump { transform: scale(1
 
   $("f").addEventListener("submit", e => { e.preventDefault(); exportImage("jpg"); });
   $("dlpng").addEventListener("click", () => exportImage("png"));
-  $("share").addEventListener("click", async () => {
-    if (!els.name.value.trim()) { say("Nhập tên người được mời trước.", "err"); return; }
+  const SHARE_TEXT = "Trân trọng kính mời bạn tới Lễ kỷ niệm 20 năm thành lập Đội SVTN Hải Dương – NEU, Thứ Bảy 24.10.2026 tại Sân ký túc xá, Đại học Kinh tế Quốc dân.";
+  const WEB_APPS = { zalo: { name: "Zalo", url: "https://chat.zalo.me/" }, msgr: { name: "Messenger", url: "https://www.messenger.com/" } };
+
+  function needName() {
+    if (els.name.value.trim()) return false;
+    say("Nhập tên người được mời trước khi chia sẻ.", "err"); els.name.focus(); return true;
+  }
+
+  async function shareSheet() {
     await draw();
+    const blob = await toBlob("image/jpeg", 0.92);
+    const file = new File([blob], `Thu-moi-${slug(els.name.value.trim())}.jpg`, { type: "image/jpeg" });
+    try { await navigator.share({ files: [file], text: SHARE_TEXT }); return true; }
+    catch (e) {
+      if (e && e.name === "AbortError") return true;
+      try { await navigator.share({ files: [file] }); return true; } catch (e2) { return e2 && e2.name === "AbortError"; }
+    }
+  }
+
+  // Desktop: put the PNG on the clipboard inside the click, then open the web chat to paste into.
+  async function copyAndOpen(app) {
+    const pngP = draw().then(() => toBlob("image/png"));
+    let copied = false;
     try {
-      const blob = await toBlob("image/jpeg", 0.93);
-      const file = new File([blob], `Thu-moi-${slug(els.name.value.trim())}.jpg`, { type: "image/jpeg" });
-      await navigator.share({ files: [file], title: "Thư mời Lễ kỷ niệm 20 năm Đội SVTN Hải Dương – NEU" });
-    } catch (e) { if (e && e.name !== "AbortError") say("Thiết bị không chia sẻ được ảnh. Hãy dùng nút tải ảnh.", "err"); }
-  });
+      if (navigator.clipboard && window.ClipboardItem) {
+        await navigator.clipboard.write([new ClipboardItem({ "image/png": pngP })]);
+        copied = true;
+      }
+    } catch (e) {}
+    if (app) {
+      const w = window.open(WEB_APPS[app].url, "_blank");
+      try { if (w) w.opener = null; } catch (e) {}
+      if (copied) say(`Đã sao chép ảnh thư mời. Trong ${WEB_APPS[app].name}, mở cuộc trò chuyện rồi nhấn Ctrl+V (⌘V trên Mac) để gửi.`, "ok");
+      else say(`Trình duyệt không cho sao chép ảnh. Hãy bấm "Tải ảnh thư mời" rồi kéo file vào ${WEB_APPS[app].name}.`, "err");
+      if (!w && copied) say(`Đã sao chép ảnh. Mở ${WEB_APPS[app].url} rồi dán (Ctrl+V) vào khung chat.`, "ok");
+    } else {
+      say(copied ? "Đã sao chép ảnh thư mời. Dán (Ctrl+V) vào bất kỳ ứng dụng chat nào để gửi." : "Trình duyệt không cho sao chép ảnh. Hãy dùng nút tải ảnh.", copied ? "ok" : "err");
+    }
+  }
+
+  async function share(app) {
+    if (needName()) return;
+    if (downloadsP) { say("Chia sẻ chỉ dùng được trên website của Đội. Ở đây, hãy tải ảnh về rồi gửi.", "err"); return; }
+    if (canShareFiles && (isMobile || !app)) {
+      const ok = await shareSheet();
+      if (ok) { if (app) say(`Chọn ${WEB_APPS[app].name} trong bảng chia sẻ để gửi ảnh.`, "ok"); return; }
+    }
+    await copyAndOpen(app);
+  }
+
+  $("shZalo").addEventListener("click", () => share("zalo"));
+  $("shMsgr").addEventListener("click", () => share("msgr"));
+  $("shOther").addEventListener("click", () => share(null));
+  if (!canShareFiles) $("shOtherLabel").textContent = "Sao chép";
 
   draw();
 })();
