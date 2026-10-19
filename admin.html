@@ -2205,11 +2205,17 @@ const MU = {
     const have = new Set(this.rows.filter(r => r.k === k).map(r => r.drive_id));
     let base = Math.max(0, ...this.inK(k).map(r => r.sort_order || 0));
     for (;;) {
-      const j = await this.gas('list', {k, offset: off, limit: PG}), fs = j.files || [];
+      let j;
+      for (let t = 1; ; t++) {
+        try { j = await this.gas('list', {k, offset: off, limit: PG}); break; }
+        catch (e) { if (t >= 3 || (e && e.code === 'session_expired') || !/Không kết nối được Google Apps Script/.test((e && e.message) || '')) throw e; await muSleep(2000 * t); }
+      }
+      const fs = j.files || [];
       total = typeof j.total === 'number' ? j.total : fs.length; seen += fs.length; fs.forEach(f => seenIds.add(f.id));
       const add = fs.filter(f => /^[\w-]{10,100}$/.test(f.id) && !have.has(f.id) && (have.add(f.id), true));
       if (add.length) {
-        const rows = add.map(f => { const o = {id: uid('mp'), k, drive_id: f.id, title: '', year: '', caption: '', sort_order: ++base}; if (this.alb) o.album = this.alb; if (/^video\//.test(f.mime || '')) o.kind = 'video'; return o; });
+        // Every row in one batch must carry the same keys, so kind and album are always set.
+        const rows = add.map(f => ({id: uid('mp'), k, drive_id: f.id, title: '', year: '', caption: '', sort_order: ++base, album: this.alb || '', kind: /^video\//.test(f.mime || '') ? 'video' : 'image'}));
         const ins = await SB.req('/rest/v1/museum_photos?on_conflict=k,drive_id', {method: 'POST', headers: {Prefer: 'resolution=ignore-duplicates,return=representation'}, body: rows});
         const got = Array.isArray(ins) ? ins : [];
         this.rows.push(...got); added += got.length;
