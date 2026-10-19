@@ -182,10 +182,10 @@ e) { .paper { transition: transform .3s ease; } .paper.bump { transform: scale(1
           <input type="text" id="name" maxlength="60" placeholder="Phạm Quốc Công" value="Phạm Quốc Công">
         </div>
         <div class="custom-title" id="customWrap" hidden>
-          <label for="titleCustom" class="hint">Danh xưng hoặc chức danh tự điền (tối đa 20 ký tự)</label>
+          <label for="titleCustom" class="hint">Danh xưng hoặc chức danh tự điền (tối đa 25 ký tự)</label>
           <div class="count-wrap">
-            <input type="text" id="titleCustom" maxlength="20" placeholder="VD: Đội trưởng">
-            <span class="count" id="titleCount" aria-live="polite">0/20</span>
+            <input type="text" id="titleCustom" maxlength="25" placeholder="VD: Đội trưởng">
+            <span class="count" id="titleCount" aria-live="polite">0/25</span>
           </div>
         </div>
       </div>
@@ -270,7 +270,7 @@ e) { .paper { transition: transform .3s ease; } .paper.bump { transform: scale(1
   function syncCustom() {
     const on = els.title.value === "__custom";
     $("customWrap").hidden = !on;
-    $("titleCount").textContent = `${els.titleCustom.value.length}/20`;
+    $("titleCount").textContent = `${els.titleCustom.value.length}/25`;
     return on;
   }
   syncCustom();
@@ -285,7 +285,7 @@ e) { .paper { transition: transform .3s ease; } .paper.bump { transform: scale(1
   function values() {
     let name = els.name.value.trim().replace(/\s+/g, " ");
     if (els.upper.checked) name = name.toLocaleUpperCase("vi");
-    const t = els.title.value === "__custom" ? els.titleCustom.value.trim().replace(/\s+/g, " ").slice(0, 20) : els.title.value;
+    const t = els.title.value === "__custom" ? els.titleCustom.value.trim().replace(/\s+/g, " ").slice(0, 25) : els.title.value;
     const full = name ? (t ? t + " " + name : name) : "";
     return { full, role: "" };
   }
