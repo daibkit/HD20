@@ -11,7 +11,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Montserrat:wght@500;600;700;800&family=Dancing+Script:wght@600;700&family=Great+Vibes&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Montserrat:wght@500;600;700;800&family=Playfair+Display:ital,wght@1,700;1,800&family=Dancing+Script:wght@700&display=swap">
 <style>
 html{-webkit-text-size-adjust:100%}body{margin:0}[hidden]{display:none!important}img{max-width:100%}
 /* Layout: top bar with site nav (Trang chủ · Thư mời), then a two-column workbench — form on the left, live invitation on the right; stacks on phones. */
@@ -173,8 +173,8 @@ e) { .paper { transition: transform .3s ease; } .paper.bump { transform: scale(1
       <div class="field">
         <label for="style">Kiểu chữ tên</label>
         <select id="style">
+          <option value="elegant">Thanh lịch (khuyên dùng)</option>
           <option value="script">Thư pháp mềm mại</option>
-          <option value="vibes">Viết tay thanh thoát</option>
           <option value="modern">Hiện đại, rõ nét</option>
         </select>
       </div>
@@ -213,8 +213,8 @@ e) { .paper { transition: transform .3s ease; } .paper.bump { transform: scale(1
   const NAME_COLOR = "#1b78d0";
   const ROLE_COLOR = "#2a4677";
   const STYLES = {
+    elegant: { font: s => `italic 800 ${s}px "Playfair Display", Georgia, "Times New Roman", serif`, start: 66, min: 40 },
     script: { font: s => `700 ${s}px "Dancing Script", "Be Vietnam Pro", cursive`, start: 84, min: 48 },
-    vibes:  { font: s => `400 ${s}px "Great Vibes", "Dancing Script", cursive`, start: 96, min: 54 },
     modern: { font: s => `600 ${s}px Montserrat, "Be Vietnam Pro", sans-serif`, start: 54, min: 36 },
   };
   const ROLE_FONT = s => `500 ${s}px Montserrat, "Be Vietnam Pro", sans-serif`;
@@ -225,8 +225,8 @@ e) { .paper { transition: transform .3s ease; } .paper.bump { transform: scale(1
   const status = $("status");
 
   try {
-    const saved = JSON.parse(localStorage.getItem("thumoi-draft") || "null");
-    if (saved) { for (const k of ["title","name","role","style"]) if (typeof saved[k] === "string") els[k].value = saved[k]; els.upper.checked = !!saved.upper; }
+    const saved = JSON.parse(localStorage.getItem("thumoi-draft-v2") || "null");
+    if (saved) { for (const k of ["title","name","role","style"]) if (typeof saved[k] === "string") els[k].value = saved[k]; if (!els.style.value) els.style.value = "elegant"; els.upper.checked = !!saved.upper; }
   } catch (e) {}
 
   const img = new Image();
@@ -298,7 +298,7 @@ e) { .paper { transition: transform .3s ease; } .paper.bump { transform: scale(1
   async function draw() {
     const ticket = ++drawing;
     const { full, role } = values();
-    const st = STYLES[els.style.value] || STYLES.script;
+    const st = STYLES[els.style.value] || STYLES.elegant;
     const sample = full + role + "ÂăêôơưĐđẠạỹỄỵ";
     try {
       await Promise.all([
@@ -340,7 +340,7 @@ e) { .paper { transition: transform .3s ease; } .paper.bump { transform: scale(1
   function schedule() {
     cancelAnimationFrame(raf);
     raf = requestAnimationFrame(draw);
-    try { localStorage.setItem("thumoi-draft", JSON.stringify({ title: els.title.value, name: els.name.value, role: els.role.value, style: els.style.value, upper: els.upper.checked })); } catch (e) {}
+    try { localStorage.setItem("thumoi-draft-v2", JSON.stringify({ title: els.title.value, name: els.name.value, role: els.role.value, style: els.style.value, upper: els.upper.checked })); } catch (e) {}
     status.textContent = ""; status.className = "status";
   }
   for (const el of Object.values(els)) { el.addEventListener("input", schedule); el.addEventListener("change", schedule); }
