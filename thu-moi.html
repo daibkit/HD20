@@ -205,7 +205,7 @@ e) { .paper { transition: transform .3s ease; } .paper.bump { transform: scale(1
 
     <dl class="event">
       <dt>Thời gian</dt><dd>8h30 – 21h00, Thứ Bảy 24/10/2026</dd>
-      <dt>Địa điểm</dt><dd>Đại học Kinh tế Quốc dân, 207 Giải Phóng, Bạch Mai, Hà Nội</dd>
+      <dt>Địa điểm</dt><dd>Sân ký túc xá, Đại học Kinh tế Quốc dân</dd>
     </dl>
   </section>
 
@@ -232,6 +232,17 @@ e) { .paper { transition: transform .3s ease; } .paper.bump { transform: scale(1
   };
   const PREFIX_FONT = s => `400 ${s}px Montserrat, "Be Vietnam Pro", sans-serif`;
   const ROLE_FONT = s => `500 ${s}px Montserrat, "Be Vietnam Pro", sans-serif`;
+  // Venue lines inside the info box (the artwork's own text there was removed so the new venue can be set in the same face)
+  const PLACE = ["Sân ký túc xá,", "Đại học Kinh tế Quốc dân"];
+  const PLACE_X = 686, PLACE_Y = [1141, 1169];
+  const PLACE_FONT = `700 23px Montserrat, "Be Vietnam Pro", sans-serif`;
+
+  function drawPlace() {
+    const grad = ctx.createLinearGradient(0, 1122, 0, 1176);
+    grad.addColorStop(0, "#1b66b5"); grad.addColorStop(1, "#1f7cc6");
+    ctx.font = PLACE_FONT; ctx.fillStyle = grad; ctx.textAlign = "left"; ctx.textBaseline = "alphabetic";
+    PLACE.forEach((t, i) => ctx.fillText(t, PLACE_X, PLACE_Y[i]));
+  }
 
   const $ = id => document.getElementById(id);
   const cv = $("cv"), ctx = cv.getContext("2d");
@@ -297,14 +308,16 @@ e) { .paper { transition: transform .3s ease; } .paper.bump { transform: scale(1
         document.fonts.load(st.font(36), sample),
         document.fonts.load(PREFIX_FONT(22), sample),
         document.fonts.load(ROLE_FONT(21), sample),
+        document.fonts.load(PLACE_FONT, PLACE.join(" ")),
       ]);
     } catch (e) {}
     await imgReady;
     if (ticket !== drawing) return;
 
     ctx.clearRect(0, 0, W, H);
-    if (!full) { ctx.drawImage(img, 0, 0, W, H); return; }
+    if (!full) { ctx.drawImage(img, 0, 0, W, H); drawPlace(); return; }
     ctx.drawImage(blank, 0, 0, W, H);
+    drawPlace();
     ctx.textAlign = "left";
     ctx.textBaseline = "alphabetic";
 
@@ -383,7 +396,7 @@ e) { .paper { transition: transform .3s ease; } .paper.bump { transform: scale(1
 
   $("f").addEventListener("submit", e => { e.preventDefault(); exportImage("jpg"); });
   $("dlpng").addEventListener("click", () => exportImage("png"));
-  const SHARE_TEXT = "Trân trọng kính mời bạn tới Lễ kỷ niệm 20 năm thành lập Đội SVTN Hải Dương – NEU, 8h30 – 21h00, Thứ Bảy 24/10/2026 tại Đại học Kinh tế Quốc dân, 207 Giải Phóng, Hà Nội.";
+  const SHARE_TEXT = "Trân trọng kính mời bạn tới Lễ kỷ niệm 20 năm thành lập Đội Sinh viên Tình nguyện Đồng hương Hải Dương – NEU, 8h30 – 21h00, Thứ Bảy 24/10/2026 tại Sân ký túc xá, Đại học Kinh tế Quốc dân.";
   const WEB_APPS = { zalo: { name: "Zalo", url: "https://chat.zalo.me/" }, msgr: { name: "Messenger", url: "https://www.messenger.com/" } };
 
   function needName() {
