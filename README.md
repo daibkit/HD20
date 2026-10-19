@@ -5,7 +5,7 @@ Website công khai triển khai trên Vercel (https://hdx20y.vercel.app).
 | Đường dẫn | Tệp | Nội dung |
 |---|---|---|
 | `/` | `index.html` | Trang sự kiện (xuất từ artifact thiết kế), có mục menu "Tin tức" |
-| `/thu-moi` | `thu-moi.html` | Thư mời: điền tên người được mời vào ảnh thư mời (`img/thu-moi-mau.jpg`) và tải ảnh JPG/PNG. Nút "Thư mời" nằm cạnh "Trang chủ" trên menu |
+| `/thu-moi` | `thu-moi.html` | Thư mời: điền tên người được mời vào ảnh thư mời và tải ảnh JPG/PNG, chia sẻ qua Zalo/Messenger. `img/thu-moi-mau.jpg` là mẫu gốc (hiện khi chưa nhập tên), `img/thu-moi-nen.jpg` là mẫu đã xoá 2 dòng lời chào chung để in "Thân gửi + tên" vào. Nút "Thư mời" nằm cạnh "Trang chủ" trên menu |
 | `/tin-tuc` | `tin-tuc.html` | Tin tức: đọc trực tiếp từ Supabase (dự phòng: `content.json`) |
 | `/admin` | `admin.html` | Trang quản trị: đăng nhập admin, thêm/sửa/xoá chuyên mục, danh mục, bài viết, tải ảnh |
 

@@ -132,7 +132,7 @@ button svg { width: 18px; height: 18px; flex: none; }
 
 .stage { display: flex; justify-content: center; min-width: 0; }
 .paper {
-  width: 100%; max-width: 620px; aspect-ratio: 1762 / 2576; border-radius: 6px; overflow: hidden;
+  width: 100%; max-width: 620px; aspect-ratio: 1200 / 1754; border-radius: 6px; overflow: hidden;
   background: var(--surface); box-shadow: 0 30px 60px -30px rgba(13,38,85,.55), 0 0 0 1px var(--line);
 }
 .paper canvas { display: block; width: 100%; height: 100%; }
@@ -209,31 +209,33 @@ e) { .paper { transition: transform .3s ease; } .paper.bump { transform: scale(1
     </form>
 
     <dl class="event">
-      <dt>Thời gian</dt><dd>Thứ Bảy, 24.10.2026 · từ 08:30</dd>
-      <dt>Địa điểm</dt><dd>Sân ký túc xá, Đại học Kinh tế Quốc dân</dd>
+      <dt>Thời gian</dt><dd>8h30 – 21h00, Thứ Bảy 24/10/2026</dd>
+      <dt>Địa điểm</dt><dd>Đại học Kinh tế Quốc dân, 207 Giải Phóng, Bạch Mai, Hà Nội</dd>
     </dl>
   </section>
 
   <div class="stage">
-    <div class="paper" id="paper"><canvas id="cv" width="1762" height="2576" aria-label="Xem trước thư mời"></canvas></div>
+    <div class="paper" id="paper"><canvas id="cv" width="1200" height="1754" aria-label="Xem trước thư mời"></canvas></div>
   </div>
 </main>
 
 <script>
 (() => {
-  const TEMPLATE = "img/thu-moi-mau.jpg";
-  const W = 1762, H = 2576;
-  // Name area measured on the original artwork (px at full size)
-  const CX = 893;              // horizontal centre of the dotted lines
-  const MAXW = 1000;           // usable width between line ends
-  // Free band between "Trân trọng kính mời:" (ends y≈470) and "Tới tham dự" (starts y≈692)
-  const TOP = 502, BOTTOM = 662, GAP = 20;
-  const NAME_COLOR = "#1b78d0";
+  const TEMPLATE = "img/thu-moi-mau.jpg";   // original artwork, shown while no name is entered
+  const BLANK = "img/thu-moi-nen.jpg";       // same artwork with the two generic greeting lines removed
+  const W = 1200, H = 1754;
+  // Greeting band between the "Thư mời" title (ends y≈340) and "Tháng 10 này…" (starts y≈439)
+  const CX = 597, MAXW = 800;
+  const TOP = 347, BOTTOM = 431, GAP = 10;
+  const PREFIX = "Thân gửi ";
+  const NAME_COLOR = "#1579ca";
+  const BODY_COLOR = "#162850";
   const ROLE_COLOR = "#2a4677";
   const STYLES = {
-    elegant: { font: s => `italic 800 ${s}px "Playfair Display", Georgia, "Times New Roman", serif`, start: 72, min: 44 },
-    modern: { font: s => `700 ${s}px Montserrat, "Be Vietnam Pro", sans-serif`, start: 64, min: 40 },
+    elegant: { font: s => `italic 800 ${s}px "Playfair Display", Georgia, "Times New Roman", serif`, start: 36, min: 24 },
+    modern: { font: s => `700 ${s}px Montserrat, "Be Vietnam Pro", sans-serif`, start: 31, min: 22 },
   };
+  const PREFIX_FONT = s => `400 ${s}px Montserrat, "Be Vietnam Pro", sans-serif`;
   const ROLE_FONT = s => `500 ${s}px Montserrat, "Be Vietnam Pro", sans-serif`;
 
   const $ = id => document.getElementById(id);
@@ -242,13 +244,14 @@ e) { .paper { transition: transform .3s ease; } .paper.bump { transform: scale(1
   const status = $("status");
 
   try {
-    const saved = JSON.parse(localStorage.getItem("thumoi-draft-v5") || "null");
+    const saved = JSON.parse(localStorage.getItem("thumoi-draft-v6") || "null");
     if (saved) { for (const k of ["title","name","role","style"]) if (typeof saved[k] === "string") els[k].value = saved[k]; if (!els.style.value) els.style.value = "elegant"; els.upper.checked = !!saved.upper; }
   } catch (e) {}
 
-  const img = new Image();
-  const imgReady = new Promise((res, rej) => { img.onload = res; img.onerror = rej; });
-  img.src = TEMPLATE;
+  function loadImg(src) { const i = new Image(); const p = new Promise((res, rej) => { i.onload = res; i.onerror = rej; }); i.src = src; return [i, p]; }
+  const [img, imgP] = loadImg(TEMPLATE);
+  const [blank, blankP] = loadImg(BLANK);
+  const imgReady = Promise.all([imgP, blankP]);
 
   function values() {
     let name = els.name.value.trim().replace(/\s+/g, " ");
@@ -269,46 +272,23 @@ e) { .paper { transition: transform .3s ease; } .paper.bump { transform: scale(1
     };
   }
 
-  function splitTwo(text) {
-    const words = text.split(" ");
-    let best = [text, ""], bestDiff = Infinity;
-    for (let i = 1; i < words.length; i++) {
-      const a = words.slice(0, i).join(" "), b = words.slice(i).join(" ");
-      const d = Math.abs(a.length - b.length);
-      if (d < bestDiff) { bestDiff = d; best = [a, b]; }
-    }
-    return best;
-  }
-
-  // Erase the dotted guide lines by copying the clean gradient just above each one.
-  function eraseLines() {
-    ctx.drawImage(img, 300, 527, 1180, 10, 300, 535, 1180, 10);
-    ctx.drawImage(img, 300, 629, 1180, 10, 300, 637, 1180, 10);
-  }
-
   function layout(full, role, st) {
     const band = BOTTOM - TOP;
-    let roleSize = 37, roleM = null;
+    let roleSize = 21, roleM = null;
     if (role) {
-      while (roleSize > 24 && metrics(role, ROLE_FONT(roleSize)).w > MAXW) roleSize -= 1;
+      while (roleSize > 15 && metrics(role, ROLE_FONT(roleSize)).w > MAXW) roleSize -= 1;
       roleM = metrics(role, ROLE_FONT(roleSize));
     }
-    for (let size = st.start; size >= st.min - 20; size -= 2) {
-      const f = st.font(size);
-      let lines = [full];
-      if (metrics(full, f).w > MAXW) {
-        if (role || size > st.min) continue;
-        lines = splitTwo(full);
-        if (Math.max(metrics(lines[0], f).w, metrics(lines[1], f).w) > MAXW) continue;
-      }
-      const m = metrics(lines.join(" "), f);
-      const lineH = m.asc + m.desc;
-      const nameH = lines.length * lineH + (lines.length - 1) * (GAP * 0.4);
-      const total = nameH + (roleM ? GAP + roleM.asc + roleM.desc : 0);
-      if (total <= band || size <= st.min - 20) return { f, lines, m, lineH, total, roleSize, roleM };
+    let pick = null;
+    for (let size = st.start; size >= st.min; size -= 1) {
+      const pSize = Math.round(Math.min(23, Math.max(18, size * 0.62)));
+      const pm = metrics(PREFIX, PREFIX_FONT(pSize)), nm = metrics(full, st.font(size));
+      const asc = Math.max(pm.asc, nm.asc), desc = Math.max(pm.desc, nm.desc);
+      const total = asc + desc + (roleM ? GAP + roleM.asc + roleM.desc : 0);
+      pick = { size, pSize, pm, nm, asc, desc, total };
+      if (pm.w + nm.w <= MAXW && total <= band) break;
     }
-    const f = st.font(st.min - 20);
-    return { f, lines: [full], m: metrics(full, f), lineH: 0, total: band, roleSize, roleM };
+    return { ...pick, roleSize, roleM };
   }
 
   let drawing = 0;
@@ -316,38 +296,39 @@ e) { .paper { transition: transform .3s ease; } .paper.bump { transform: scale(1
     const ticket = ++drawing;
     const { full, role } = values();
     const st = STYLES[els.style.value] || STYLES.elegant;
-    const sample = full + role + "ÂăêôơưĐđẠạỹỄỵ";
+    const sample = full + role + PREFIX + "ÂăêôơưĐđẠạỹỄỵ";
     try {
       await Promise.all([
-        document.fonts.load(st.font(64), sample),
-        document.fonts.load(ROLE_FONT(36), sample),
+        document.fonts.load(st.font(36), sample),
+        document.fonts.load(PREFIX_FONT(22), sample),
+        document.fonts.load(ROLE_FONT(21), sample),
       ]);
     } catch (e) {}
     await imgReady;
     if (ticket !== drawing) return;
 
     ctx.clearRect(0, 0, W, H);
-    ctx.drawImage(img, 0, 0, W, H);
-    if (!full) return;
-    eraseLines();
-    ctx.textAlign = "center";
+    if (!full) { ctx.drawImage(img, 0, 0, W, H); return; }
+    ctx.drawImage(blank, 0, 0, W, H);
+    ctx.textAlign = "left";
     ctx.textBaseline = "alphabetic";
 
     const L = layout(full, role, st);
-    let y = TOP + (BOTTOM - TOP - L.total) / 2;
-    if (full) {
-      ctx.font = L.f; ctx.fillStyle = NAME_COLOR;
-      for (const line of L.lines) {
-        y += L.m.asc;
-        ctx.fillText(line, CX, y);
-        y += L.m.desc + GAP * 0.4;
-      }
-      y -= GAP * 0.4;
-    }
+    const lineW = Math.min(MAXW, L.pm.w + L.nm.w);
+    const scaleX = lineW / (L.pm.w + L.nm.w);
+    let y = TOP + (BOTTOM - TOP - L.total) / 2 + L.asc;
+    let x = CX - lineW / 2;
+    ctx.font = PREFIX_FONT(L.pSize); ctx.fillStyle = BODY_COLOR;
+    ctx.fillText(PREFIX, x, y, L.pm.w * scaleX);
+    x += L.pm.w * scaleX;
+    ctx.font = st.font(L.size); ctx.fillStyle = NAME_COLOR;
+    ctx.fillText(full, x, y, L.nm.w * scaleX);
+
     if (role && L.roleM) {
-      y += GAP + L.roleM.asc;
+      y += L.desc + GAP + L.roleM.asc;
+      ctx.textAlign = "center";
       ctx.font = ROLE_FONT(L.roleSize); ctx.fillStyle = ROLE_COLOR;
-      try { ctx.letterSpacing = "1px"; } catch (e) {}
+      try { ctx.letterSpacing = "0.5px"; } catch (e) {}
       ctx.fillText(role, CX, y);
       try { ctx.letterSpacing = "0px"; } catch (e) {}
     }
@@ -357,7 +338,7 @@ e) { .paper { transition: transform .3s ease; } .paper.bump { transform: scale(1
   function schedule() {
     cancelAnimationFrame(raf);
     raf = requestAnimationFrame(draw);
-    try { localStorage.setItem("thumoi-draft-v5", JSON.stringify({ title: els.title.value, name: els.name.value, role: els.role.value, style: els.style.value, upper: els.upper.checked })); } catch (e) {}
+    try { localStorage.setItem("thumoi-draft-v6", JSON.stringify({ title: els.title.value, name: els.name.value, role: els.role.value, style: els.style.value, upper: els.upper.checked })); } catch (e) {}
     status.textContent = ""; status.className = "status";
   }
   for (const el of Object.values(els)) { el.addEventListener("input", schedule); el.addEventListener("change", schedule); }
@@ -407,7 +388,7 @@ e) { .paper { transition: transform .3s ease; } .paper.bump { transform: scale(1
 
   $("f").addEventListener("submit", e => { e.preventDefault(); exportImage("jpg"); });
   $("dlpng").addEventListener("click", () => exportImage("png"));
-  const SHARE_TEXT = "Trân trọng kính mời bạn tới Lễ kỷ niệm 20 năm thành lập Đội SVTN Hải Dương – NEU, Thứ Bảy 24.10.2026 tại Sân ký túc xá, Đại học Kinh tế Quốc dân.";
+  const SHARE_TEXT = "Trân trọng kính mời bạn tới Lễ kỷ niệm 20 năm thành lập Đội SVTN Hải Dương – NEU, 8h30 – 21h00, Thứ Bảy 24/10/2026 tại Đại học Kinh tế Quốc dân, 207 Giải Phóng, Hà Nội.";
   const WEB_APPS = { zalo: { name: "Zalo", url: "https://chat.zalo.me/" }, msgr: { name: "Messenger", url: "https://www.messenger.com/" } };
 
   function needName() {
