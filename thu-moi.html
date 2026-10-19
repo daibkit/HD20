@@ -177,11 +177,6 @@ e) { .paper { transition: transform .3s ease; } .paper.bump { transform: scale(1
         </div>
       </div>
       <div class="field">
-        <label for="role">Dòng thứ hai <span style="font-weight:400;color:var(--muted)">(không bắt buộc)</span></label>
-        <input type="text" id="role" maxlength="80" placeholder="Đội trưởng K50" value="Đội trưởng K50">
-        <span class="hint">Chức vụ, đơn vị hoặc khóa. Để trống nếu không cần.</span>
-      </div>
-      <div class="field">
         <label for="style">Kiểu chữ tên</label>
         <select id="style">
           <option value="elegant" selected>Thanh lịch, chữ nghiêng</option>
@@ -232,20 +227,20 @@ e) { .paper { transition: transform .3s ease; } .paper.bump { transform: scale(1
   const BODY_COLOR = "#162850";
   const ROLE_COLOR = "#2a4677";
   const STYLES = {
-    elegant: { font: s => `italic 800 ${s}px "Playfair Display", Georgia, "Times New Roman", serif`, start: 36, min: 24 },
-    modern: { font: s => `700 ${s}px Montserrat, "Be Vietnam Pro", sans-serif`, start: 31, min: 22 },
+    elegant: { font: s => `italic 800 ${s}px "Playfair Display", Georgia, "Times New Roman", serif`, start: 40, min: 24 },
+    modern: { font: s => `700 ${s}px Montserrat, "Be Vietnam Pro", sans-serif`, start: 34, min: 22 },
   };
   const PREFIX_FONT = s => `400 ${s}px Montserrat, "Be Vietnam Pro", sans-serif`;
   const ROLE_FONT = s => `500 ${s}px Montserrat, "Be Vietnam Pro", sans-serif`;
 
   const $ = id => document.getElementById(id);
   const cv = $("cv"), ctx = cv.getContext("2d");
-  const els = { title: $("title"), name: $("name"), role: $("role"), upper: $("upper"), style: $("style") };
+  const els = { title: $("title"), name: $("name"), upper: $("upper"), style: $("style") };
   const status = $("status");
 
   try {
-    const saved = JSON.parse(localStorage.getItem("thumoi-draft-v6") || "null");
-    if (saved) { for (const k of ["title","name","role","style"]) if (typeof saved[k] === "string") els[k].value = saved[k]; if (!els.style.value) els.style.value = "elegant"; els.upper.checked = !!saved.upper; }
+    const saved = JSON.parse(localStorage.getItem("thumoi-draft-v7") || "null");
+    if (saved) { for (const k of ["title","name","style"]) if (typeof saved[k] === "string") els[k].value = saved[k]; if (!els.style.value) els.style.value = "elegant"; els.upper.checked = !!saved.upper; }
   } catch (e) {}
 
   function loadImg(src) { const i = new Image(); const p = new Promise((res, rej) => { i.onload = res; i.onerror = rej; }); i.src = src; return [i, p]; }
@@ -258,7 +253,7 @@ e) { .paper { transition: transform .3s ease; } .paper.bump { transform: scale(1
     if (els.upper.checked) name = name.toLocaleUpperCase("vi");
     const t = els.title.value;
     const full = name ? (t ? t + " " + name : name) : "";
-    return { full, role: els.role.value.trim().replace(/\s+/g, " ") };
+    return { full, role: "" };
   }
 
   // Vertical metrics measured from the real glyphs; a reference with stacked Vietnamese marks keeps the baseline steady while typing.
@@ -338,7 +333,7 @@ e) { .paper { transition: transform .3s ease; } .paper.bump { transform: scale(1
   function schedule() {
     cancelAnimationFrame(raf);
     raf = requestAnimationFrame(draw);
-    try { localStorage.setItem("thumoi-draft-v6", JSON.stringify({ title: els.title.value, name: els.name.value, role: els.role.value, style: els.style.value, upper: els.upper.checked })); } catch (e) {}
+    try { localStorage.setItem("thumoi-draft-v7", JSON.stringify({ title: els.title.value, name: els.name.value, style: els.style.value, upper: els.upper.checked })); } catch (e) {}
     status.textContent = ""; status.className = "status";
   }
   for (const el of Object.values(els)) { el.addEventListener("input", schedule); el.addEventListener("change", schedule); }
