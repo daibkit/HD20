@@ -2188,8 +2188,8 @@ const MU = {
         const row = {id: uid('mp'), k, drive_id: j.id, title: '', year: '', caption: '', sort_order: ++base};
         if (this.alb) row.album = this.alb;
         if (j.kind === 'video') row.kind = 'video';
-        await SB.req('/rest/v1/museum_photos', {method: 'POST', headers: {Prefer: 'return=minimal'}, body: row});
-        this.rows.push({kind: 'image', ...row, created_at: new Date().toISOString()}); this.prog[i].st = 'ok'; if (j.shared === false) toast('Ảnh đã lên Drive nhưng chưa bật được chia sẻ công khai (' + (j.warn || '') + '). Khách có thể chưa xem được ảnh.', 'err', 9000); this.prog[i].msg = j.folder ? 'Drive › …/' + j.folder : ''; if (j.folder && j.folder !== (k === 'VIDEO' ? 'Video giới thiệu' : k)) { this.prog[i].st = 'err'; this.prog[i].msg = 'Tệp nằm trong thư mục “' + j.folder + '” trên Drive, không phải ' + k + '. Mở Drive để kiểm tra.'; ok--; } ok++;
+        const ins = await SB.req('/rest/v1/museum_photos?on_conflict=k,drive_id', {method: 'POST', headers: {Prefer: 'resolution=ignore-duplicates,return=representation'}, body: row});
+        if (Array.isArray(ins) && ins.length) this.rows.push(...ins); else if (!this.rows.some(r => r.k === k && r.drive_id === j.id)) this.rows.push({kind: 'image', ...row, created_at: new Date().toISOString()}); this.prog[i].st = 'ok'; if (j.shared === false) toast('Ảnh đã lên Drive nhưng chưa bật được chia sẻ công khai (' + (j.warn || '') + '). Khách có thể chưa xem được ảnh.', 'err', 9000); this.prog[i].msg = j.folder ? 'Drive › …/' + j.folder : ''; if (j.folder && j.folder !== (k === 'VIDEO' ? 'Video giới thiệu' : k)) { this.prog[i].st = 'err'; this.prog[i].msg = 'Tệp nằm trong thư mục “' + j.folder + '” trên Drive, không phải ' + k + '. Mở Drive để kiểm tra.'; ok--; } ok++;
       } catch (e) {
         this.prog[i].st = 'err'; this.prog[i].msg = e && e.status === 400 && /album/.test(String(e.message)) ? 'chưa chạy lại supabase/museum.sql (thiếu cột album) để lưu bộ sưu tập' : e && e.status === 400 && /kind/.test(String(e.message)) ? 'chưa chạy lại supabase/museum.sql (thiếu cột kind) để lưu video' : (e && e.message) || 'Lỗi';
         if (e && e.code === 'session_expired') break;
@@ -2207,11 +2207,12 @@ const MU = {
     for (;;) {
       const j = await this.gas('list', {k, offset: off, limit: PG}), fs = j.files || [];
       total = typeof j.total === 'number' ? j.total : fs.length; seen += fs.length; fs.forEach(f => seenIds.add(f.id));
-      const add = fs.filter(f => /^[\w-]{10,100}$/.test(f.id) && !have.has(f.id));
+      const add = fs.filter(f => /^[\w-]{10,100}$/.test(f.id) && !have.has(f.id) && (have.add(f.id), true));
       if (add.length) {
         const rows = add.map(f => { const o = {id: uid('mp'), k, drive_id: f.id, title: '', year: '', caption: '', sort_order: ++base}; if (this.alb) o.album = this.alb; if (/^video\//.test(f.mime || '')) o.kind = 'video'; return o; });
-        await SB.req('/rest/v1/museum_photos', {method: 'POST', headers: {Prefer: 'return=minimal'}, body: rows});
-        rows.forEach(r => { have.add(r.drive_id); this.rows.push({kind: 'image', ...r, created_at: new Date().toISOString()}); }); added += rows.length;
+        const ins = await SB.req('/rest/v1/museum_photos?on_conflict=k,drive_id', {method: 'POST', headers: {Prefer: 'resolution=ignore-duplicates,return=representation'}, body: rows});
+        const got = Array.isArray(ins) ? ins : [];
+        this.rows.push(...got); added += got.length;
       }
       if (onProg) onProg(Math.min(seen, total), total, added);
       if (!fs.length || typeof j.next !== 'number' || j.next >= total) break;
