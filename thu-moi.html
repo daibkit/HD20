@@ -173,8 +173,8 @@ e) { .paper { transition: transform .3s ease; } .paper.bump { transform: scale(1
       <div class="field">
         <label for="style">Kiểu chữ tên</label>
         <select id="style">
+          <option value="elegant" selected>Thanh lịch, chữ nghiêng</option>
           <option value="modern">Hiện đại, rõ nét</option>
-          <option value="elegant">Thanh lịch, chữ nghiêng</option>
         </select>
       </div>
       <label class="check"><input type="checkbox" id="upper"> Viết hoa toàn bộ tên</label>
@@ -223,8 +223,8 @@ e) { .paper { transition: transform .3s ease; } .paper.bump { transform: scale(1
   const status = $("status");
 
   try {
-    const saved = JSON.parse(localStorage.getItem("thumoi-draft-v4") || "null");
-    if (saved) { for (const k of ["title","name","role","style"]) if (typeof saved[k] === "string") els[k].value = saved[k]; if (!els.style.value) els.style.value = "modern"; els.upper.checked = !!saved.upper; }
+    const saved = JSON.parse(localStorage.getItem("thumoi-draft-v5") || "null");
+    if (saved) { for (const k of ["title","name","role","style"]) if (typeof saved[k] === "string") els[k].value = saved[k]; if (!els.style.value) els.style.value = "elegant"; els.upper.checked = !!saved.upper; }
   } catch (e) {}
 
   const img = new Image();
@@ -296,7 +296,7 @@ e) { .paper { transition: transform .3s ease; } .paper.bump { transform: scale(1
   async function draw() {
     const ticket = ++drawing;
     const { full, role } = values();
-    const st = STYLES[els.style.value] || STYLES.modern;
+    const st = STYLES[els.style.value] || STYLES.elegant;
     const sample = full + role + "ÂăêôơưĐđẠạỹỄỵ";
     try {
       await Promise.all([
@@ -338,7 +338,7 @@ e) { .paper { transition: transform .3s ease; } .paper.bump { transform: scale(1
   function schedule() {
     cancelAnimationFrame(raf);
     raf = requestAnimationFrame(draw);
-    try { localStorage.setItem("thumoi-draft-v4", JSON.stringify({ title: els.title.value, name: els.name.value, role: els.role.value, style: els.style.value, upper: els.upper.checked })); } catch (e) {}
+    try { localStorage.setItem("thumoi-draft-v5", JSON.stringify({ title: els.title.value, name: els.name.value, role: els.role.value, style: els.style.value, upper: els.upper.checked })); } catch (e) {}
     status.textContent = ""; status.className = "status";
   }
   for (const el of Object.values(els)) { el.addEventListener("input", schedule); el.addEventListener("change", schedule); }
