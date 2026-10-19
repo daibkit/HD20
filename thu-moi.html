@@ -11,7 +11,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Montserrat:wght@500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Montserrat:wght@500;600;700;800&family=Dancing+Script:wght@600;700&family=Great+Vibes&display=swap">
 <style>
 html{-webkit-text-size-adjust:100%}body{margin:0}[hidden]{display:none!important}img{max-width:100%}
 /* Layout: top bar with site nav (Trang chủ · Thư mời), then a two-column workbench — form on the left, live invitation on the right; stacks on phones. */
@@ -170,6 +170,14 @@ e) { .paper { transition: transform .3s ease; } .paper.bump { transform: scale(1
         <input type="text" id="role" maxlength="80" placeholder="Cựu thành viên khóa 50" value="Cựu Đội trưởng khóa 50">
         <span class="hint">Chức vụ, đơn vị hoặc khóa. Để trống nếu không cần.</span>
       </div>
+      <div class="field">
+        <label for="style">Kiểu chữ tên</label>
+        <select id="style">
+          <option value="script">Thư pháp mềm mại</option>
+          <option value="vibes">Viết tay thanh thoát</option>
+          <option value="modern">Hiện đại, rõ nét</option>
+        </select>
+      </div>
       <label class="check"><input type="checkbox" id="upper"> Viết hoa toàn bộ tên</label>
       <div class="actions">
         <button type="submit" class="btn-primary" id="dl">
@@ -199,20 +207,26 @@ e) { .paper { transition: transform .3s ease; } .paper.bump { transform: scale(1
   const W = 1762, H = 2576;
   // Name area measured on the original artwork (px at full size)
   const CX = 893;              // horizontal centre of the dotted lines
-  const MAXW = 1040;           // usable width between line ends
-  const LINE1 = 528;           // baseline just above first dotted line (y≈540)
-  const LINE2 = 628;           // baseline just above second dotted line (y≈642)
-  const NAME_COLOR = "#1f7fd6";
-  const ROLE_COLOR = "#0d2655";
+  const MAXW = 1000;           // usable width between line ends
+  // Free band between "Trân trọng kính mời:" (ends y≈470) and "Tới tham dự" (starts y≈692)
+  const TOP = 502, BOTTOM = 662, GAP = 20;
+  const NAME_COLOR = "#1b78d0";
+  const ROLE_COLOR = "#2a4677";
+  const STYLES = {
+    script: { font: s => `700 ${s}px "Dancing Script", "Be Vietnam Pro", cursive`, start: 84, min: 48 },
+    vibes:  { font: s => `400 ${s}px "Great Vibes", "Dancing Script", cursive`, start: 96, min: 54 },
+    modern: { font: s => `600 ${s}px Montserrat, "Be Vietnam Pro", sans-serif`, start: 54, min: 36 },
+  };
+  const ROLE_FONT = s => `500 ${s}px Montserrat, "Be Vietnam Pro", sans-serif`;
 
   const $ = id => document.getElementById(id);
   const cv = $("cv"), ctx = cv.getContext("2d");
-  const els = { title: $("title"), name: $("name"), role: $("role"), upper: $("upper") };
+  const els = { title: $("title"), name: $("name"), role: $("role"), upper: $("upper"), style: $("style") };
   const status = $("status");
 
   try {
     const saved = JSON.parse(localStorage.getItem("thumoi-draft") || "null");
-    if (saved) { for (const k of ["title","name","role"]) if (typeof saved[k] === "string") els[k].value = saved[k]; els.upper.checked = !!saved.upper; }
+    if (saved) { for (const k of ["title","name","role","style"]) if (typeof saved[k] === "string") els[k].value = saved[k]; els.upper.checked = !!saved.upper; }
   } catch (e) {}
 
   const img = new Image();
@@ -227,15 +241,15 @@ e) { .paper { transition: transform .3s ease; } .paper.bump { transform: scale(1
     return { full, role: els.role.value.trim().replace(/\s+/g, " ") };
   }
 
-  function fitFont(text, weight, start, min) {
-    let size = start;
-    while (size > min) {
-      ctx.font = `${weight} ${size}px Montserrat, "Be Vietnam Pro", sans-serif`;
-      if (ctx.measureText(text).width <= MAXW) break;
-      size -= 2;
-    }
-    ctx.font = `${weight} ${size}px Montserrat, "Be Vietnam Pro", sans-serif`;
-    return ctx.measureText(text).width <= MAXW;
+  // Vertical metrics measured from the real glyphs; a reference with stacked Vietnamese marks keeps the baseline steady while typing.
+  function metrics(text, font) {
+    ctx.font = font;
+    const m = ctx.measureText(text), r = ctx.measureText("Ễỵ");
+    return {
+      w: m.width,
+      asc: Math.max(m.actualBoundingBoxAscent || 0, r.actualBoundingBoxAscent || 0),
+      desc: Math.max(m.actualBoundingBoxDescent || 0, r.actualBoundingBoxDescent || 0),
+    };
   }
 
   function splitTwo(text) {
@@ -249,15 +263,47 @@ e) { .paper { transition: transform .3s ease; } .paper.bump { transform: scale(1
     return best;
   }
 
+  // Erase the dotted guide lines by copying the clean gradient just above each one.
+  function eraseLines() {
+    ctx.drawImage(img, 300, 527, 1180, 10, 300, 535, 1180, 10);
+    ctx.drawImage(img, 300, 629, 1180, 10, 300, 637, 1180, 10);
+  }
+
+  function layout(full, role, st) {
+    const band = BOTTOM - TOP;
+    let roleSize = 32, roleM = null;
+    if (role) {
+      while (roleSize > 24 && metrics(role, ROLE_FONT(roleSize)).w > MAXW) roleSize -= 1;
+      roleM = metrics(role, ROLE_FONT(roleSize));
+    }
+    for (let size = st.start; size >= st.min - 20; size -= 2) {
+      const f = st.font(size);
+      let lines = [full];
+      if (metrics(full, f).w > MAXW) {
+        if (role || size > st.min) continue;
+        lines = splitTwo(full);
+        if (Math.max(metrics(lines[0], f).w, metrics(lines[1], f).w) > MAXW) continue;
+      }
+      const m = metrics(lines.join(" "), f);
+      const lineH = m.asc + m.desc;
+      const nameH = lines.length * lineH + (lines.length - 1) * (GAP * 0.4);
+      const total = nameH + (roleM ? GAP + roleM.asc + roleM.desc : 0);
+      if (total <= band || size <= st.min - 20) return { f, lines, m, lineH, total, roleSize, roleM };
+    }
+    const f = st.font(st.min - 20);
+    return { f, lines: [full], m: metrics(full, f), lineH: 0, total: band, roleSize, roleM };
+  }
+
   let drawing = 0;
   async function draw() {
     const ticket = ++drawing;
     const { full, role } = values();
-    const sample = full + role + "ÂăêôơưĐđẠạỹ";
+    const st = STYLES[els.style.value] || STYLES.script;
+    const sample = full + role + "ÂăêôơưĐđẠạỹỄỵ";
     try {
       await Promise.all([
-        document.fonts.load('700 64px Montserrat', sample),
-        document.fonts.load('600 44px Montserrat', sample),
+        document.fonts.load(st.font(64), sample),
+        document.fonts.load(ROLE_FONT(36), sample),
       ]);
     } catch (e) {}
     await imgReady;
@@ -265,25 +311,28 @@ e) { .paper { transition: transform .3s ease; } .paper.bump { transform: scale(1
 
     ctx.clearRect(0, 0, W, H);
     ctx.drawImage(img, 0, 0, W, H);
+    if (!full) return;
+    eraseLines();
     ctx.textAlign = "center";
     ctx.textBaseline = "alphabetic";
 
+    const L = layout(full, role, st);
+    let y = TOP + (BOTTOM - TOP - L.total) / 2;
     if (full) {
-      ctx.fillStyle = NAME_COLOR;
-      const fits = fitFont(full, 700, 58, 40);
-      if (!fits && !role) {
-        const [a, b] = splitTwo(full);
-        fitFont(a.length > b.length ? a : b, 700, 52, 32);
-        ctx.fillText(a, CX, LINE1, MAXW);
-        ctx.fillText(b, CX, LINE2, MAXW);
-      } else {
-        ctx.fillText(full, CX, LINE1, MAXW);
+      ctx.font = L.f; ctx.fillStyle = NAME_COLOR;
+      for (const line of L.lines) {
+        y += L.m.asc;
+        ctx.fillText(line, CX, y);
+        y += L.m.desc + GAP * 0.4;
       }
+      y -= GAP * 0.4;
     }
-    if (role) {
-      ctx.fillStyle = ROLE_COLOR;
-      fitFont(role, 600, 42, 28);
-      ctx.fillText(role, CX, LINE2, MAXW);
+    if (role && L.roleM) {
+      y += GAP + L.roleM.asc;
+      ctx.font = ROLE_FONT(L.roleSize); ctx.fillStyle = ROLE_COLOR;
+      try { ctx.letterSpacing = "1px"; } catch (e) {}
+      ctx.fillText(role, CX, y);
+      try { ctx.letterSpacing = "0px"; } catch (e) {}
     }
   }
 
@@ -291,7 +340,7 @@ e) { .paper { transition: transform .3s ease; } .paper.bump { transform: scale(1
   function schedule() {
     cancelAnimationFrame(raf);
     raf = requestAnimationFrame(draw);
-    try { localStorage.setItem("thumoi-draft", JSON.stringify({ title: els.title.value, name: els.name.value, role: els.role.value, upper: els.upper.checked })); } catch (e) {}
+    try { localStorage.setItem("thumoi-draft", JSON.stringify({ title: els.title.value, name: els.name.value, role: els.role.value, style: els.style.value, upper: els.upper.checked })); } catch (e) {}
     status.textContent = ""; status.className = "status";
   }
   for (const el of Object.values(els)) { el.addEventListener("input", schedule); el.addEventListener("change", schedule); }
