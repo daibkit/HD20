@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Tạo thư mời Lễ kỷ niệm 20 năm Đội SVTN Hải Dương – NEU mang tên bạn và tải ảnh về.">
+<link rel="icon" type="image/png" href="img/favicon.png">
+<script src="config.js"></script>
+<script src="stats.js" defer></script>
+<title>Thư mời 20 năm Đội</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Montserrat:wght@500;600;700;800&display=swap">
+<style>
+html{-webkit-text-size-adjust:100%}body{margin:0}[hidden]{display:none!important}img{max-width:100%}
+/* Layout: top bar with site nav (Trang chủ · Thư mời), then a two-column workbench — form on the left, live invitation on the right; stacks on phones. */
+:root {
+  --bg: #eef4fb;
+  --surface: #ffffff;
+  --ink: #0d2655;
+  --muted: #4d6286;
+  --line: #cfdcee;
+  --accent: #1f7fd6;
+  --accent-ink: #ffffff;
+  --accent-soft: #e2effc;
+  --gold: #f2b631;
+  --bar: #0d2f6e;
+  --bar-ink: #ffffff;
+  --ok: #157a4a;
+  --err: #b42318;
+  --shadow: 0 18px 40px -22px rgba(13, 38, 85, .45);
+  --ui: "Be Vietnam Pro", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --card: "Montserrat", "Be Vietnam Pro", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #08142b; --surface: #0f2042; --ink: #e6eefb; --muted: #9db0d1; --line: #223a66;
+    --accent: #5aaaf2; --accent-ink: #06142c; --accent-soft: #14305c; --gold: #f2c25a;
+    --bar: #050e20; --bar-ink: #e6eefb; --ok: #4cc58a; --err: #ff8a7a;
+    --shadow: 0 18px 40px -22px rgba(0, 0, 0, .8); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #08142b; --surface: #0f2042; --ink: #e6eefb; --muted: #9db0d1; --line: #223a66;
+  --accent: #5aaaf2; --accent-ink: #06142c; --accent-soft: #14305c; --gold: #f2c25a;
+  --bar: #050e20; --bar-ink: #e6eefb; --ok: #4cc58a; --err: #ff8a7a;
+  --shadow: 0 18px 40px -22px rgba(0, 0, 0, .8); color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--ui); font-size: 15px; line-height: 1.55; }
+
+.topbar { background: var(--bar); color: var(--bar-ink); }
+.topbar-in {
+  max-width: 1180px; margin: 0 auto;
+  padding-block: 12px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+}
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: .02em; font-size: 14px; text-transform: uppercase; }
+.brand-mark {
+  width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--gold); color: #0d2655; font-family: var(--card); font-weight: 800; font-size: 14px;
+}
+.nav { display: flex; gap: 6px; }
+.nav a {
+  color: var(--bar-ink); text-decoration: none; font-weight: 600; font-size: 14px;
+  padding: 8px 16px; border-radius: 999px; border: 1px solid transparent; opacity: .85;
+}
+.nav a:hover { opacity: 1; border-color: rgba(255,255,255,.3); }
+.nav a[aria-current="page"] { background: var(--gold); color: #0d2655; opacity: 1; }
+.nav a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+
+main {
+  max-width: 1180px; margin: 0 auto;
+  padding-block: 28px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; grid-template-columns: minmax(0, 420px) minmax(0, 1fr); gap: 32px; align-items: start;
+}
+@media (max-width: 860px) { main { grid-template-columns: minmax(0, 1fr); gap: 24px; } }
+
+.intro .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+.intro h1 { font-family: var(--card); font-weight: 800; font-size: clamp(26px, 3.2vw, 34px); line-height: 1.15; margin: 6px 0 10px; text-wrap: balance; }
+.intro p { margin: 0; color: var(--muted); max-width: 46ch; }
+
+.panel { display: flex; flex-direction: column; gap: 22px; position: sticky; top: 20px; }
+@media (max-width: 860px) { .panel { position: static; } }
+
+form { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 16px; box-shadow: var(--shadow); }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font-weight: 600; font-size: 14px; }
+.field .hint { font-size: 12.5px; color: var(--muted); }
+.row { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 10px; }
+input[type="text"], select {
+  font: inherit; font-size: 16px; color: var(--ink); background: var(--bg);
+  border: 1px solid var(--line); border-radius: 10px; padding: 11px 12px; width: 100%;
+}
+input[type="text"]:focus, select:focus { border-color: var(--accent); }
+.check { display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; }
+.check input { width: 18px; height: 18px; accent-color: var(--accent); }
+
+.actions { display: flex; flex-wrap: wrap; gap: 10px; }
+button {
+  font: inherit; font-weight: 700; font-size: 15px; cursor: pointer; border-radius: 10px;
+  padding: 12px 18px; border: 1px solid var(--accent); display: inline-flex; align-items: center; gap: 8px;
+}
+.btn-primary { background: var(--accent); color: var(--accent-ink); flex: 1 1 auto; justify-content: center; }
+.btn-primary:hover { filter: brightness(1.07); }
+.btn-ghost { background: transparent; color: var(--accent); }
+.btn-ghost:hover { background: var(--accent-soft); }
+button:disabled { opacity: .5; cursor: not-allowed; }
+button svg { width: 18px; height: 18px; flex: none; }
+.status { min-height: 1.4em; font-size: 13.5px; color: var(--muted); margin: 0; }
+.status.ok { color: var(--ok); } .status.err { color: var(--err); }
+
+.event { font-size: 13.5px; color: var(--muted); display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 0; }
+.event dt { font-weight: 600; color: var(--ink); }
+.event dd { margin: 0; }
+
+.stage { display: flex; justify-content: center; min-width: 0; }
+.paper {
+  width: 100%; max-width: 620px; aspect-ratio: 1762 / 2576; border-radius: 6px; overflow: hidden;
+  background: var(--surface); box-shadow: 0 30px 60px -30px rgba(13,38,85,.55), 0 0 0 1px var(--line);
+}
+.paper canvas { display: block; width: 100%; height: 100%; }
+@media (prefers-reduced-motion: no-preferenc</head>
+<body>
+e) { .paper { transition: transform .3s ease; } .paper.bump { transform: scale(1.006); } }
+</style>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="brand"><img src="img/logo.png" alt="" width="34" height="34" style="border-radius:50%;background:#fff"><span>Đội SVTN Hải Dương – NEU</span></div>
+    <nav class="nav" aria-label="Điều hướng chính">
+      <a href="index.html">Trang chủ</a>
+      <a href="#thu-moi" aria-current="page">Thư mời</a>
+    </nav>
+  </div>
+</header>
+
+<main id="thu-moi">
+  <section class="panel">
+    <div class="intro">
+      <div class="eyebrow">Lễ kỷ niệm 20 năm · 24.10.2026</div>
+      <h1>Tạo thư mời mang tên bạn</h1>
+      <p>Nhập tên người được mời, thư mời bên cạnh cập nhật ngay. Xong thì bấm tải ảnh để gửi hoặc in.</p>
+    </div>
+
+    <form id="f" autocomplete="off">
+      <div class="field">
+        <label for="name">Họ và tên người được mời</label>
+        <div class="row">
+          <select id="title" aria-label="Danh xưng">
+            <option value="">Không</option>
+            <option>Ông</option>
+            <option>Bà</option>
+            <option>Anh</option>
+            <option>Chị</option>
+            <option>Bạn</option>
+            <option>Thầy</option>
+            <option>Cô</option>
+          </select>
+          <input type="text" id="name" maxlength="60" placeholder="Nguyễn Văn An" value="Nguyễn Văn An">
+        </div>
+      </div>
+      <div class="field">
+        <label for="role">Dòng thứ hai <span style="font-weight:400;color:var(--muted)">(không bắt buộc)</span></label>
+        <input type="text" id="role" maxlength="80" placeholder="Cựu thành viên khóa 50" value="Cựu Đội trưởng khóa 50">
+        <span class="hint">Chức vụ, đơn vị hoặc khóa. Để trống nếu không cần.</span>
+      </div>
+      <label class="check"><input type="checkbox" id="upper"> Viết hoa toàn bộ tên</label>
+      <div class="actions">
+        <button type="submit" class="btn-primary" id="dl">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 19h16"/></svg>
+          Tải ảnh thư mời (JPG)
+        </button>
+        <button type="button" class="btn-ghost" id="dlpng">PNG chất lượng cao</button>
+        <button type="button" class="btn-ghost" id="share" hidden>Chia sẻ</button>
+      </div>
+      <p class="status" id="status" role="status"></p>
+    </form>
+
+    <dl class="event">
+      <dt>Thời gian</dt><dd>Thứ Bảy, 24.10.2026 · từ 08:30</dd>
+      <dt>Địa điểm</dt><dd>Sân ký túc xá, Đại học Kinh tế Quốc dân</dd>
+    </dl>
+  </section>
+
+  <div class="stage">
+    <div class="paper" id="paper"><canvas id="cv" width="1762" height="2576" aria-label="Xem trước thư mời"></canvas></div>
+  </div>
+</main>
+
+<script>
+(() => {
+  const TEMPLATE = "img/thu-moi-mau.jpg";
+  const W = 1762, H = 2576;
+  // Name area measured on the original artwork (px at full size)
+  const CX = 893;              // horizontal centre of the dotted lines
+  const MAXW = 1040;           // usable width between line ends
+  const LINE1 = 528;           // baseline just above first dotted line (y≈540)
+  const LINE2 = 628;           // baseline just above second dotted line (y≈642)
+  const NAME_COLOR = "#1f7fd6";
+  const ROLE_COLOR = "#0d2655";
+
+  const $ = id => document.getElementById(id);
+  const cv = $("cv"), ctx = cv.getContext("2d");
+  const els = { title: $("title"), name: $("name"), role: $("role"), upper: $("upper") };
+  const status = $("status");
+
+  try {
+    const saved = JSON.parse(localStorage.getItem("thumoi-draft") || "null");
+    if (saved) { for (const k of ["title","name","role"]) if (typeof saved[k] === "string") els[k].value = saved[k]; els.upper.checked = !!saved.upper; }
+  } catch (e) {}
+
+  const img = new Image();
+  const imgReady = new Promise((res, rej) => { img.onload = res; img.onerror = rej; });
+  img.src = TEMPLATE;
+
+  function values() {
+    let name = els.name.value.trim().replace(/\s+/g, " ");
+    if (els.upper.checked) name = name.toLocaleUpperCase("vi");
+    const t = els.title.value;
+    const full = name ? (t ? t + " " + name : name) : "";
+    return { full, role: els.role.value.trim().replace(/\s+/g, " ") };
+  }
+
+  function fitFont(text, weight, start, min) {
+    let size = start;
+    while (size > min) {
+      ctx.font = `${weight} ${size}px Montserrat, "Be Vietnam Pro", sans-serif`;
+      if (ctx.measureText(text).width <= MAXW) break;
+      size -= 2;
+    }
+    ctx.font = `${weight} ${size}px Montserrat, "Be Vietnam Pro", sans-serif`;
+    return ctx.measureText(text).width <= MAXW;
+  }
+
+  function splitTwo(text) {
+    const words = text.split(" ");
+    let best = [text, ""], bestDiff = Infinity;
+    for (let i = 1; i < words.length; i++) {
+      const a = words.slice(0, i).join(" "), b = words.slice(i).join(" ");
+      const d = Math.abs(a.length - b.length);
+      if (d < bestDiff) { bestDiff = d; best = [a, b]; }
+    }
+    return best;
+  }
+
+  let drawing = 0;
+  async function draw() {
+    const ticket = ++drawing;
+    const { full, role } = values();
+    const sample = full + role + "ÂăêôơưĐđẠạỹ";
+    try {
+      await Promise.all([
+        document.fonts.load('700 64px Montserrat', sample),
+        document.fonts.load('600 44px Montserrat', sample),
+      ]);
+    } catch (e) {}
+    await imgReady;
+    if (ticket !== drawing) return;
+
+    ctx.clearRect(0, 0, W, H);
+    ctx.drawImage(img, 0, 0, W, H);
+    ctx.textAlign = "center";
+    ctx.textBaseline = "alphabetic";
+
+    if (full) {
+      ctx.fillStyle = NAME_COLOR;
+      const fits = fitFont(full, 700, 58, 40);
+      if (!fits && !role) {
+        const [a, b] = splitTwo(full);
+        fitFont(a.length > b.length ? a : b, 700, 52, 32);
+        ctx.fillText(a, CX, LINE1, MAXW);
+        ctx.fillText(b, CX, LINE2, MAXW);
+      } else {
+        ctx.fillText(full, CX, LINE1, MAXW);
+      }
+    }
+    if (role) {
+      ctx.fillStyle = ROLE_COLOR;
+      fitFont(role, 600, 42, 28);
+      ctx.fillText(role, CX, LINE2, MAXW);
+    }
+  }
+
+  let raf = 0;
+  function schedule() {
+    cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(draw);
+    try { localStorage.setItem("thumoi-draft", JSON.stringify({ title: els.title.value, name: els.name.value, role: els.role.value, upper: els.upper.checked })); } catch (e) {}
+    status.textContent = ""; status.className = "status";
+  }
+  for (const el of Object.values(els)) { el.addEventListener("input", schedule); el.addEventListener("change", schedule); }
+
+  function slug(s) {
+    return s.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/đ/g, "d").replace(/Đ/g, "D")
+      .replace(/[^A-Za-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60) || "khach-moi";
+  }
+
+  function toBlob(type, q) { return new Promise((res, rej) => cv.toBlob(b => b ? res(b) : rej(new Error("blob")), type, q)); }
+
+  function say(msg, cls) { status.textContent = msg; status.className = "status" + (cls ? " " + cls : ""); }
+
+  // Inside a Claude artifact the page must ask the viewer to save; on a normal website, a plain download works.
+  let downloadsP = null;
+  if (window.claude && typeof window.claude.use === "function") downloadsP = window.claude.use("downloads").catch(() => null);
+  else if (navigator.canShare) {
+    try { if (navigator.canShare({ files: [new File([new Blob(["x"], { type: "image/png" })], "x.png", { type: "image/png" })] })) $("share").hidden = false; } catch (e) {}
+  }
+
+  async function exportImage(kind) {
+    const { full } = values();
+    if (!els.name.value.trim()) { say("Nhập tên người được mời trước khi tải ảnh.", "err"); els.name.focus(); return; }
+    await draw();
+    const type = kind === "png" ? "image/png" : "image/jpeg";
+    const filename = `Thu-moi-${slug(els.name.value.trim())}.${kind === "png" ? "png" : "jpg"}`;
+    let blob;
+    try { blob = await toBlob(type, 0.93); } catch (e) { say("Không tạo được ảnh. Hãy tải lại trang rồi thử lần nữa.", "err"); return; }
+
+    if (downloadsP) {
+      const dl = await downloadsP;
+      if (!dl) { say("Trang xem trước này không cho tải file. Hãy mở trang trên website của Đội để tải.", "err"); return; }
+      try { await dl.save({ filename, data: blob }); say(`Đã lưu ${filename}.`, "ok"); }
+      catch (e) {
+        if (e && e.code === "declined") say("Bạn đã huỷ tải ảnh.");
+        else if (e && e.code === "rate_limited") say("Đang có một lượt tải chờ xác nhận. Đợi giây lát rồi thử lại.", "err");
+        else say("Không tải được ảnh ở đây. Hãy thử lại sau.", "err");
+      }
+      return;
+    }
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+    say(`Đã tải ${filename}${full ? " — thư mời " + full : ""}.`, "ok");
+  }
+
+  $("f").addEventListener("submit", e => { e.preventDefault(); exportImage("jpg"); });
+  $("dlpng").addEventListener("click", () => exportImage("png"));
+  $("share").addEventListener("click", async () => {
+    if (!els.name.value.trim()) { say("Nhập tên người được mời trước.", "err"); return; }
+    await draw();
+    try {
+      const blob = await toBlob("image/jpeg", 0.93);
+      const file = new File([blob], `Thu-moi-${slug(els.name.value.trim())}.jpg`, { type: "image/jpeg" });
+      await navigator.share({ files: [file], title: "Thư mời Lễ kỷ niệm 20 năm Đội SVTN Hải Dương – NEU" });
+    } catch (e) { if (e && e.name !== "AbortError") say("Thiết bị không chia sẻ được ảnh. Hãy dùng nút tải ảnh.", "err"); }
+  });
+
+  draw();
+})();
+</script>
+
+</body>
+</html>
