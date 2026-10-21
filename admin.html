@@ -1898,7 +1898,7 @@ const HC_BLOCKS = {
   radios: {label: 'HD Radioshow', noun: 'số radio', head: 'title', req: 'title', hint: 'Mỗi số radio dùng link YouTube (nhúng) hoặc tải tệp âm thanh/video lên. Nếu có cả hai thì ưu tiên tệp đã tải lên.', media: true,
     fields: [{k: 'title', l: 'Tên số', max: 120}, {k: 'desc', l: 'Mô tả', max: 300}, {k: 'id', l: 'Link hoặc ID YouTube', max: 300, ph: 'VD: https://www.youtube.com/watch?v=dQw4w9WgXcQ', yt: true, err: 'Link/ID YouTube không hợp lệ.'}, {k: 'file', l: '', max: 600, hide: true}, {k: 'ftype', l: '', max: 10, hide: true}]},
   songs: {label: 'Tiếng gọi HDX', noun: 'bài hát', head: 'title', req: 'title', hint: 'Mỗi bài dùng link tệp .mp3 HOẶC ID YouTube (chỉ phát âm thanh).',
-    fields: [{k: 'title', l: 'Tên bài', max: 120}, {k: 'desc', l: 'Mô tả', max: 300}, {k: 'src', l: 'Link tệp âm thanh (.mp3)', max: 500, ph: 'https://…/bai-hat.mp3', re: /^(https?:\/\/[^\s"'<>]+|[\w\-./]+\.(mp3|m4a|ogg|wav))$/i, err: 'Link âm thanh phải bắt đầu bằng https:// hoặc là tệp .mp3/.m4a/.ogg/.wav.'}, {k: 'yt', l: 'hoặc link/ID YouTube', max: 300, yt: true, err: 'Link/ID YouTube không hợp lệ.'}]},
+    fields: [{k: 'title', l: 'Tên bài', max: 120}, {k: 'desc', l: 'Mô tả', max: 300}, {k: 'src', l: 'Link tệp âm thanh (.mp3)', max: 500, ph: 'https://…/bai-hat.mp3', re: /^(https?:\/\/[^\s"'<>]+|[\w\-./]+\.(mp3|m4a|ogg|wav))$/i, err: 'Link âm thanh phải bắt đầu bằng https:// hoặc là tệp .mp3/.m4a/.ogg/.wav.'}, {k: 'yt', l: 'hoặc link/ID YouTube', max: 300, yt: true, err: 'Link/ID YouTube không hợp lệ.'}, {k: 'sp', l: '', max: 60, hide: true}, {k: 'lyrics', l: 'Lời bài hát (mỗi câu một dòng)', max: 6000, ta: 1}]},
   contacts: {label: 'Liên hệ', noun: 'đầu mối', head: 'role', req: 'role', hint: 'Danh sách ở trang “Liên hệ & Tài trợ”.',
     fields: [{k: 'role', l: 'Vai trò / ban', max: 120}, {k: 'name', l: 'Họ tên', max: 80}, {k: 'k', l: 'Khóa (K…)', max: 20}, {k: 'phone', l: 'Số điện thoại', max: 30}]},
   slides: {label: 'Lời hẹn ước', noun: 'lời nhắn', head: 'who', req: 'text', hint: 'Các lời nhắn trượt ở trang chủ.',
@@ -1931,7 +1931,7 @@ const HC = {
     if (f.hide) return '';
     if (f.chk) return `<div class="fld hc-wide"><label class="hc-chk"><input type="checkbox" data-i="${i}" data-k="${f.k}" ${v === '1' || v === true ? 'checked' : ''}> ${esc(f.l)}</label></div>`;
     const id = `hc-${this.cur}-${i}-${f.k}`, a = `data-i="${i}" data-k="${f.k}" maxlength="${f.max}" ${f.ph ? `placeholder="${esc(f.ph)}"` : ''}`;
-    return `<div class="fld ${f.ta ? 'hc-wide' : ''}"><label for="${id}">${esc(f.l)}</label>${f.ta ? `<textarea id="${id}" class="ta" rows="3" ${a}>${esc(v || '')}</textarea>` : `<input id="${id}" class="inp" type="text" ${a} value="${esc(v || '')}">`}</div>`;
+    return `<div class="fld ${f.ta ? 'hc-wide' : ''}"><label for="${id}">${esc(f.l)}</label>${f.ta ? `<textarea id="${id}" class="ta" rows="${f.k === 'lyrics' ? 10 : 3}" ${a}>${esc(v || '')}</textarea>` : `<input id="${id}" class="inp" type="text" ${a} value="${esc(v || '')}">`}</div>`;
   },
   mediaUi(it, i) {
     const busy = this.upl === i, f = String(it.file || '');

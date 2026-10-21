@@ -119,3 +119,7 @@ Thống kê: log click ghi theo dạng "Trang › Khu vực › Thẻ › Nút" 
 
 - **Đồng bộ từ Drive** (tab Bảo tàng ký ức) giờ khớp hai chiều: thêm ảnh mới trong thư mục Drive, và hỏi xác nhận để **xoá khỏi website** những ảnh không còn nằm trong thư mục đó (đã xoá/chuyển đi). Chỉ ảnh của khóa + bộ sưu tập đang chọn bị ảnh hưởng.
 - Nút **Đồng bộ cả bộ sưu tập** đồng bộ lần lượt tất cả K48–K67 của bộ đang chọn (thêm ảnh mới), rồi hỏi **một lần** để xoá các ảnh không còn trên Drive. Thư mục nào lỗi (VD thiếu quyền) thì bỏ qua, không xoá gì ở thư mục đó.
+
+## Lời bài hát (mục Tiếng gọi HDX)
+
+Mỗi bài hát có ô **Lời bài hát** (tối đa 6000 ký tự, mỗi câu một dòng, dòng trống để tách đoạn): sửa ở Admin → Trang chủ → Tiếng gọi HDX, hoặc bật “Chỉnh sửa trang” rồi bấm vào bài hát. Bài có lời hiện nhãn “Có lời” trong danh sách; trên trình phát có nút **Xem lời bài hát** để bật/tắt khung lời của bài đang chọn (giữ trạng thái bật khi chuyển bài). Không cần chạy SQL.
