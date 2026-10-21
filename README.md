@@ -122,4 +122,4 @@ Thống kê: log click ghi theo dạng "Trang › Khu vực › Thẻ › Nút" 
 
 ## Lời bài hát (mục Tiếng gọi HDX)
 
-Mỗi bài hát có ô **Lời bài hát** (tối đa 6000 ký tự, mỗi câu một dòng, dòng trống để tách đoạn): sửa ở Admin → Trang chủ → Tiếng gọi HDX, hoặc bật “Chỉnh sửa trang” rồi bấm vào bài hát. Bài có lời hiện nhãn “Có lời” trong danh sách; trên trình phát có nút **Xem lời bài hát** để bật/tắt khung lời của bài đang chọn (giữ trạng thái bật khi chuyển bài). Không cần chạy SQL.
+Mỗi bài hát có ô **Lời bài hát** (tối đa 6000 ký tự, mỗi câu một dòng, dòng trống để tách đoạn): sửa ở Admin → Trang chủ → Tiếng gọi HDX, hoặc bật “Chỉnh sửa trang” rồi bấm vào bài hát. Bài có lời hiện nhãn “Có lời” trong danh sách; khi bấm phát một bài có lời, khung lời tự hiện ở cột bên phải trình phát (trên điện thoại: bên dưới danh sách bài). Nút ✕ hoặc **Ẩn lời bài hát** để đóng; đã đóng thì các bài sau không tự mở lại cho tới khi bấm **Xem lời bài hát**. Không cần chạy SQL.
