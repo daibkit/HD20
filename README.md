@@ -1,6 +1,6 @@
 # Anh em ơi! Về nhà — 20 năm Đội SVTN Đồng hương Hải Dương - NEU
 
-Website công khai triển khai trên Vercel (https://hdx20y.vercel.app).
+Website công khai triển khai trên Vercel, tên miền chính https://hdxneu.vn (tự chuyển sang https://www.hdxneu.vn; thẻ chia sẻ og:* dùng bản www).
 
 | Đường dẫn | Tệp | Nội dung |
 |---|---|---|
@@ -18,8 +18,8 @@ Website công khai triển khai trên Vercel (https://hdx20y.vercel.app).
    - Email admin được khai báo ở đầu `schema.sql` (bảng `admins`). Đổi nếu cần.
 3. **Authentication → Users → Add user → Create new user**: nhập email admin + mật khẩu, tick **Auto Confirm User**.
 4. **Authentication → Sign In / Providers → Email**: tắt **Allow new users to sign up** (không ai tự đăng ký được).
-5. **Authentication → URL Configuration**: Site URL = `https://hdx20y.vercel.app`; thêm Redirect URLs
-   `https://hdx20y.vercel.app/admin` và `https://hdx20y.vercel.app/admin.html` (để link "Quên mật khẩu" hoạt động).
+5. **Authentication → URL Configuration**: Site URL = `https://www.hdxneu.vn`; thêm Redirect URLs
+   `https://www.hdxneu.vn/admin`, `https://www.hdxneu.vn/admin.html` (và bản không có www) (để link "Quên mật khẩu" hoạt động).
 6. **Project Settings → API**: chép **Project URL** và khoá **anon public** vào `config.js`, commit → Vercel tự triển khai.
 
 ## Bảo mật
