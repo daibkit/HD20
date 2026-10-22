@@ -2139,7 +2139,14 @@ const MU = {
   async load() {
     if (this.loading) return; this.loading = true; this.err = ''; this.draw();
     try {
-      this.rows = await SB.req('/rest/v1/museum_photos?select=*&order=sort_order.asc,created_at.asc&limit=5000') || [];
+      { // Supabase trả tối đa 1000 dòng mỗi lần → tải theo từng trang cho đủ
+        const all = [];
+        for (let off = 0; off < 100000; off += 1000) {
+          const part = await SB.req('/rest/v1/museum_photos?select=*&order=sort_order.asc,created_at.asc,id.asc&limit=1000&offset=' + off) || [];
+          all.push(...part); if (part.length < 1000) break;
+        }
+        this.rows = all;
+      }
       const st = await SB.req('/rest/v1/site_content?select=data&key=eq.settings').catch(() => []);
       this.driveUrl = String(st && st[0] && st[0].data && st[0].data.driveUrl || '');
       this.albums = this.normAlbums(st && st[0] && st[0].data && st[0].data.albums); if (!this.albums.some(a => a.id === this.alb)) this.alb = '';
