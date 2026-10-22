@@ -5,7 +5,7 @@ Website công khai triển khai trên Vercel (https://hdx20y.vercel.app).
 | Đường dẫn | Tệp | Nội dung |
 |---|---|---|
 | `/` | `index.html` | Trang sự kiện (xuất từ artifact thiết kế), có mục menu "Tin tức" |
-| `/thu-moi` | `thu-moi.html` | Thư mời: điền tên người được mời vào ảnh thư mời và tải ảnh JPG/PNG, chia sẻ qua Zalo/Messenger. `img/thu-moi-mau.jpg` là mẫu gốc (hiện khi chưa nhập tên), `img/thu-moi-nen.jpg` là mẫu đã xoá 2 dòng lời chào chung để in "Thân gửi + tên" vào. Nút "Thư mời" nằm cạnh "Trang chủ" trên menu |
+| `/thu-moi` | `thu-moi.html` | Thư mời: điền tên người được mời vào ảnh thư mời và tải ảnh JPG/PNG, chia sẻ qua Zalo/Messenger. `img/thu-moi-mau.jpg` là mẫu gốc (hiện khi chưa nhập tên), `img/thu-moi-nen.jpg` là mẫu đã xoá 2 dòng lời chào chung để in "Thân gửi + tên" vào. Đã gỡ khỏi menu trang chủ; trang vẫn mở được trực tiếp qua đường dẫn `/thu-moi` |
 | `/tin-tuc` | `tin-tuc.html` | Tin tức: đọc trực tiếp từ Supabase (dự phòng: `content.json`) |
 | `/admin` | `admin.html` | Trang quản trị: đăng nhập admin, thêm/sửa/xoá chuyên mục, danh mục, bài viết, tải ảnh |
 
@@ -123,3 +123,11 @@ Thống kê: log click ghi theo dạng "Trang › Khu vực › Thẻ › Nút" 
 ## Lời bài hát (mục Tiếng gọi HDX)
 
 Mỗi bài hát có ô **Lời bài hát** (tối đa 6000 ký tự, mỗi câu một dòng, dòng trống để tách đoạn): sửa ở Admin → Trang chủ → Tiếng gọi HDX, hoặc bật “Chỉnh sửa trang” rồi bấm vào bài hát. Bài có lời hiện nhãn “Có lời” trong danh sách; khi bấm phát một bài có lời, khung lời tự hiện ở cột bên phải trình phát (trên điện thoại: bên dưới danh sách bài). Nút ✕ hoặc **Ẩn lời bài hát** để đóng; đã đóng thì các bài sau không tự mở lại cho tới khi bấm **Xem lời bài hát**. Không cần chạy SQL.
+
+## Sơ đồ sự kiện (tab trên menu)
+
+Tab "Sơ đồ sự kiện" (`#/map`) gồm sơ đồ hướng dẫn di chuyển (lối đi chính 1 → 4 → 5, không đi qua cổng 6) và sơ đồ 12 khu vực tại Sân nhà 3 ký túc xá, kèm danh sách chữ. Ảnh: `img/so-do-di-chuyen.webp`, `img/so-do-khong-gian.webp`; muốn đổi sơ đồ thì thay 2 tệp này (giữ nguyên tên).
+
+## Sổ tay lời bài hát (tab trên menu)
+
+Tab "Sổ tay" (`#/notebook`) gom lời các bài trong "Tiếng gọi HDX" thành một sổ để đọc khi hát: tìm theo tên/lời (gõ không dấu được), phóng to/thu nhỏ chữ, nút nghe bài nếu bài có link nhạc. Lời bài hát sửa ở chỗ cũ (Admin → Trang chủ → Tiếng gọi HDX, hoặc "Chỉnh sửa trang"), sổ tay tự cập nhật theo.
