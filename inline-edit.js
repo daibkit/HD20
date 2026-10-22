@@ -451,14 +451,14 @@
   }
   function findNth() { return true; }
   function openItemSoon(key, j) { setTimeout(() => openItem(key, j), 60); }
-  async function commit(key, arr, okMsg) {
+  async function commit(key, arr, okMsg, onErr) {
     const H = window.HDX_HOME, B = H.blocks[key];
     if (!arr.length) { toast('Cần giữ lại ít nhất 1 mục.', true); return false; }
     try {
       await req('/rest/v1/site_content?on_conflict=key', {method: 'POST', headers: {Prefer: 'resolution=merge-duplicates,return=minimal'}, body: {key, data: arr, updated_at: new Date().toISOString()}});
     } catch (e) {
       const msg = e && (e.status === 404 || e.code === '23514') ? 'Cần cập nhật cơ sở dữ liệu: chạy lại supabase/site_content.sql trong Supabase (SQL Editor), rồi lưu lại.' : errMsg(e);
-      const er = modal.querySelector('#err'); if (er) er.textContent = msg; toast(msg, true); return false;
+      const er = modal.querySelector('#err'); if (er) er.textContent = msg; if (onErr) onErr(msg); toast(msg, true); return false;
     }
     B.t.splice(0, B.t.length, ...arr.map(B.derive));
     try { const rows = (lsGet(H.cacheKey) || []).filter(r => r && r.key !== key); rows.push({key, data: arr}); lsSet(H.cacheKey, rows); } catch (e) {}
@@ -658,6 +658,7 @@
     if (!session || !session.access_token) return;
     try { isAdmin = (await req('/rest/v1/rpc/is_admin', {method: 'POST', body: {}})) === true; } catch (e) { isAdmin = false; }
     if (!isAdmin) return;
+    if (window.HDX_HOME && window.HDX_HOME.rerender) window.HDX_HOME.rerender(); // hiện nút sửa ở Sổ hát
     document.head.appendChild(pageCss); document.body.appendChild(host);
     document.addEventListener('mousemove', onMove, {passive: true});
     document.addEventListener('click', onClick, true);
@@ -668,6 +669,19 @@
     // Trang chủ dựng sau khi script này chạy: vẽ lại thanh khi dữ liệu sẵn sàng
     let n = 0; const iv = setInterval(() => { draw(); if (homeBlocks() || ++n > 20) clearInterval(iv); }, 500);
   }
-  window.HDXEdit = {afterRoute};
+  // Sổ hát: lưu lời bài hát ngay trong tab (chỉ admin; quyền ghi vẫn do Supabase kiểm tra).
+  async function saveSong(i, patch) {
+    const bl = homeBlocks(), B = bl && bl.songs;
+    if (!isAdmin || !B) return {ok: false, error: 'Cần đăng nhập tài khoản admin ở trang quản trị.'};
+    const arr = B.t.map(B.clean);
+    if (i >= 0 && !arr[i]) return {ok: false, error: 'Không tìm thấy bài hát này.'};
+    const it = B.clean(Object.assign({}, i >= 0 ? arr[i] : {}, patch));
+    if (!norm(it.title)) return {ok: false, error: 'Tên bài hát không được để trống.'};
+    if (i >= 0) arr[i] = it; else arr.push(it);
+    let errText = '';
+    const ok = await commit('songs', arr, i >= 0 ? 'Đã lưu lời bài hát.' : 'Đã thêm bài hát vào sổ hát.', m => { errText = m; });
+    return ok ? {ok: true} : {ok: false, error: errText || 'Không lưu được. Thử lại sau.'};
+  }
+  window.HDXEdit = {afterRoute, isAdmin: () => isAdmin, saveSong};
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();

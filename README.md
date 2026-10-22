@@ -128,6 +128,8 @@ Mỗi bài hát có ô **Lời bài hát** (tối đa 6000 ký tự, mỗi câu 
 
 Tab "Sơ đồ sự kiện" (`#/map`) gồm sơ đồ hướng dẫn di chuyển (lối đi chính 1 → 4 → 5, không đi qua cổng 6) và sơ đồ 12 khu vực tại Sân nhà 3 ký túc xá, kèm danh sách chữ. Ảnh: `img/so-do-di-chuyen.webp`, `img/so-do-khong-gian.webp`; muốn đổi sơ đồ thì thay 2 tệp này (giữ nguyên tên).
 
-## Sổ tay lời bài hát (tab trên menu)
+## Sổ hát (tab trên menu)
 
-Tab "Sổ tay" (`#/notebook`) gom lời các bài trong "Tiếng gọi HDX" thành một sổ để đọc khi hát: tìm theo tên/lời (gõ không dấu được), phóng to/thu nhỏ chữ, nút nghe bài nếu bài có link nhạc. Lời bài hát sửa ở chỗ cũ (Admin → Trang chủ → Tiếng gọi HDX, hoặc "Chỉnh sửa trang"), sổ tay tự cập nhật theo.
+Tab "Sổ hát" (`#/notebook`) gom lời các bài trong "Tiếng gọi HDX" thành một sổ để đọc khi hát: tìm theo tên/lời (gõ không dấu được), phóng to/thu nhỏ chữ, nút nghe bài nếu bài có link nhạc.
+
+Cập nhật lời ngay trong tab: đăng nhập ở `/admin` một lần, mở tab Sổ hát → chọn bài → **Sửa lời** (hoặc **＋ Thêm lời** nếu bài chưa có lời), hoặc **＋ Thêm bài hát** để thêm bài mới → **Lưu vào sổ hát**. Khách không thấy các nút này; quyền ghi vẫn do Supabase kiểm tra. Dữ liệu dùng chung với mục Tiếng gọi HDX (Admin → Trang chủ → Tiếng gọi HDX), tối đa 6000 ký tự mỗi bài.
