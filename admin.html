@@ -2208,8 +2208,10 @@ const MU = {
   },
   // Quét một thư mục khóa trên Drive: thêm ảnh mới vào website, trả về các mã tệp đang có trên Drive để so sánh.
   async scanK(k, onProg) {
-    const PG = 25, seenIds = new Set(); let added = 0, seen = 0, total = 0, off = 0;
+    const PG = 25, seenIds = new Set(); let added = 0, moved = 0, seen = 0, total = 0, off = 0;
     const have = new Set(this.rows.filter(r => r.k === k).map(r => r.drive_id));
+    // Ảnh đã có nhưng ghi thuộc bộ sưu tập khác (VD tệp được chuyển sang thư mục Drive của bộ này): chuyển dòng sang bộ đang chọn.
+    const mine = new Set(this.rows.filter(r => r.k === k && (r.album || '') === (this.alb || '')).map(r => r.drive_id));
     let base = Math.max(0, ...this.inK(k).map(r => r.sort_order || 0));
     for (;;) {
       let j;
@@ -2219,7 +2221,13 @@ const MU = {
       }
       const fs = j.files || [];
       total = typeof j.total === 'number' ? j.total : fs.length; seen += fs.length; fs.forEach(f => seenIds.add(f.id));
-      const add = fs.filter(f => /^[\w-]{10,100}$/.test(f.id) && !have.has(f.id) && (have.add(f.id), true));
+      const claim = fs.filter(f => /^[\w-]{10,100}$/.test(f.id) && have.has(f.id) && !mine.has(f.id)).map(f => f.id);
+      for (let i = 0; i < claim.length; i += 40) {
+        const ids = claim.slice(i, i + 40);
+        await SB.req('/rest/v1/museum_photos?k=eq.' + encodeURIComponent(k) + '&drive_id=in.(' + ids.join(',') + ')', {method: 'PATCH', headers: {Prefer: 'return=minimal'}, body: {album: this.alb || ''}});
+        ids.forEach(id => mine.add(id)); this.rows.forEach(r => { if (r.k === k && ids.includes(r.drive_id)) r.album = this.alb || ''; }); moved += ids.length;
+      }
+      const add = fs.filter(f => /^[\w-]{10,100}$/.test(f.id) && !have.has(f.id) && (have.add(f.id), mine.add(f.id), true));
       if (add.length) {
         // Every row in one batch must carry the same keys, so kind and album are always set.
         const rows = add.map(f => ({id: uid('mp'), k, drive_id: f.id, title: '', year: '', caption: '', sort_order: ++base, album: this.alb || '', kind: /^video\//.test(f.mime || '') ? 'video' : 'image'}));
@@ -2227,11 +2235,11 @@ const MU = {
         const got = Array.isArray(ins) ? ins : [];
         this.rows.push(...got); added += got.length;
       }
-      if (onProg) onProg(Math.min(seen, total), total, added);
+      if (onProg) onProg(Math.min(seen, total), total, added, moved);
       if (!fs.length || typeof j.next !== 'number' || j.next >= total) break;
       off = j.next;
     }
-    return {total, added, seenIds};
+    return {total, added, moved, seenIds};
   },
   // Ảnh còn trên website nhưng không còn trong thư mục Drive (đã xoá / chuyển đi).
   goneK(k, seenIds) { return this.rows.filter(r => r.k === k && (r.album || '') === this.alb && !seenIds.has(r.drive_id)); },
@@ -2248,15 +2256,15 @@ const MU = {
     this.busy = true; this.progAll = false; this.prog = [{name: 'Đồng bộ thư mục ' + k + ' từ Drive', st: 'run', pct: 0, txt: 'Đang quét thư mục…'}]; this.draw();
     const P = this.prog[0];
     try {
-      const r = await this.scanK(k, (n, total, added) => { P.pct = total ? Math.round(n / total * 100) : 100; P.txt = `Đã kiểm tra ${n}/${total} tệp · thêm mới ${added}`; this.draw(); });
+      const r = await this.scanK(k, (n, total, added, mv) => { P.pct = total ? Math.round(n / total * 100) : 100; P.txt = `Đã kiểm tra ${n}/${total} tệp · thêm mới ${added}` + (mv ? ` · chuyển từ bộ khác ${mv}` : ''); this.draw(); });
       const gone = this.goneK(k, r.seenIds); let removed = 0;
       if (gone.length) {
         P.txt = `Phát hiện ${gone.length} ảnh không còn trên Drive…`; this.draw();
         const ok = await confirmDialog({title: `Xoá ${gone.length} ảnh không còn trên Drive?`, message: `Thư mục ${k} trên Drive hiện có ${r.total} tệp. Có ${gone.length} ảnh trên website không còn nằm trong thư mục này (đã xoá hoặc chuyển đi). Xoá chúng khỏi website để khớp với Drive?`, confirmLabel: 'Xoá khỏi website', danger: true});
         if (ok) removed = await this.dropRows(gone);
       }
-      P.st = 'ok'; P.pct = 100; P.txt = `Xong: kiểm tra ${r.total} tệp, thêm mới ${r.added}, xoá ${removed} ảnh không còn trên Drive`; this.draw();
-      toast(r.added || removed ? `Đã đồng bộ ${k}: thêm ${r.added}, xoá ${removed}.` : `Thư mục ${k} đã khớp với Drive.`);
+      P.st = 'ok'; P.pct = 100; P.txt = `Xong: kiểm tra ${r.total} tệp, thêm mới ${r.added}` + (r.moved ? `, chuyển từ bộ khác ${r.moved}` : '') + `, xoá ${removed} ảnh không còn trên Drive`; this.draw();
+      toast(r.added || r.moved || removed ? `Đã đồng bộ ${k}: thêm ${r.added}` + (r.moved ? `, chuyển sang bộ này ${r.moved}` : '') + `, xoá ${removed}.` : `Thư mục ${k} đã khớp với Drive.`);
     } catch (e) { P.st = 'err'; P.msg = (e && e.message) || 'Không đồng bộ được.'; this.draw(); toast(P.msg, 'err', 6000); }
     finally { this.busy = false; this.draw(); }
   },
@@ -2264,13 +2272,13 @@ const MU = {
   async syncAll() {
     if (this.busy) return; const name = this.curAlbum().name;
     this.busy = true; this.progAll = true; this.prog = MU_KS.map(k => ({name: 'Thư mục ' + k, st: 'wait', pct: 0})); this.draw();
-    let added = 0, removed = 0, errs = 0; const goneAll = [];
+    let added = 0, moved = 0, removed = 0, errs = 0; const goneAll = [];
     for (let i = 0; i < MU_KS.length; i++) {
       const k = MU_KS[i], P = this.prog[i]; P.st = 'run'; P.txt = 'Đang quét…'; this.draw();
       try {
-        const r = await this.scanK(k, (n, total, a) => { P.pct = total ? Math.round(n / total * 100) : 100; P.txt = `Đã kiểm tra ${n}/${total} tệp · thêm mới ${a}`; this.draw(); });
-        const gone = this.goneK(k, r.seenIds); goneAll.push(...gone); added += r.added;
-        P.st = 'ok'; P.pct = 100; P.txt = `${r.total} tệp · thêm ${r.added}` + (gone.length ? ` · ${gone.length} ảnh không còn trên Drive` : '');
+        const r = await this.scanK(k, (n, total, a, mv) => { P.pct = total ? Math.round(n / total * 100) : 100; P.txt = `Đã kiểm tra ${n}/${total} tệp · thêm mới ${a}` + (mv ? ` · chuyển ${mv}` : ''); this.draw(); });
+        const gone = this.goneK(k, r.seenIds); goneAll.push(...gone); added += r.added; moved += r.moved;
+        P.st = 'ok'; P.pct = 100; P.txt = `${r.total} tệp · thêm ${r.added}` + (r.moved ? ` · chuyển từ bộ khác ${r.moved}` : '') + (gone.length ? ` · ${gone.length} ảnh không còn trên Drive` : '');
       } catch (e) { P.st = 'err'; P.msg = (e && e.message) || 'Không đồng bộ được.'; errs++; }
       this.draw();
     }
@@ -2281,7 +2289,7 @@ const MU = {
       }
     } catch (e) { errs++; toast((e && e.message) || 'Không xoá được.', 'err', 6000); }
     this.busy = false; this.draw();
-    toast(`Đồng bộ bộ “${name}”: thêm ${added}, xoá ${removed}` + (errs ? `, ${errs} thư mục lỗi (xem bên dưới).` : '.'), errs ? 'err' : 'ok', 7000);
+    toast(`Đồng bộ bộ “${name}”: thêm ${added}` + (moved ? `, chuyển sang bộ này ${moved}` : '') + `, xoá ${removed}` + (errs ? `, ${errs} thư mục lỗi (xem bên dưới).` : '.'), errs ? 'err' : 'ok', 7000);
   },
   async saveUrl(url) {
     url = String(url || '').trim();
